@@ -5,7 +5,7 @@ import lombok.*;
 
 /** Perfil de administrador de Uruguay Mnatural. */
 @Entity
-@Table(name = "admins")
+@Table(name = "administrator")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +21,6 @@ public class Admin {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = 100)
     private String name;
 }

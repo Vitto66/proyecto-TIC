@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import uy.edu.um.proytic2026.dto.RegisterTouristRequest;
 import uy.edu.um.proytic2026.dto.UserResponse;
 import uy.edu.um.proytic2026.entity.Provider;
-import uy.edu.um.proytic2026.entity.ProviderType;
+import uy.edu.um.proytic2026.entity.PersonType;
 import uy.edu.um.proytic2026.entity.Tourist;
 import uy.edu.um.proytic2026.entity.User;
 import uy.edu.um.proytic2026.exception.EmailAlreadyRegisteredException;
@@ -94,7 +94,7 @@ class UserServiceTest {
     void registerTourist_existingProviderWithSamePassword_addsTouristProfile() {
         User existing = User.builder().id(7L).email("ana@mail.com")
                 .passwordHash(passwordEncoder.encode("secreta123")).build();
-        existing.setProvider(Provider.builder().user(existing).type(ProviderType.INDIVIDUAL).build());
+        existing.setProvider(Provider.builder().user(existing).personType(PersonType.PHYSICAL).build());
         when(userRepository.findByEmailIgnoreCase("ana@mail.com")).thenReturn(Optional.of(existing));
         when(touristRepository.save(any(Tourist.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -109,7 +109,7 @@ class UserServiceTest {
     void registerTourist_existingProviderWithWrongPassword_throwsInvalidCredentials() {
         User existing = User.builder().id(7L).email("ana@mail.com")
                 .passwordHash(passwordEncoder.encode("otraClave99")).build();
-        existing.setProvider(Provider.builder().user(existing).type(ProviderType.INDIVIDUAL).build());
+        existing.setProvider(Provider.builder().user(existing).personType(PersonType.PHYSICAL).build());
         when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() -> userService.registerTourist(request("ana@mail.com", "secreta123")))
