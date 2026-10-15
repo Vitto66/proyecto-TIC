@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 /**
- * Perfil de prestador. Los campos de persona física (firstName, lastName,
- * documentNumber, address) y de persona jurídica (rut, companyName) se
- * completan según el {@link ProviderType}.
+ * Perfil de prestador. Los campos de persona física (firstName, lastName, document)
+ * y de persona jurídica (rut, legalName) se completan según el {@link PersonType};
+ * la base lo controla con el CHECK ck_provider_person_data.
+ * La dirección no va acá: es del emprendimiento (tabla business).
  */
 @Entity
-@Table(name = "providers")
+@Table(name = "provider")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,32 +27,28 @@ public class Provider {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private ProviderType type;
+    @Column(name = "person_type", nullable = false, length = 10)
+    private PersonType personType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 10)
     @Builder.Default
     private ProviderStatus status = ProviderStatus.PENDING;
 
     // Persona física
-    @Column(length = 80)
+    @Column(length = 100)
     private String firstName;
 
-    @Column(length = 80)
+    @Column(length = 100)
     private String lastName;
 
     @Column(unique = true, length = 20)
-    private String documentNumber;
+    private String document;
 
     // Persona jurídica
     @Column(unique = true, length = 20)
     private String rut;
 
-    @Column(length = 150)
-    private String companyName;
-
-    // Ambos
     @Column(length = 200)
-    private String address;
+    private String legalName;
 }

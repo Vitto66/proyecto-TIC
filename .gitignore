@@ -12,3 +12,8 @@ target/
 
 # Logs
 *.log
+
+# Credenciales locales: nunca subirlas
+.env
+*.env
+application-local.properties

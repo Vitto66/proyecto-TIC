@@ -5,7 +5,7 @@ import lombok.*;
 
 /** Perfil de turista. Comparte la clave primaria con su User. */
 @Entity
-@Table(name = "tourists")
+@Table(name = "tourist")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,10 +21,10 @@ public class Tourist {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = 100)
     private String firstName;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = 100)
     private String lastName;
 
     /** Cédula de identidad. */

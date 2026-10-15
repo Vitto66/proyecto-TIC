@@ -3,8 +3,6 @@ package uy.edu.um.proytic2026.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
  * Cuenta de acceso a la plataforma. Guarda solo las credenciales y datos comunes.
  * Los datos propios de cada rol viven en los perfiles Tourist, Provider y Admin,
@@ -12,7 +10,7 @@ import java.time.LocalDateTime;
  * y prestador a la vez, como pidió el cliente.
  */
 @Entity
-@Table(name = "users") // "user" es palabra reservada en PostgreSQL
+@Table(name = "app_user") // "user" es palabra reservada en PostgreSQL
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false)
@@ -32,9 +30,6 @@ public class User {
 
     @Column(length = 30)
     private String phone;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Tourist tourist;
@@ -44,11 +39,4 @@ public class User {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Admin admin;
-
-    @PrePersist
-    void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
 }
