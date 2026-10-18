@@ -55,14 +55,14 @@
                     <legend class="field-legend">¿Cómo te registrás?</legend>
                     <div class="person-types">
                         <label class="person-type">
-                            <input type="radio" th:field="*{personType}" value="PHYSICAL" required>
+                            <input type="radio" name="personType" th:field="*{personType}" value="PHYSICAL" required>
                             <span class="person-type-body">
                                 <strong>Persona física</strong>
                                 <small>Trabajás por tu cuenta, con tu cédula.</small>
                             </span>
                         </label>
                         <label class="person-type">
-                            <input type="radio" th:field="*{personType}" value="LEGAL" required>
+                            <input type="radio" name="personType" th:field="*{personType}" value="LEGAL" required>
                             <span class="person-type-body">
                                 <strong>Persona jurídica</strong>
                                 <small>Una empresa con RUT.</small>

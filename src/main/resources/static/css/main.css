@@ -21,6 +21,10 @@
     --bs-form-invalid-border-color: var(--error);
 }
 
+h1, h2, h3 {
+    color: var(--ink);
+}
+
 body {
     background: var(--paper);
     color: var(--ink);
