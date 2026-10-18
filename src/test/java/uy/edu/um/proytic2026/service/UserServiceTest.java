@@ -16,6 +16,7 @@ import uy.edu.um.proytic2026.entity.User;
 import uy.edu.um.proytic2026.exception.EmailAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.InvalidCredentialsException;
 import uy.edu.um.proytic2026.exception.NationalIdAlreadyRegisteredException;
+import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
 
@@ -37,13 +38,16 @@ class UserServiceTest {
     @Mock
     private TouristRepository touristRepository;
 
+    @Mock
+    private ProviderRepository providerRepository;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, touristRepository, passwordEncoder);
+        userService = new UserService(userRepository, touristRepository, providerRepository, passwordEncoder);
     }
 
     private RegisterTouristRequest request(String email, String password) {

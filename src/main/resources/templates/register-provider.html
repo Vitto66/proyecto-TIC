@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registro de prestadores · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl">
+        <span class="brand">Uruguay <span>Mnatural</span></span>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <div class="row g-0 register-shell">
+
+        <!-- Qué pasa después de registrarse (CU-02 → CU-03 → CU-07) -->
+        <aside class="col-lg-4 register-aside">
+            <h1>Ofrecé tus actividades en Uruguay Mnatural</h1>
+            <p class="lead-text">
+                Creá tu cuenta de prestador para publicar excursiones, cabalgatas, kayak o cualquier
+                experiencia en la naturaleza.
+            </p>
+            <ol class="steps">
+                <li>
+                    <strong>Completás tus datos</strong>
+                    <span>Como persona física o como empresa.</span>
+                </li>
+                <li>
+                    <strong>Un administrador los revisa</strong>
+                    <span>Mientras tanto tu cuenta queda pendiente de aprobación.</span>
+                </li>
+                <li>
+                    <strong>Cargás tu emprendimiento</strong>
+                    <span>Una vez aprobado, registrás tu emprendimiento y publicás actividades.</span>
+                </li>
+            </ol>
+        </aside>
+
+        <section class="col-lg-8 register-main">
+            <h2 class="form-title">Registrarse como prestador</h2>
+
+            <form th:action="@{/register/provider}" th:object="${form}" method="post"
+                  id="provider-form" class="needs-validation" novalidate>
+
+                <!-- Tipo de prestador -->
+                <fieldset class="mb-4">
+                    <legend class="field-legend">¿Cómo te registrás?</legend>
+                    <div class="person-types">
+                        <label class="person-type">
+                            <input type="radio" th:field="*{personType}" value="PHYSICAL" required>
+                            <span class="person-type-body">
+                                <strong>Persona física</strong>
+                                <small>Trabajás por tu cuenta, con tu cédula.</small>
+                            </span>
+                        </label>
+                        <label class="person-type">
+                            <input type="radio" th:field="*{personType}" value="LEGAL" required>
+                            <span class="person-type-body">
+                                <strong>Persona jurídica</strong>
+                                <small>Una empresa con RUT.</small>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('personType')}"
+                         th:errors="*{personType}">elegí persona física o jurídica</div>
+                    <div class="invalid-feedback" id="person-type-feedback">Elegí persona física o jurídica.</div>
+                </fieldset>
+
+                <!-- Persona física -->
+                <div class="row g-3 person-section" data-person="PHYSICAL" hidden>
+                    <div class="col-md-6">
+                        <label class="form-label" for="firstName">Nombre</label>
+                        <input class="form-control" type="text" th:field="*{firstName}" maxlength="100"
+                               autocomplete="given-name" required
+                               th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('firstName')} ? ${#fields.errors('firstName')[0]} : 'es obligatorio'">es obligatorio</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="lastName">Apellido</label>
+                        <input class="form-control" type="text" th:field="*{lastName}" maxlength="100"
+                               autocomplete="family-name" required
+                               th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('lastName')} ? ${#fields.errors('lastName')[0]} : 'es obligatorio'">es obligatorio</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="document">Cédula</label>
+                        <input class="form-control" type="text" th:field="*{document}" inputmode="numeric"
+                               pattern="\d{7,8}" maxlength="8" placeholder="12345678" required
+                               th:classappend="${#fields.hasErrors('document')} ? 'is-invalid'"
+                               aria-describedby="document-help">
+                        <div class="form-text" id="document-help">Sin puntos ni guion.</div>
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('document')} ? ${#fields.errors('document')[0]} : 'debe tener 7 u 8 dígitos, sin puntos ni guion'">debe tener 7 u 8 dígitos</div>
+                    </div>
+                </div>
+
+                <!-- Persona jurídica -->
+                <div class="row g-3 person-section" data-person="LEGAL" hidden>
+                    <div class="col-md-6">
+                        <label class="form-label" for="rut">RUT</label>
+                        <input class="form-control" type="text" th:field="*{rut}" inputmode="numeric"
+                               pattern="\d{12}" maxlength="12" placeholder="211234560018" required
+                               th:classappend="${#fields.hasErrors('rut')} ? 'is-invalid'"
+                               aria-describedby="rut-help">
+                        <div class="form-text" id="rut-help">12 dígitos, sin puntos ni guiones.</div>
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('rut')} ? ${#fields.errors('rut')[0]} : 'debe tener 12 dígitos, sin puntos ni guiones'">debe tener 12 dígitos</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="legalName">Razón social</label>
+                        <input class="form-control" type="text" th:field="*{legalName}" maxlength="200"
+                               autocomplete="organization" required
+                               th:classappend="${#fields.hasErrors('legalName')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('legalName')} ? ${#fields.errors('legalName')[0]} : 'es obligatoria'">es obligatoria</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="businessName">Nombre del emprendimiento</label>
+                        <input class="form-control" type="text" th:field="*{businessName}" maxlength="150"
+                               placeholder="Ej.: Kayak Laguna de Rocha" required
+                               th:classappend="${#fields.hasErrors('businessName')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('businessName')} ? ${#fields.errors('businessName')[0]} : 'es obligatorio'">es obligatorio</div>
+                    </div>
+                </div>
+
+                <!-- Datos comunes -->
+                <div class="row g-3 mt-0 common-section" hidden>
+                    <div class="col-12">
+                        <label class="form-label" for="address" id="address-label">Domicilio</label>
+                        <input class="form-control" type="text" th:field="*{address}" maxlength="200"
+                               autocomplete="street-address" required
+                               th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('address')} ? ${#fields.errors('address')[0]} : 'es obligatorio'">es obligatorio</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="email">Correo electrónico</label>
+                        <input class="form-control" type="email" th:field="*{email}" maxlength="150"
+                               autocomplete="email" required
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : 'no es un correo válido'">no es un correo válido</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="password">Contraseña</label>
+                        <input class="form-control" type="password" id="password" name="password"
+                               minlength="8" maxlength="72" autocomplete="new-password" required
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                               aria-describedby="password-help">
+                        <div class="form-text" id="password-help">Entre 8 y 72 caracteres.</div>
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('password')} ? ${#fields.errors('password')[0]} : 'debe tener entre 8 y 72 caracteres'">debe tener entre 8 y 72 caracteres</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="confirmPassword">Confirmar contraseña</label>
+                        <input class="form-control" type="password" id="confirmPassword" name="confirmPassword"
+                               autocomplete="new-password" required
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                        <div class="invalid-feedback"
+                             th:text="${#fields.hasErrors('confirmPassword')} ? ${#fields.errors('confirmPassword')[0]} : 'las contraseñas no coinciden'">las contraseñas no coinciden</div>
+                    </div>
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-submit">Registrarse como prestador</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<script th:src="@{/js/register-provider.js}" src="../static/js/register-provider.js"></script>
+</body>
+</html>

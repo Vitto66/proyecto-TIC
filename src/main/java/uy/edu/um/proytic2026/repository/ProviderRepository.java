@@ -9,4 +9,8 @@ import java.util.List;
 public interface ProviderRepository extends JpaRepository<Provider, Long> {
 
     List<Provider> findByStatus(ProviderStatus status);
+
+    boolean existsByDocument(String document);
+
+    boolean existsByRut(String rut);
 }

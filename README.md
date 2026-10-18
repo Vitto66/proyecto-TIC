@@ -26,6 +26,22 @@ Consola de la base: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:proy
 
 Desde la terminal: `DB_PASSWORD='<la contraseña>' ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres`
 
+## Páginas y endpoints
+
+| Qué | Dónde |
+| --- | --- |
+| Formulario de registro de prestadores (CU-02) | http://localhost:8080/register/provider |
+| API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
+| API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
+
+Las páginas usan Thymeleaf + Bootstrap: las plantillas están en `src/main/resources/templates`
+y los estilos y scripts en `src/main/resources/static`.
+
+## Scripts SQL de Supabase
+
+Los cambios de tablas están en `db/supabase/`, en orden por fecha. Cuando entra uno nuevo a
+`main`, alguien del equipo lo corre una vez en el SQL Editor de Supabase.
+
 ## Reglas importantes
 
 - **Nunca subas contraseñas, tokens ni claves al repo.** El repo es público y los bots las encuentran en minutos. Si pasa, hay que cambiar la contraseña en Supabase de inmediato: borrar el commit no alcanza.
