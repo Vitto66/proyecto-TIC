@@ -1,0 +1,285 @@
+/* Uruguay Mnatural — estilos base.
+   Paleta: verde de monte nativo, celeste de la bandera y un dorado de sol usado solo como detalle. */
+:root {
+    --monte: #1F4D3A;        /* verde principal */
+    --monte-dark: #163829;
+    --celeste: #7FB2DE;      /* acento frío */
+    --sol: #E8A93A;          /* detalle puntual */
+    --paper: #F3F6F2;        /* fondo de página */
+    --ink: #18261F;          /* texto */
+    --muted: #55655C;
+    --line: #CBD6CE;
+    --error: #B3261E;
+
+    --font-display: "Familjen Grotesk", system-ui, sans-serif;
+    --font-body: "Public Sans", system-ui, sans-serif;
+
+    --bs-body-font-family: var(--font-body);
+    --bs-body-color: var(--ink);
+    --bs-body-bg: var(--paper);
+    --bs-form-invalid-color: var(--error);
+    --bs-form-invalid-border-color: var(--error);
+}
+
+h1, h2, h3 {
+    color: var(--ink);
+}
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+/* Encabezado */
+.site-header {
+    padding: 1.25rem 0;
+}
+.brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: var(--monte);
+    letter-spacing: -0.01em;
+}
+.brand span {
+    color: var(--celeste);
+}
+
+/* Contenedor del registro */
+.register {
+    padding-bottom: 4rem;
+}
+.register-shell {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+/* Panel lateral: qué pasa después */
+.register-aside {
+    background: var(--monte);
+    color: #E6EFE9;
+    padding: 2.5rem 2rem;
+    position: relative;
+}
+.register-aside::after {
+    /* el horizonte: una franja celeste fina en la base del panel */
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 6px;
+    background: var(--celeste);
+}
+.register-aside h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+.lead-text {
+    color: #C9DACF;
+    max-width: 34ch;
+    margin-bottom: 2rem;
+}
+
+.steps {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0;
+}
+.steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 2.75rem;
+    padding-bottom: 1.5rem;
+}
+.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 1.9rem; height: 1.9rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--celeste);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: grid;
+    place-items: center;
+}
+.steps li:first-child::before {
+    /* el paso en el que está ahora: el sol */
+    background: var(--sol);
+    border-color: var(--sol);
+    color: var(--monte-dark);
+}
+.steps li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: calc(0.95rem - 0.75px);
+    top: 2.1rem;
+    bottom: 0.3rem;
+    width: 1.5px;
+    background: rgba(127, 178, 222, 0.45);
+}
+.steps strong {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+}
+.steps span {
+    color: #B9CCBF;
+    font-size: 0.925rem;
+}
+
+/* Formulario */
+.register-main {
+    padding: 2.5rem 2.5rem 3rem;
+}
+.form-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.015em;
+    margin-bottom: 1.75rem;
+}
+.field-legend {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+}
+.form-control {
+    border-color: var(--line);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+}
+.form-control:focus {
+    border-color: var(--monte);
+    box-shadow: 0 0 0 3px rgba(31, 77, 58, 0.18);
+}
+.form-text {
+    color: var(--muted);
+}
+.invalid-feedback::first-letter {
+    text-transform: uppercase;
+}
+
+/* Selector de tipo de persona */
+.person-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+}
+.person-type {
+    position: relative;
+    cursor: pointer;
+}
+.person-type input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+}
+.person-type-body {
+    display: block;
+    height: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.person-type-body strong {
+    display: block;
+    font-weight: 600;
+}
+.person-type-body small {
+    color: var(--muted);
+}
+.person-type:hover .person-type-body {
+    border-color: var(--monte);
+}
+.person-type input:checked + .person-type-body {
+    border-color: var(--monte);
+    background: #EAF2EC;
+    box-shadow: inset 0 0 0 1px var(--monte);
+}
+.person-type input:focus-visible + .person-type-body {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+.was-validated .person-types:has(input:invalid) .person-type-body {
+    border-color: var(--error);
+}
+.was-validated fieldset:has(input:invalid) #person-type-feedback {
+    display: block;
+}
+
+.btn-submit {
+    background: var(--monte);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    border: none;
+}
+.btn-submit:hover,
+.btn-submit:focus-visible {
+    background: var(--monte-dark);
+    color: #fff;
+}
+.btn-submit:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+
+/* Confirmación */
+.sent-card {
+    max-width: 560px;
+    margin: 3rem auto 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 2.5rem;
+}
+.sent-sun {
+    width: 3rem; height: 3rem;
+    border-radius: 50%;
+    background: var(--sol);
+    box-shadow: 0 0 0 8px rgba(232, 169, 58, 0.18);
+    margin-bottom: 1.5rem;
+}
+.sent-card h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.75rem;
+}
+.sent-card p {
+    color: var(--muted);
+    margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+    .register-aside { padding: 2rem 1.5rem 2.25rem; }
+    .register-aside h1 { font-size: 1.65rem; }
+    .register-main { padding: 2rem 1.5rem 2.5rem; }
+}
+@media (max-width: 575.98px) {
+    .person-types { grid-template-columns: 1fr; }
+    .btn-submit { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .person-type-body { transition: none; }
+}
