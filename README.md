@@ -26,6 +26,16 @@ Consola de la base: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:proy
 
 Desde la terminal: `DB_PASSWORD='<la contraseña>' ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres`
 
+## Administrador
+
+No hay registro público de administradores. Al arrancar, si no existe ninguno, la app crea el
+primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcional).
+
+- **H2 local:** se crea solo, con `admin@uruguaymnatural.uy` / `admin1234`. Sirve para probar el CU-03 en tu compu.
+- **Supabase:** la contraseña no tiene valor por defecto. La primera vez, quien lo cree agrega
+  `ADMIN_PASSWORD=<contraseña>` (y si quiere `ADMIN_EMAIL`) a las variables de entorno de IntelliJ y arranca
+  la app una vez. Después se puede sacar: si ya hay un admin, no hace nada.
+
 ## Páginas y endpoints
 
 | Qué | Dónde |
