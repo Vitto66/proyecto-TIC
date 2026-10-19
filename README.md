@@ -26,6 +26,17 @@ Consola de la base: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:proy
 
 Desde la terminal: `DB_PASSWORD='<la contraseña>' ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres`
 
+## Administradores
+
+Los administradores **no se registran desde la web**. Al arrancar, la app crea el administrador
+inicial si todavía no existe (clase `AdminBootstrap`):
+
+- **Con H2:** se crea siempre `admin@mnatural.uy` / `admin1234`. Es solo para desarrollo.
+- **Con Supabase:** una sola vez, una persona del equipo agrega `ADMIN_PASSWORD=<contraseña elegida>`
+  a las *Environment variables* (junto a `DB_PASSWORD`) y arranca la app. Queda creado
+  `admin@mnatural.uy` en la base compartida y después ya no hace falta la variable.
+  La contraseña se comparte por privado, nunca en el repo. Para usar otro correo, definir también `ADMIN_EMAIL`.
+
 ## Páginas y endpoints
 
 | Qué | Dónde |
