@@ -43,10 +43,10 @@ public class UserService {
      */
     @Transactional
     public UserResponse registerTourist(RegisterTouristRequest request) {
-        String email = normalizeEmail(request.email());
+        String email = normalizeEmail(request.getEmail());
 
-        if (touristRepository.existsByNationalId(request.nationalId())) {
-            throw new NationalIdAlreadyRegisteredException(request.nationalId());
+        if (touristRepository.existsByNationalId(request.getNationalId())) {
+            throw new NationalIdAlreadyRegisteredException(request.getNationalId());
         }
 
         User user = userRepository.findByEmailIgnoreCase(email)
@@ -54,15 +54,15 @@ public class UserService {
                     if (existing.getTourist() != null) {
                         throw new EmailAlreadyRegisteredException(existing.getEmail(), "turista");
                     }
-                    return checkPassword(existing, request.password());
+                    return checkPassword(existing, request.getPassword());
                 })
-                .orElseGet(() -> createAccount(email, request.password(), request.phone()));
+                .orElseGet(() -> createAccount(email, request.getPassword(), blankToNull(trim(request.getPhone()))));
 
         Tourist tourist = touristRepository.save(Tourist.builder()
                 .user(user)
-                .firstName(request.firstName().trim())
-                .lastName(request.lastName().trim())
-                .nationalId(request.nationalId())
+                .firstName(trim(request.getFirstName()))
+                .lastName(trim(request.getLastName()))
+                .nationalId(request.getNationalId())
                 .build());
         user.setTourist(tourist);
 
@@ -145,6 +145,11 @@ public class UserService {
 
     private static String trim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    /** El formulario web manda "" en los campos opcionales que quedan vacíos. */
+    private static String blankToNull(String value) {
+        return value == null || value.isEmpty() ? null : value;
     }
 
     private UserResponse toResponse(User user) {

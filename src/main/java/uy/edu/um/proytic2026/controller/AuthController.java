@@ -10,6 +10,7 @@ import uy.edu.um.proytic2026.dto.RegisterTouristRequest;
 import uy.edu.um.proytic2026.dto.UserResponse;
 import uy.edu.um.proytic2026.service.UserService;
 import uy.edu.um.proytic2026.validation.ProviderRegistrationValidator;
+import uy.edu.um.proytic2026.validation.TouristRegistrationValidator;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +19,13 @@ public class AuthController {
 
     private final UserService userService;
     private final ProviderRegistrationValidator providerRegistrationValidator;
+    private final TouristRegistrationValidator touristRegistrationValidator;
+
+    /** Suma la verificación de la confirmación de contraseña al @Valid del CU-01. */
+    @InitBinder("registerTouristRequest")
+    void initTouristBinder(WebDataBinder binder) {
+        binder.addValidators(touristRegistrationValidator);
+    }
 
     /** Suma las validaciones que dependen del tipo de persona al @Valid del CU-02. */
     @InitBinder("registerProviderRequest")
