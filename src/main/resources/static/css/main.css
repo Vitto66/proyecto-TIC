@@ -283,3 +283,212 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .person-type-body { transition: none; }
 }
+
+/* ---------- Panel de administración (CU-03) ---------- */
+.admin-page {
+    max-width: 960px;
+    padding-bottom: 4rem;
+}
+.link-logout {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--monte);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.link-logout:hover { color: var(--monte-dark); }
+.link-logout,
+.site-header .brand { white-space: nowrap; }
+.link-logout:focus-visible,
+.back-link:focus-visible,
+.admin-shortcut:focus-visible,
+.btn-reject:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+.back-link {
+    display: inline-block;
+    margin: 0.5rem 0 1.25rem;
+    color: var(--monte);
+    font-weight: 500;
+    text-decoration: none;
+}
+.back-link::before { content: "‹ "; }
+.back-link:hover { text-decoration: underline; }
+
+.admin-heading h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+}
+.admin-heading p {
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+}
+.admin-empty {
+    background: #fff;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    padding: 2rem;
+    color: var(--muted);
+}
+.admin-empty p { margin: 0; }
+
+/* Lista de pendientes */
+.review-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.review-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.1rem 1.25rem;
+}
+.review-row + .review-row { border-top: 1px solid var(--line); }
+.review-who strong { display: block; }
+.review-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+.review-label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+.review-mail {
+    overflow-wrap: anywhere;
+    color: var(--ink);
+}
+.review-open { padding: 0.5rem 1.1rem; }
+
+/* Detalle */
+.review-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 2rem 2.25rem;
+}
+.review-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.review-card-head h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.2rem;
+}
+.review-card-head p { color: var(--muted); margin: 0; }
+.status-pill {
+    flex-shrink: 0;
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+.status-pending  { background: #FBEFD8; color: #7A5410; }
+.status-approved { background: #E1EFE5; color: var(--monte-dark); }
+.status-rejected { background: #F7E1DF; color: var(--error); }
+
+.review-data {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem 2rem;
+    margin: 0 0 2rem;
+}
+.review-data dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.review-data dd {
+    margin: 0.1rem 0 0;
+    overflow-wrap: anywhere;
+}
+.review-decision {
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+}
+.review-decision p {
+    color: var(--muted);
+    max-width: 62ch;
+}
+.review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.review-actions form { margin: 0; }
+.btn-reject {
+    background: #fff;
+    color: var(--error);
+    font-weight: 600;
+    border: 1.5px solid var(--error);
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+}
+.btn-reject:hover { background: #FBEDEB; }
+.review-resolved {
+    border-top: 1px solid var(--line);
+    padding-top: 1.25rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* Acceso desde el panel */
+.admin-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1rem 1.1rem;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    color: var(--ink);
+    text-decoration: none;
+}
+.admin-shortcut:hover { border-color: var(--monte); }
+.admin-shortcut strong { display: block; }
+.admin-shortcut small { color: var(--muted); }
+.admin-shortcut-count {
+    flex-shrink: 0;
+    width: 2.6rem; height: 2.6rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--sol);
+    color: var(--monte-dark);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 767.98px) {
+    .review-row { grid-template-columns: 1fr; gap: 0.5rem; }
+    .review-open { justify-self: start; }
+    .review-card { padding: 1.5rem 1.25rem; }
+    .review-data { grid-template-columns: 1fr; }
+}
+@media (max-width: 575.98px) {
+    .admin-user { display: none; }
+    .review-actions form,
+    .review-actions button { width: 100%; }
+}

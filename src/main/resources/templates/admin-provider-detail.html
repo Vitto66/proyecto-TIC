@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${provider.displayName()} + ' · Revisión de prestador'">Revisión de prestador · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="space-user admin-user" th:text="${currentUser.displayName}">Administrador</span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="link-logout">Cerrar sesión</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="container-xl admin-page">
+    <a class="back-link" th:href="@{/admin/providers}" href="admin-providers.html">Volver a pendientes</a>
+
+    <article class="review-card">
+        <header class="review-card-head">
+            <div>
+                <h1 th:text="${provider.displayName()}">Juan Rodríguez</h1>
+                <p th:text="${provider.personTypeLabel()}">Persona física</p>
+            </div>
+            <span class="status-pill" th:classappend="'status-' + ${#strings.toLowerCase(provider.status())}"
+                  th:text="${provider.statusLabel()}">Pendiente</span>
+        </header>
+
+        <dl class="review-data">
+            <!-- Persona física -->
+            <th:block th:unless="${provider.legal()}">
+                <div><dt>Nombre</dt><dd th:text="${provider.firstName()}">Juan</dd></div>
+                <div><dt>Apellido</dt><dd th:text="${provider.lastName()}">Rodríguez</dd></div>
+                <div><dt>Cédula</dt><dd th:text="${provider.document()}">45678901</dd></div>
+                <div><dt>Domicilio</dt><dd th:text="${provider.address()} ?: '—'">Ruta 10 km 264, La Paloma</dd></div>
+            </th:block>
+            <!-- Persona jurídica -->
+            <th:block th:if="${provider.legal()}">
+                <div><dt>RUT</dt><dd th:text="${provider.rut()}">211234560018</dd></div>
+                <div><dt>Razón social</dt><dd th:text="${provider.legalName()}">Laguna Aventuras S.A.</dd></div>
+                <div><dt>Emprendimiento</dt><dd th:text="${provider.businessName()} ?: '—'">Kayak Laguna de Rocha</dd></div>
+                <div><dt>Dirección</dt><dd th:text="${provider.address()} ?: '—'">Av. Costanera 123, Rocha</dd></div>
+            </th:block>
+            <div><dt>Correo</dt><dd th:text="${provider.email()}">juan@mail.com</dd></div>
+            <div th:if="${provider.phone()}"><dt>Teléfono</dt><dd th:text="${provider.phone()}">099 123 456</dd></div>
+        </dl>
+
+        <!-- Paso 3: aprobar o rechazar. Solo si sigue pendiente. -->
+        <div class="review-decision" th:if="${provider.pending()}">
+            <p>
+                Al <strong>aprobarlo</strong>, va a poder registrar su emprendimiento y publicar actividades.
+                Si lo <strong>rechazás</strong>, no va a poder ingresar a su espacio de prestador.
+            </p>
+            <div class="review-actions">
+                <form th:action="@{/admin/providers/{id}/approve(id=${provider.id()})}" method="post">
+                    <button type="submit" class="btn btn-submit">Aprobar prestador</button>
+                </form>
+                <form th:action="@{/admin/providers/{id}/reject(id=${provider.id()})}" method="post">
+                    <button type="submit" class="btn-reject">Rechazar prestador</button>
+                </form>
+            </div>
+        </div>
+        <p class="review-resolved" th:unless="${provider.pending()}">
+            Esta solicitud ya fue revisada y no se puede cambiar desde acá.
+        </p>
+    </article>
+</main>
+
+</body>
+</html>
