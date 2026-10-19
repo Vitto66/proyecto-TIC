@@ -51,7 +51,10 @@ class UserServiceTest {
     }
 
     private RegisterTouristRequest request(String email, String password) {
-        return new RegisterTouristRequest("Ana", "Pérez", "12345678", email, password, null);
+        return RegisterTouristRequest.builder()
+                .firstName("Ana").lastName("Pérez").nationalId("12345678")
+                .email(email).password(password)
+                .build();
     }
 
     @Test

@@ -30,6 +30,7 @@ Desde la terminal: `DB_PASSWORD='<la contraseña>' ./mvnw spring-boot:run -Dspri
 
 | Qué | Dónde |
 | --- | --- |
+| Formulario de registro de turistas (CU-01) | http://localhost:8080/register/tourist |
 | Formulario de registro de prestadores (CU-02) | http://localhost:8080/register/provider |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
