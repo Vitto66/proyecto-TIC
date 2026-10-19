@@ -299,6 +299,8 @@ body {
     text-underline-offset: 3px;
 }
 .link-logout:hover { color: var(--monte-dark); }
+.link-logout,
+.site-header .brand { white-space: nowrap; }
 .link-logout:focus-visible,
 .back-link:focus-visible,
 .admin-shortcut:focus-visible,
@@ -486,6 +488,7 @@ body {
     .review-data { grid-template-columns: 1fr; }
 }
 @media (max-width: 575.98px) {
+    .admin-user { display: none; }
     .review-actions form,
     .review-actions button { width: 100%; }
 }

@@ -17,7 +17,7 @@
     <div class="container-xl d-flex align-items-center justify-content-between gap-3">
         <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
         <div class="d-flex align-items-center gap-3">
-            <span class="space-user" th:text="${currentUser.displayName}">Administrador</span>
+            <span class="space-user admin-user" th:text="${currentUser.displayName}">Administrador</span>
             <form th:action="@{/logout}" method="post" class="m-0">
                 <button type="submit" class="link-logout">Cerrar sesión</button>
             </form>
