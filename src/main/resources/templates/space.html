@@ -32,7 +32,23 @@
             publicar actividades.
         </div>
 
+        <!-- CU-03 paso 4: el prestador se entera de que fue aprobado al ingresar -->
+        <div class="alert alert-success mt-3" role="status" th:if="${approvedProvider}">
+            Tu cuenta de prestador fue aprobada. Ya podés registrar tu emprendimiento.
+        </div>
+
         <p th:text="${intro}">Descripción del espacio.</p>
+
+        <!-- CU-03: acceso a la revisión de prestadores -->
+        <a class="admin-shortcut" th:if="${pendingProviders != null}" th:href="@{/admin/providers}"
+           href="admin-providers.html">
+            <span class="admin-shortcut-count" th:text="${pendingProviders}">2</span>
+            <span>
+                <strong>Prestadores pendientes</strong>
+                <small th:text="${pendingProviders == 0} ? 'No hay solicitudes para revisar.'
+                        : 'Revisá sus datos y aprobalos o rechazalos.'">Revisá sus datos y aprobalos o rechazalos.</small>
+            </span>
+        </a>
 
         <div class="space-actions">
             <a class="btn-outline-monte" th:href="@{/}" href="home.html">Ir al menú</a>

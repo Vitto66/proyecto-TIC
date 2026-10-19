@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.service.AuthService;
+import uy.edu.um.proytic2026.service.ProviderReviewService;
 
 /**
  * Espacio de cada perfil: a donde se llega después de iniciar sesión (CU-04).
@@ -21,6 +22,7 @@ public class SpaceController {
     static final String SPACE_VIEW = "space";
 
     private final AuthService authService;
+    private final ProviderReviewService providerReviewService;
 
     @GetMapping("/tourist")
     public String tourist(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
@@ -35,11 +37,11 @@ public class SpaceController {
         model.addAttribute("title", "Tu espacio de prestador");
         model.addAttribute("intro", "Cuando registres tu emprendimiento vas a poder publicar actividades "
                 + "y ver las reservas que reciban.");
-        // Un prestador PENDING entra, pero todavía no puede publicar (CU-02 / CU-03)
-        boolean pending = authService.providerStatus(user.userId())
-                .map(status -> status == ProviderStatus.PENDING)
-                .orElse(false);
-        model.addAttribute("pendingProvider", pending);
+        // Un prestador PENDING entra, pero todavía no puede publicar (CU-02 / CU-03).
+        // Uno APPROVED ve el aviso de que ya fue aprobado (CU-03 paso 4: notificación).
+        ProviderStatus providerStatus = authService.providerStatus(user.userId()).orElse(null);
+        model.addAttribute("pendingProvider", providerStatus == ProviderStatus.PENDING);
+        model.addAttribute("approvedProvider", providerStatus == ProviderStatus.APPROVED);
         return space(user, model);
     }
 
@@ -48,6 +50,7 @@ public class SpaceController {
         model.addAttribute("title", "Panel de administración");
         model.addAttribute("intro", "Desde acá vas a revisar los prestadores pendientes y mantener "
                 + "los tipos de actividad y de equipamiento.");
+        model.addAttribute("pendingProviders", providerReviewService.countPending());
         return space(user, model);
     }
 
