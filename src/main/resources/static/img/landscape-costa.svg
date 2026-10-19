@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Costa atlántica con faro al atardecer">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3F6FA3"/>
+      <stop offset="0.42" stop-color="#A98FB0"/>
+      <stop offset="0.75" stop-color="#E7A66B"/>
+      <stop offset="1" stop-color="#F6D7A0"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FB2DE"/>
+      <stop offset="1" stop-color="#2E5F8C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFD98A" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#FFD98A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="420" cy="520" r="260" fill="url(#glow)"/>
+  <circle cx="420" cy="520" r="66" fill="#E8A93A"/>
+  <rect y="520" width="1600" height="380" fill="url(#sea)"/>
+  <g fill="#FFE2A0">
+    <rect x="360" y="530" width="120" height="6" rx="3" opacity="0.8"/>
+    <rect x="375" y="552" width="90" height="6" rx="3" opacity="0.65"/>
+    <rect x="345" y="575" width="150" height="6" rx="3" opacity="0.5"/>
+    <rect x="385" y="602" width="70" height="6" rx="3" opacity="0.4"/>
+    <rect x="360" y="632" width="120" height="6" rx="3" opacity="0.3"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.35">
+    <path d="M700 600 q30 -10 60 0 t60 0"/>
+    <path d="M900 660 q40 -12 80 0 t80 0"/>
+    <path d="M200 700 q40 -12 80 0 t80 0"/>
+    <path d="M620 760 q50 -14 100 0 t100 0"/>
+  </g>
+  <path d="M0 800 C200 780 450 810 700 840 C780 852 830 874 860 900 L0 900 Z" fill="#E9D8A6"/>
+  <path d="M900 900 C930 850 960 790 1020 765 C1110 735 1200 712 1300 716 C1420 710 1500 728 1600 745 L1600 900 Z" fill="#163829"/>
+  <g fill="#1F4D3A">
+    <ellipse cx="1120" cy="760" rx="50" ry="20"/>
+    <ellipse cx="1500" cy="745" rx="60" ry="22"/>
+  </g>
+  <polygon points="1384,500 1900,420 1900,580" fill="#FFE2A0" opacity="0.18"/>
+  <polygon points="1362,716 1398,716 1390,540 1370,540" fill="#F3F6F2"/>
+  <polygon points="1365.2,650 1394.8,650 1392.9,605 1367.1,605" fill="#163829"/>
+  <rect x="1362" y="530" width="44" height="10" fill="#163829"/>
+  <rect x="1372" y="500" width="24" height="30" fill="#E8A93A"/>
+  <polygon points="1368,500 1400,500 1384,478" fill="#163829"/>
+</svg>

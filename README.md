@@ -40,13 +40,39 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 
 | Qué | Dónde |
 | --- | --- |
+| Menú inicial (público) | http://localhost:8080/ |
+| Iniciar sesión (CU-04) | http://localhost:8080/login |
+| Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
+| Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
 | Formulario de registro de turistas (CU-01) | http://localhost:8080/register/tourist |
 | Formulario de registro de prestadores (CU-02) | http://localhost:8080/register/provider |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 
 Las páginas usan Thymeleaf + Bootstrap: las plantillas están en `src/main/resources/templates`
-y los estilos y scripts en `src/main/resources/static`.
+y los estilos, scripts e imágenes en `src/main/resources/static`.
+
+## Inicio de sesión y permisos (CU-04)
+
+Se usa **Spring Security** (`config/SecurityConfig`). Las reglas del login están en `AuthService`;
+`LoginPageController` maneja la sesión y la elección de perfil.
+
+- Un mismo correo puede ser turista, prestador y administrador. Si tiene más de un perfil, después de
+  poner bien la contraseña se pregunta con cuál ingresar, y los permisos son los de ese perfil: un
+  prestador no puede entrar a las funciones del turista.
+- Credenciales incorrectas: mensaje genérico, sin decir si falló el correo o la contraseña.
+- Un prestador `REJECTED` no puede ingresar como prestador. Uno `PENDING` entra, pero ve un aviso y todavía
+  no puede publicar.
+- Rutas públicas: el menú, el login, los registros, los archivos de `static` y `/api/**` (la API de solo
+  lectura para otras plataformas, que no usa sesión ni token CSRF). Todo lo demás pide sesión iniciada.
+- **Si agregan un endpoint de `/api/**` que modifique datos, hay que protegerlo en `SecurityConfig`:** hoy
+  toda la API es pública.
+- Los formularios nuevos tienen que usar `th:action` para que Thymeleaf agregue el token CSRF solo.
+
+### Fondos del menú inicial
+
+Los tres paisajes son ilustraciones propias en `static/img/landscape-*.svg`. Para usar fotos, copiarlas a
+`static/img/` y cambiar las tres líneas `.hero-slide[data-scene=...]` de `static/css/home.css`.
 
 ## Scripts SQL de Supabase
 

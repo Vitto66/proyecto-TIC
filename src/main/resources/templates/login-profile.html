@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Elegí tu perfil · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <section class="sent-card">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>¿Con qué perfil querés ingresar?</h1>
+        <p class="mb-4">Tu correo tiene más de un perfil. Elegí con cuál querés entrar ahora.</p>
+
+        <form th:action="@{/login/profile}" method="post" id="profile-form">
+
+            <div class="alert alert-danger" role="alert" th:if="${error != null}"
+                 th:text="${error}">Elegí con qué perfil querés ingresar.</div>
+
+            <fieldset class="mb-4">
+                <legend class="visually-hidden">Perfil</legend>
+                <div class="person-types">
+                    <label class="person-type" th:each="option : ${options}">
+                        <input type="radio" name="role" th:value="${option.value}">
+                        <span class="person-type-body">
+                            <strong th:text="${option.title}">Turista</strong>
+                            <small th:text="${option.description}">Explorá y reservá actividades.</small>
+                        </span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="space-actions mt-0">
+                <button type="submit" class="btn btn-submit">Continuar</button>
+                <a class="btn-outline-monte" th:href="@{/login}" href="login.html">Volver</a>
+            </div>
+        </form>
+    </section>
+</main>
+
+</body>
+</html>
