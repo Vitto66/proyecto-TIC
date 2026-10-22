@@ -492,3 +492,30 @@ body {
     .review-actions form,
     .review-actions button { width: 100%; }
 }
+
+/* ---------- Registro: medio de pago opcional y acceso al login (CU-01 / CU-02) ---------- */
+.payment-optional {
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+}
+.payment-optional[open] {
+    padding-bottom: 1.2rem;
+}
+.payment-optional summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--monte);
+}
+.payment-optional summary:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+.offer-login {
+    margin: 0.35rem 0 0;
+}
+.offer-login a {
+    color: var(--monte);
+    font-weight: 600;
+}

@@ -2,7 +2,9 @@ package uy.edu.um.proytic2026.controller.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +41,8 @@ public class ProviderRegistrationPageController {
     }
 
     @PostMapping
-    public String submit(@Valid @ModelAttribute("form") RegisterProviderRequest form, BindingResult result) {
+    public String submit(@Valid @ModelAttribute("form") RegisterProviderRequest form, BindingResult result,
+                         Model model) {
         if (result.hasErrors()) {
             return FORM_VIEW;
         }
@@ -47,15 +50,21 @@ public class ProviderRegistrationPageController {
             userService.registerProvider(form);
         } catch (EmailAlreadyRegisteredException ex) {
             // 5a. Correo ya usado como prestador → se informa y se ofrece iniciar sesión
-            result.rejectValue("email", "taken", "ya está registrado como prestador. Iniciá sesión con esa cuenta");
+            result.rejectValue("email", "taken", "ya está registrado como prestador");
+            model.addAttribute("offerLogin", true);
             return FORM_VIEW;
         } catch (DocumentAlreadyRegisteredException ex) {
+            // 5d. Documento o RUT ya registrado por otro prestador → se marca el campo
             result.rejectValue(ex.getField(), "taken", "ya está registrado por otro prestador");
             return FORM_VIEW;
         } catch (InvalidCredentialsException ex) {
-            // El correo ya es de un turista: para sumarle el perfil de prestador, la contraseña tiene que ser la misma
+            // 5c. El correo ya es de un turista: para sumarle el perfil de prestador, la contraseña tiene que ser la misma
             result.rejectValue("password", "mismatch",
                     "ese correo ya tiene una cuenta de turista. Ingresá la misma contraseña para agregarle el perfil de prestador");
+            return FORM_VIEW;
+        } catch (DataIntegrityViolationException ex) {
+            // Dos registros simultáneos con el mismo correo, documento o RUT: la restricción UNIQUE de la base lo frena
+            result.reject("duplicate", "Ya existe una cuenta con esos datos. Revisá el correo, el documento o el RUT e intentá de nuevo.");
             return FORM_VIEW;
         }
         // Post/Redirect/Get: si recargan la página de confirmación no se reenvía el formulario

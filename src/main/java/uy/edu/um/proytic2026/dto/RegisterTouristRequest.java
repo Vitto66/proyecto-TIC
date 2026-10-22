@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Datos de entrada del CU-01 Registrarse como turista.
@@ -41,12 +42,40 @@ public class RegisterTouristRequest {
 
     @NotBlank(message = "es obligatoria")
     @Size(min = 8, max = 72, message = "debe tener entre 8 y 72 caracteres")
+    @ToString.Exclude
     private String password;
 
     /** Solo lo manda el formulario web. Si viene, tiene que coincidir con password. */
+    @ToString.Exclude
     private String confirmPassword;
 
     /** Opcional. */
     @Size(max = 30)
     private String phone;
+
+    // --- Medio de pago, opcional (CU-01 paso 3). Si se completa uno, se piden los tres. ---
+    // Lo valida TouristRegistrationValidator. El número y el CVV nunca se guardan ni se loguean.
+
+    /** Número de tarjeta; se aceptan espacios o guiones entre los grupos. */
+    @Size(max = 25)
+    @ToString.Exclude
+    private String cardNumber;
+
+    /** Vencimiento, "MM/AA". */
+    @Size(max = 7)
+    private String cardExpiry;
+
+    /** Código de seguridad, 3 o 4 dígitos. */
+    @Size(max = 4)
+    @ToString.Exclude
+    private String cardCvv;
+
+    /** true si el turista quiso registrar un medio de pago (completó al menos un dato). */
+    public boolean wantsPaymentMethod() {
+        return hasText(cardNumber) || hasText(cardExpiry) || hasText(cardCvv);
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
 }

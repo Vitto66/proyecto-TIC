@@ -160,4 +160,16 @@ class ProviderRegistrationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeHasFieldErrors("form", "rut"));
     }
+
+    @Test
+    void page_emailAlreadyProvider_offersLoginLink() throws Exception {
+        mockMvc.perform(legalForm()).andExpect(status().is3xxRedirection());
+
+        // Mismo correo, otro RUT: 5a. se informa y se ofrece iniciar sesión
+        mockMvc.perform(legalForm("219999990013", "info@laguna.uy", "secreta123"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrors("form", "email"))
+                .andExpect(content().string(containsString("Iniciá sesión con esa cuenta")))
+                .andExpect(content().string(containsString("href=\"/login\"")));
+    }
 }

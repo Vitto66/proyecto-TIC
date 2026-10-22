@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,8 @@ public class TouristRegistrationPageController {
     }
 
     @PostMapping
-    public String submit(@Valid @ModelAttribute("form") RegisterTouristRequest form, BindingResult result) {
+    public String submit(@Valid @ModelAttribute("form") RegisterTouristRequest form, BindingResult result,
+                         Model model) {
         // 4b. Datos inválidos → se marcan los campos
         if (result.hasErrors()) {
             return FORM_VIEW;
@@ -48,14 +50,16 @@ public class TouristRegistrationPageController {
         try {
             userService.registerTourist(form);
         } catch (EmailAlreadyRegisteredException ex) {
-            // 4a. Correo ya registrado → se informa y se ofrece iniciar sesión
-            result.rejectValue("email", "taken", "ya tiene una cuenta de turista. Iniciá sesión con esa cuenta");
+            // 4a. Correo ya registrado como turista → se informa y se ofrece iniciar sesión
+            result.rejectValue("email", "taken", "ya tiene una cuenta de turista");
+            model.addAttribute("offerLogin", true);
             return FORM_VIEW;
         } catch (NationalIdAlreadyRegisteredException ex) {
+            // 4d. Cédula ya registrada → se informa
             result.rejectValue("nationalId", "taken", "ya está registrada por otro turista");
             return FORM_VIEW;
         } catch (InvalidCredentialsException ex) {
-            // El correo ya es de un prestador: para sumarle el perfil de turista, la contraseña tiene que ser la misma
+            // 4c. El correo ya es de un prestador: para sumarle el perfil de turista, la contraseña tiene que ser la misma
             result.rejectValue("password", "mismatch",
                     "ese correo ya tiene una cuenta de prestador. Ingresá la misma contraseña para agregarle el perfil de turista");
             return FORM_VIEW;

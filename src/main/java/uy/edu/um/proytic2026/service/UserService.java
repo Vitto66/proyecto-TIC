@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uy.edu.um.proytic2026.dto.RegisterProviderRequest;
 import uy.edu.um.proytic2026.dto.RegisterTouristRequest;
 import uy.edu.um.proytic2026.dto.UserResponse;
+import uy.edu.um.proytic2026.entity.CardBrand;
+import uy.edu.um.proytic2026.entity.PaymentMethod;
 import uy.edu.um.proytic2026.entity.PersonType;
 import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
@@ -16,10 +18,13 @@ import uy.edu.um.proytic2026.exception.DocumentAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.EmailAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.InvalidCredentialsException;
 import uy.edu.um.proytic2026.exception.NationalIdAlreadyRegisteredException;
+import uy.edu.um.proytic2026.repository.PaymentMethodRepository;
 import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
+import uy.edu.um.proytic2026.validation.PaymentCardRules;
 
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +37,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final TouristRepository touristRepository;
     private final ProviderRepository providerRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final PaymentTokenizer paymentTokenizer;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -39,7 +46,9 @@ public class UserService {
      * <p>
      * Si el correo es nuevo, se crea la cuenta y el perfil de turista.
      * Si el correo ya existe como prestador, se le agrega el perfil de turista
-     * a la misma cuenta, siempre que la contraseña coincida.
+     * a la misma cuenta, siempre que la contraseña coincida (4c).
+     * Si completó un medio de pago (paso 3), se registra junto con la cuenta.
+     * Se espera que el request ya haya pasado por TouristRegistrationValidator.
      */
     @Transactional
     public UserResponse registerTourist(RegisterTouristRequest request) {
@@ -66,7 +75,30 @@ public class UserService {
                 .build());
         user.setTourist(tourist);
 
+        if (request.wantsPaymentMethod()) {
+            registerPaymentMethod(tourist, request);
+        }
         return toResponse(user);
+    }
+
+    /**
+     * CU-01 paso 3: el servicio de pagos tokeniza la tarjeta y se guarda solo el token,
+     * la marca, los últimos 4 dígitos y el vencimiento. El número y el CVV no se guardan.
+     */
+    private void registerPaymentMethod(Tourist tourist, RegisterTouristRequest request) {
+        String digits = PaymentCardRules.digits(request.getCardNumber());
+        YearMonth expiry = PaymentCardRules.parseExpiry(request.getCardExpiry());
+        String token = paymentTokenizer.tokenize(digits, expiry.getMonthValue(), expiry.getYear(),
+                request.getCardCvv().trim());
+
+        paymentMethodRepository.save(PaymentMethod.builder()
+                .tourist(tourist)
+                .token(token)
+                .brand(CardBrand.detect(digits))
+                .last4(PaymentCardRules.last4(digits))
+                .expiryMonth(expiry.getMonthValue())
+                .expiryYear(expiry.getYear())
+                .build());
     }
 
     /**

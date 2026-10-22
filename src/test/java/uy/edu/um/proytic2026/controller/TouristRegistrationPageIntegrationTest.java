@@ -10,7 +10,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import uy.edu.um.proytic2026.entity.CardBrand;
+import uy.edu.um.proytic2026.entity.PaymentMethod;
 import uy.edu.um.proytic2026.entity.Tourist;
+import uy.edu.um.proytic2026.repository.PaymentMethodRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
 
@@ -35,6 +38,9 @@ class TouristRegistrationPageIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
 
     private MockMvc mockMvc;
 
@@ -106,7 +112,9 @@ class TouristRegistrationPageIntegrationTest {
         mockMvc.perform(touristForm("ana@mail.com", "87654321", "secreta123", "secreta123"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeHasFieldErrors("form", "email"))
-                .andExpect(content().string(containsString("Iniciá sesión")));
+                // 4a. se ofrece iniciar sesión, con un enlace al login
+                .andExpect(content().string(containsString("Iniciá sesión con esa cuenta")))
+                .andExpect(content().string(containsString("href=\"/login\"")));
     }
 
     @Test
@@ -127,5 +135,63 @@ class TouristRegistrationPageIntegrationTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fields.confirmPassword").exists());
+    }
+
+    // ---------- Paso 3: medio de pago opcional ----------
+
+    private static final String FUTURE_EXPIRY = java.time.YearMonth.now().plusYears(3)
+            .format(java.time.format.DateTimeFormatter.ofPattern("MM/yy"));
+
+    @Test
+    void page_showsOptionalPaymentSection() throws Exception {
+        mockMvc.perform(get(PAGE_URL))
+                .andExpect(content().string(containsString("Agregar un medio de pago")))
+                .andExpect(content().string(containsString("name=\"cardNumber\"")));
+    }
+
+    @Test
+    void page_withCard_registersTouristAndPaymentMethodWithoutStoringTheNumber() throws Exception {
+        mockMvc.perform(touristForm()
+                        .param("cardNumber", "5555 5555 5555 4444")
+                        .param("cardExpiry", FUTURE_EXPIRY)
+                        .param("cardCvv", "123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register/tourist/done"));
+
+        Long touristId = userRepository.findByEmailIgnoreCase("ana@mail.com").orElseThrow().getId();
+        assertThat(paymentMethodRepository.findByTouristId(touristId)).singleElement().satisfies(pm -> {
+            assertThat(pm.getBrand()).isEqualTo(CardBrand.MASTERCARD);
+            assertThat(pm.getLast4()).isEqualTo("4444");
+            assertThat(pm.getToken()).startsWith("tok_").doesNotContain("5555");
+        });
+    }
+
+    @Test
+    void page_invalidCard_marksFieldsAndCreatesNothing() throws Exception {
+        mockMvc.perform(touristForm()
+                        .param("cardNumber", "4242 4242 4242 4241")
+                        .param("cardExpiry", "13/99")
+                        .param("cardCvv", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("register-tourist"))
+                .andExpect(model().attributeHasFieldErrors("form", "cardNumber", "cardExpiry", "cardCvv"))
+                // El número y el CVV no se vuelven a mostrar en la página
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("4242 4242 4242 4241"))));
+
+        assertThat(touristRepository.count()).isZero();
+        assertThat(paymentMethodRepository.count()).isZero();
+    }
+
+    @Test
+    void api_withCard_registersPaymentMethod() throws Exception {
+        mockMvc.perform(post("/api/auth/register/tourist").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"firstName":"Ana","lastName":"Pérez","nationalId":"12345678",
+                                 "email":"ana@mail.com","password":"secreta123",
+                                 "cardNumber":"4242424242424242","cardExpiry":"%s","cardCvv":"123"}
+                                """.formatted(FUTURE_EXPIRY)))
+                .andExpect(status().isCreated());
+
+        assertThat(paymentMethodRepository.findAll()).extracting(PaymentMethod::getLast4).containsExactly("4242");
     }
 }

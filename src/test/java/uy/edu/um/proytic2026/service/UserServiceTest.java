@@ -1,5 +1,8 @@
 package uy.edu.um.proytic2026.service;
 
+import org.mockito.ArgumentCaptor;
+import uy.edu.um.proytic2026.entity.CardBrand;
+import uy.edu.um.proytic2026.entity.PaymentMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +19,7 @@ import uy.edu.um.proytic2026.entity.User;
 import uy.edu.um.proytic2026.exception.EmailAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.InvalidCredentialsException;
 import uy.edu.um.proytic2026.exception.NationalIdAlreadyRegisteredException;
+import uy.edu.um.proytic2026.repository.PaymentMethodRepository;
 import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
@@ -41,13 +45,20 @@ class UserServiceTest {
     @Mock
     private ProviderRepository providerRepository;
 
+    @Mock
+    private PaymentMethodRepository paymentMethodRepository;
+
+    @Mock
+    private PaymentTokenizer paymentTokenizer;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, touristRepository, providerRepository, passwordEncoder);
+        userService = new UserService(userRepository, touristRepository, providerRepository,
+                paymentMethodRepository, paymentTokenizer, passwordEncoder);
     }
 
     private RegisterTouristRequest request(String email, String password) {
@@ -122,5 +133,48 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.registerTourist(request("ana@mail.com", "secreta123")))
                 .isInstanceOf(InvalidCredentialsException.class);
         verify(touristRepository, never()).save(any());
+    }
+
+    // ---------- Paso 3: medio de pago opcional ----------
+
+    private void newTouristIsSaved() {
+        when(userRepository.findByEmailIgnoreCase(any())).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(1L);
+            return u;
+        });
+        when(touristRepository.save(any(Tourist.class))).thenAnswer(inv -> inv.getArgument(0));
+    }
+
+    @Test
+    void registerTourist_withCard_savesOnlyTokenBrandLast4AndExpiry() {
+        newTouristIsSaved();
+        when(paymentTokenizer.tokenize("4242424242424242", 8, 2031, "123")).thenReturn("tok_123");
+        RegisterTouristRequest request = request("ana@mail.com", "secreta123");
+        request.setCardNumber("4242 4242 4242 4242");
+        request.setCardExpiry("08/31");
+        request.setCardCvv("123");
+
+        userService.registerTourist(request);
+
+        ArgumentCaptor<PaymentMethod> saved = ArgumentCaptor.forClass(PaymentMethod.class);
+        verify(paymentMethodRepository).save(saved.capture());
+        PaymentMethod pm = saved.getValue();
+        assertThat(pm.getToken()).isEqualTo("tok_123");
+        assertThat(pm.getBrand()).isEqualTo(CardBrand.VISA);
+        assertThat(pm.getLast4()).isEqualTo("4242");
+        assertThat(pm.getExpiryMonth()).isEqualTo(8);
+        assertThat(pm.getExpiryYear()).isEqualTo(2031);
+        assertThat(pm.getTourist()).isNotNull();
+    }
+
+    @Test
+    void registerTourist_withoutCard_doesNotRegisterPaymentMethod() {
+        newTouristIsSaved();
+
+        userService.registerTourist(request("ana@mail.com", "secreta123"));
+
+        verifyNoInteractions(paymentTokenizer, paymentMethodRepository);
     }
 }
