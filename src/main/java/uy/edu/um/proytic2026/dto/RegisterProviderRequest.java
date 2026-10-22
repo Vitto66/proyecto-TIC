@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import uy.edu.um.proytic2026.entity.PersonType;
 
 /**
@@ -60,8 +61,10 @@ public class RegisterProviderRequest {
 
     @NotBlank(message = "es obligatoria")
     @Size(min = 8, max = 72, message = "debe tener entre 8 y 72 caracteres")
+    @ToString.Exclude
     private String password;
 
     /** Solo lo manda el formulario web. Si viene, tiene que coincidir con password. */
+    @ToString.Exclude
     private String confirmPassword;
 }

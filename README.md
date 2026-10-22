@@ -77,7 +77,22 @@ Los tres paisajes son ilustraciones propias en `static/img/landscape-*.svg`. Par
 ## Scripts SQL de Supabase
 
 Los cambios de tablas están en `db/supabase/`, en orden por fecha. Cuando entra uno nuevo a
-`main`, alguien del equipo lo corre una vez en el SQL Editor de Supabase.
+`main`, alguien del equipo lo corre una vez en el SQL Editor de Supabase, **antes** de arrancar
+la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no borran datos.
+
+| Script | Para qué |
+| --- | --- |
+| `2026-10-18_cu02_provider_address.sql` | Domicilio y nombre del emprendimiento del prestador (CU-02) |
+| `2026-10-22_cu01_payment_method.sql` | Tabla `payment_method`: medio de pago opcional del turista (CU-01) |
+
+## Medios de pago
+
+El turista puede registrar una tarjeta al crear su cuenta (CU-01, opcional). **Nunca se guarda el
+número ni el código de seguridad**: el `PaymentTokenizer` los convierte en un token y se guardan solo
+el token, la marca, los últimos 4 dígitos y el vencimiento. Hoy el token lo genera
+`SimulatedPaymentTokenizer`; cuando se integre el servicio de pagos externo (CU-15) se reemplaza esa
+clase por una que llame a su API. Para probar sirven las tarjetas de prueba `4242 4242 4242 4242`
+(Visa) o `5555 5555 5555 4444` (Mastercard), con cualquier vencimiento futuro y CVV.
 
 ## Reglas importantes
 

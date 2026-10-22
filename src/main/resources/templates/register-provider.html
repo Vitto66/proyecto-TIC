@@ -50,6 +50,9 @@
             <form th:action="@{/register/provider}" th:object="${form}" method="post"
                   id="provider-form" class="needs-validation" novalidate>
 
+                <div class="alert alert-danger" role="alert" th:if="${#fields.hasGlobalErrors()}"
+                     th:text="${#fields.globalErrors()[0]}">Error general</div>
+
                 <!-- Tipo de prestador -->
                 <fieldset class="mb-4">
                     <legend class="field-legend">¿Cómo te registrás?</legend>
@@ -151,6 +154,10 @@
                                th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
                         <div class="invalid-feedback"
                              th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : 'no es un correo válido'">no es un correo válido</div>
+                        <!-- 4a / 5a: se ofrece iniciar sesión con esa cuenta -->
+                        <p class="form-text offer-login" th:if="${offerLogin}">
+                            ¿Es tuya? <a th:href="@{/login}" href="login.html">Iniciá sesión con esa cuenta</a>.
+                        </p>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="password">Contraseña</label>

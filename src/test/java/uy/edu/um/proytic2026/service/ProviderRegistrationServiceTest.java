@@ -18,6 +18,7 @@ import uy.edu.um.proytic2026.entity.User;
 import uy.edu.um.proytic2026.exception.DocumentAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.EmailAlreadyRegisteredException;
 import uy.edu.um.proytic2026.exception.InvalidCredentialsException;
+import uy.edu.um.proytic2026.repository.PaymentMethodRepository;
 import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
@@ -42,13 +43,20 @@ class ProviderRegistrationServiceTest {
     @Mock
     private ProviderRepository providerRepository;
 
+    @Mock
+    private PaymentMethodRepository paymentMethodRepository;
+
+    @Mock
+    private PaymentTokenizer paymentTokenizer;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, touristRepository, providerRepository, passwordEncoder);
+        userService = new UserService(userRepository, touristRepository, providerRepository,
+                paymentMethodRepository, paymentTokenizer, passwordEncoder);
     }
 
     private RegisterProviderRequest physical(String email) {
