@@ -50,6 +50,16 @@
             </span>
         </a>
 
+        <!-- CU-08: "Mis actividades" (con el emprendimiento ya registrado) -->
+        <a class="admin-shortcut" th:if="${hasBusiness}" th:href="@{/provider/activities}"
+           href="activities.html">
+            <span class="admin-shortcut-count" aria-hidden="true">★</span>
+            <span>
+                <strong>Mis actividades</strong>
+                <small>Publicá actividades y mirá las que ya tenés.</small>
+            </span>
+        </a>
+
         <!-- CU-03: acceso a la revisión de prestadores -->
         <a class="admin-shortcut" th:if="${pendingProviders != null}" th:href="@{/admin/providers}"
            href="admin-providers.html">

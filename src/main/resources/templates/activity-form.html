@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Publicar actividad · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/business.css}" href="../static/css/business.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
+        <span class="space-user" th:text="${currentUser.displayName}">Nombre</span>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <a class="back-link" th:href="@{/provider/activities}" href="activities.html">Volver a mis actividades</a>
+
+    <div class="register-shell activity-shell">
+        <section class="register-main">
+            <h1 class="form-title">Publicar una actividad</h1>
+
+            <form th:action="@{/provider/activities}" th:object="${form}" method="post"
+                  id="activity-form" class="needs-validation" novalidate>
+
+                <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('*')}">
+                    Revisá los campos marcados.
+                    <th:block th:if="${#fields.hasGlobalErrors()}">
+                        <br><span th:text="${#fields.globalErrors()[0]}">elegí equipamiento de la lista</span>
+                    </th:block>
+                </div>
+
+                <!-- Paso 2: datos de la actividad -->
+                <fieldset class="form-section">
+                    <legend>La actividad</legend>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="name">Nombre</label>
+                            <input class="form-control" type="text" th:field="*{name}" maxlength="150"
+                                   placeholder="Ej.: Atardecer en kayak por la laguna" required
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                            <div class="invalid-feedback"
+                                 th:text="${#fields.hasErrors('name')} ? ${#fields.errors('name')[0]} : 'es obligatorio'">es obligatorio</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="description">Descripción</label>
+                            <textarea class="form-control" th:field="*{description}" rows="5" maxlength="2000" required
+                                      placeholder="Qué se hace, cómo es el recorrido, qué incluye."
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback"
+                                 th:text="${#fields.hasErrors('description')} ? ${#fields.errors('description')[0]} : 'es obligatoria'">es obligatoria</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="departmentId">Departamento</label>
+                            <select class="form-select" th:field="*{departmentId}" required
+                                    th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid'">
+                                <option value="">Elegí un departamento</option>
+                                <option th:each="d : ${options.locations().departments()}"
+                                        th:value="${d.id()}" th:text="${d.name()}">Rocha</option>
+                            </select>
+                            <div class="invalid-feedback"
+                                 th:text="${#fields.hasErrors('departmentId')} ? ${#fields.errors('departmentId')[0]} : 'elegí el departamento'">elegí el departamento</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="localityId">Localidad</label>
+                            <select class="form-select" th:field="*{localityId}" required
+                                    th:classappend="${#fields.hasErrors('localityId')} ? 'is-invalid'"
+                                    aria-describedby="locality-help">
+                                <option value="">Elegí una localidad</option>
+                                <option th:each="l : ${options.locations().localities()}"
+                                        th:value="${l.id()}" th:text="${l.name()}"
+                                        th:attr="data-department=${l.departmentId()}">La Paloma</option>
+                            </select>
+                            <div class="form-text" id="locality-help" hidden>
+                                Todavía no hay localidades cargadas para ese departamento. Avisale a un administrador.
+                            </div>
+                            <div class="invalid-feedback"
+                                 th:text="${#fields.hasErrors('localityId')} ? ${#fields.errors('localityId')[0]} : 'elegí la localidad'">elegí la localidad</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Paso 2 y 5: números -->
+                <fieldset class="form-section">
+                    <legend>Duración, precio y reservas</legend>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="durationMinutes">Duración aproximada</label>
+                            <div class="input-group has-validation">
+                                <input class="form-control" type="number" th:field="*{durationMinutes}"
+                                       min="1" max="10080" step="1" inputmode="numeric" placeholder="120" required
+                                       th:classappend="${#fields.hasErrors('durationMinutes')} ? 'is-invalid'"
+                                       aria-describedby="duration-help">
+                                <span class="input-group-text">minutos</span>
+                                <div class="invalid-feedback"
+                                     th:text="${#fields.hasErrors('durationMinutes')} ? ${#fields.errors('durationMinutes')[0]} : 'tiene que ser de al menos 1 minuto'">obligatoria</div>
+                            </div>
+                            <div class="form-text" id="duration-help">Por ejemplo, 90 para una hora y media.</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="price">Precio por persona</label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" th:field="*{price}"
+                                       min="0" step="0.01" inputmode="decimal" placeholder="1500" required
+                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                                       aria-describedby="price-help">
+                                <div class="invalid-feedback"
+                                     th:text="${#fields.hasErrors('price')} ? ${#fields.errors('price')[0]} : 'es obligatorio'">es obligatorio</div>
+                            </div>
+                            <div class="form-text" id="price-help">En pesos uruguayos.</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="minAge">Edad mínima</label>
+                            <div class="input-group has-validation">
+                                <input class="form-control" type="number" th:field="*{minAge}"
+                                       min="0" max="99" step="1" inputmode="numeric" required
+                                       th:classappend="${#fields.hasErrors('minAge')} ? 'is-invalid'"
+                                       aria-describedby="age-help">
+                                <span class="input-group-text">años</span>
+                                <div class="invalid-feedback"
+                                     th:text="${#fields.hasErrors('minAge')} ? ${#fields.errors('minAge')[0]} : 'es obligatoria'">es obligatoria</div>
+                            </div>
+                            <div class="form-text" id="age-help">0 si es apta para todas las edades.</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="bookingCutoffMinutes">Cierre de reservas</label>
+                            <div class="input-group has-validation">
+                                <input class="form-control" type="number" th:field="*{bookingCutoffMinutes}"
+                                       min="0" max="10080" step="1" inputmode="numeric" required
+                                       th:classappend="${#fields.hasErrors('bookingCutoffMinutes')} ? 'is-invalid'"
+                                       aria-describedby="cutoff-help">
+                                <span class="input-group-text">min antes</span>
+                                <div class="invalid-feedback"
+                                     th:text="${#fields.hasErrors('bookingCutoffMinutes')} ? ${#fields.errors('bookingCutoffMinutes')[0]} : 'es obligatorio'">es obligatorio</div>
+                            </div>
+                            <div class="form-text" id="cutoff-help">0 = se puede reservar hasta la hora de comienzo.</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Paso 3: tipos de actividad -->
+                <fieldset class="form-section" id="types-fieldset">
+                    <legend>Tipo de actividad</legend>
+                    <p class="form-text mt-0">Elegí uno o más. Los tipos los define el administrador.</p>
+                    <div class="chip-options">
+                        <label class="chip-option" th:each="t : ${options.activityTypes()}">
+                            <input type="checkbox" th:field="*{activityTypeIds}" th:value="${t.id()}">
+                            <span th:text="${t.name()}">Trekking</span>
+                        </label>
+                    </div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('activityTypeIds')}"
+                         th:text="${#fields.errors('activityTypeIds')[0]}">elegí al menos un tipo de actividad</div>
+                    <div class="invalid-feedback" id="types-feedback">Elegí al menos un tipo de actividad.</div>
+                </fieldset>
+
+                <!-- Paso 4: equipamiento y quién lo pone -->
+                <fieldset class="form-section">
+                    <legend>Equipamiento</legend>
+                    <p class="form-text mt-0">Marcá solo el que se usa en la actividad, e indicá quién lo pone.</p>
+                    <div class="equipment-list" th:if="${!options.equipmentTypes().isEmpty()}">
+                        <div class="equipment-row" th:each="e : ${options.equipmentTypes()}">
+                            <span class="equipment-name" th:id="'eq-label-' + ${e.id()}" th:text="${e.name()}">Casco</span>
+                            <div class="equipment-choice" role="radiogroup" th:attr="aria-labelledby='eq-label-' + ${e.id()}">
+                                <label>
+                                    <input type="radio" th:name="'equipment[' + ${e.id()} + ']'" value=""
+                                           th:checked="${form.equipmentChoice(e.id()) == ''}">
+                                    <span>No se usa</span>
+                                </label>
+                                <label>
+                                    <input type="radio" th:name="'equipment[' + ${e.id()} + ']'" value="PROVIDER"
+                                           th:checked="${form.equipmentChoice(e.id()) == 'PROVIDER'}">
+                                    <span>Lo pongo yo</span>
+                                </label>
+                                <label>
+                                    <input type="radio" th:name="'equipment[' + ${e.id()} + ']'" value="TOURIST"
+                                           th:checked="${form.equipmentChoice(e.id()) == 'TOURIST'}">
+                                    <span>Lo trae el turista</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="form-text" th:if="${options.equipmentTypes().isEmpty()}">
+                        Todavía no hay tipos de equipamiento cargados.
+                    </p>
+                </fieldset>
+
+                <div class="pt-2">
+                    <button type="submit" class="btn btn-submit">Publicar actividad</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<script th:src="@{/js/activity-form.js}" src="../static/js/activity-form.js"></script>
+</body>
+</html>

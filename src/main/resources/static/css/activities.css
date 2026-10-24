@@ -1,0 +1,213 @@
+/* CU-08 Actividades del prestador. Se carga después de main.css y home.css y reutiliza su paleta. */
+
+/* ---------- Formulario ---------- */
+.activity-shell {
+    max-width: 880px;
+    margin: 0 auto;
+}
+.activity-shell .form-title {
+    margin-bottom: 1.5rem;
+}
+.form-section {
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+    margin-bottom: 1.75rem;
+}
+.form-section:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+}
+.form-section legend {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.9rem;
+}
+.input-group-text {
+    border-color: var(--line);
+    background: #EEF3EF;
+    color: var(--muted);
+    border-radius: 10px;
+}
+
+/* Tipos de actividad: casillas con forma de etiqueta */
+.chip-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+}
+.chip-option {
+    position: relative;
+    cursor: pointer;
+}
+.chip-option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+}
+.chip-option span {
+    display: inline-block;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-weight: 500;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.chip-option:hover span { border-color: var(--monte); }
+.chip-option input:checked + span {
+    border-color: var(--monte);
+    background: var(--monte);
+    color: #fff;
+}
+.chip-option input:focus-visible + span {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+.was-validated #types-fieldset.is-missing .chip-option span { border-color: var(--error); }
+.was-validated #types-fieldset.is-missing #types-feedback { display: block; }
+
+/* Equipamiento: una fila por tipo, con quién lo pone */
+.equipment-list {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.equipment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+}
+.equipment-row + .equipment-row { border-top: 1px solid var(--line); }
+.equipment-name { font-weight: 600; }
+.equipment-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+.equipment-choice label { position: relative; cursor: pointer; }
+.equipment-choice input { position: absolute; opacity: 0; inset: 0; }
+.equipment-choice span {
+    display: inline-block;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.equipment-choice input:checked + span {
+    border-color: var(--monte);
+    background: #EAF2EC;
+    color: var(--monte-dark);
+    font-weight: 600;
+}
+.equipment-choice input:focus-visible + span {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+
+/* ---------- Mis actividades ---------- */
+.activities-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.activities-head h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+.activities-head .btn-submit,
+.empty-state .btn-submit { text-decoration: none; }
+
+.empty-state {
+    background: #fff;
+    border: 1px dashed var(--line);
+    border-radius: 18px;
+    padding: 2.5rem;
+    text-align: center;
+}
+.empty-state h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+}
+.empty-state p { color: var(--muted); margin: 0; }
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.5rem;
+}
+.activity-main h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.25rem;
+}
+.activity-types {
+    color: var(--monte);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+.activity-facts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+.activity-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+.activity-price {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    white-space: nowrap;
+}
+.activity-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+}
+.activity-status.is-active { background: #EAF2EC; color: var(--monte-dark); }
+.activity-status.is-inactive { background: #EFEFEF; color: var(--muted); }
+
+@media (max-width: 575.98px) {
+    .equipment-row { flex-direction: column; align-items: flex-start; }
+    .activity-item { flex-direction: column; }
+    .activity-side { flex-direction: row; align-items: center; width: 100%; }
+    .activities-head .btn-submit { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .chip-option span { transition: none; }
+}
