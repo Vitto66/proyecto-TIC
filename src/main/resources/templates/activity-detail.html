@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${activity.name()} + ' · Uruguay Mnatural'">Atardecer en kayak · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+    <link th:href="@{/css/catalog.css}" href="../static/css/catalog.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
+        <nav class="site-nav" aria-label="Principal">
+            <th:block th:if="${currentUser == null}">
+                <a th:href="@{/login}" href="login.html">Iniciar sesión</a>
+                <a class="btn btn-submit btn-sm-nav nav-optional" th:href="@{/register/tourist}" href="register-tourist.html">Crear cuenta</a>
+            </th:block>
+            <a th:if="${currentUser != null}" class="btn btn-submit btn-sm-nav"
+               th:href="@{${spacePath}}" href="space.html">Mi espacio</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container-xl catalog">
+    <a class="back-link" th:href="@{/activities}" href="catalog.html">Volver a explorar</a>
+
+    <!-- Paso 2: la actividad y quién la organiza -->
+    <header class="detail-head">
+        <p class="card-types" th:text="${activity.typesLabel()}">Actividades acuáticas · Turismo de naturaleza</p>
+        <h1 th:text="${activity.name()}">Atardecer en kayak por la laguna</h1>
+        <p class="detail-sub">
+            <span>Organiza <strong th:text="${activity.businessName()}">Kayak Laguna de Rocha</strong></span>
+            <span th:text="${activity.location()}">La Paloma, Rocha</span>
+            <span class="card-rating" th:if="${activity.rated()}">
+                <span class="stars" aria-hidden="true">★</span>
+                <strong th:text="${activity.ratingLabel()}">4,5</strong>
+                <span th:text="'(' + ${activity.reviewsLabel()} + ')'">(12 valoraciones)</span>
+            </span>
+        </p>
+    </header>
+
+    <div class="detail-layout">
+        <div class="detail-main">
+
+            <section class="detail-section">
+                <h2>Sobre la actividad</h2>
+                <p class="detail-description" th:text="${activity.description()}">Un recorrido en kayak por la laguna al atardecer.</p>
+
+                <dl class="detail-facts">
+                    <div><dt>Duración</dt><dd th:text="${activity.durationLabel()}">2 h 30 min</dd></div>
+                    <div><dt>Precio</dt><dd th:text="${activity.priceLabel()} + ' por persona'">$ 1.500 por persona</dd></div>
+                    <div><dt>Edad mínima</dt><dd th:text="${activity.minAgeLabel()}">Desde 12 años</dd></div>
+                    <div><dt>Se reserva</dt><dd th:text="${activity.cutoffLabel()}">Hasta 1 h antes</dd></div>
+                </dl>
+            </section>
+
+            <!-- Equipamiento necesario y provisto -->
+            <section class="detail-section">
+                <h2>Equipamiento</h2>
+                <p class="text-muted mb-0" th:if="${activity.noEquipment()}">No hace falta equipamiento especial.</p>
+                <div class="equipment-columns" th:unless="${activity.noEquipment()}">
+                    <div th:unless="${activity.equipmentToBring().isEmpty()}">
+                        <h3>Tenés que traer</h3>
+                        <ul><li th:each="e : ${activity.equipmentToBring()}" th:text="${e}">Gorro</li></ul>
+                    </div>
+                    <div th:unless="${activity.equipmentProvided().isEmpty()}">
+                        <h3>Lo pone el prestador</h3>
+                        <ul><li th:each="e : ${activity.equipmentProvided()}" th:text="${e}">Chaleco salvavidas</li></ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Paso 3: próximas fechas, con el clima (paso 5) -->
+            <section class="detail-section" id="fechas">
+                <h2>Próximas fechas</h2>
+
+                <!-- 3a. Sin fechas futuras -->
+                <p class="text-muted mb-0" th:if="${activity.dates().isEmpty()}">
+                    No hay fechas disponibles por ahora. Volvé a fijarte más adelante.
+                </p>
+
+                <ul class="detail-dates" th:unless="${activity.dates().isEmpty()}">
+                    <li th:each="d : ${activity.dates()}" th:classappend="${d.available()} ? '' : 'is-unavailable'">
+                        <div class="detail-date-when">
+                            <strong th:text="${d.date().dayLabel()}">Domingo 25 de octubre de 2026</strong>
+                            <span th:text="${d.date().timeLabel()}">10:00 a 12:30</span>
+                        </div>
+                        <div class="detail-date-weather" th:if="${d.forecast() != null}"
+                             th:title="${d.forecast().description()}">
+                            <span class="weather-icon" aria-hidden="true" th:text="${d.forecast().icon()}">⛅</span>
+                            <span>
+                                <span th:text="${d.forecast().description()}">Parcialmente nublado</span>
+                                <small>
+                                    <span th:text="${d.forecast().temperatureLabel()}">24° / 15°</span>
+                                    <span th:if="${d.forecast().rainLabel() != null}"
+                                          th:text="' · ' + ${d.forecast().rainLabel()}"> · 20 % de lluvia</span>
+                                </small>
+                            </span>
+                        </div>
+                        <span class="detail-date-status" th:text="${d.statusLabel()}">8 lugares libres</span>
+                    </li>
+                </ul>
+
+                <!-- 5a. Pronóstico no disponible -->
+                <p class="form-text mt-2 mb-0" th:if="${!activity.dates().isEmpty() and !activity.anyForecast()}">
+                    El pronóstico del clima no está disponible para estas fechas.
+                </p>
+                <p class="form-text mt-2 mb-0" th:if="${activity.anyForecast()}">
+                    Pronóstico de <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>,
+                    disponible para los próximos 16 días.
+                </p>
+            </section>
+
+            <!-- Paso 4: comentarios y calificaciones -->
+            <section class="detail-section">
+                <h2 th:text="'Valoraciones' + (${activity.rated()} ? ' · ' + ${activity.ratingLabel()} + ' ★' : '')">Valoraciones · 4,5 ★</h2>
+                <p class="text-muted mb-0" th:if="${activity.reviews().isEmpty()}">
+                    Todavía nadie valoró esta actividad.
+                </p>
+                <ul class="ratings-list" th:unless="${activity.reviews().isEmpty()}">
+                    <li th:each="r : ${activity.reviews()}">
+                        <div class="ratings-head">
+                            <strong th:text="${r.author()}">Ana P.</strong>
+                            <span class="stars" th:text="${r.stars()}" th:attr="aria-label=${r.rating()} + ' de 5'">★★★★☆</span>
+                        </div>
+                        <p class="mb-1" th:if="${r.hasComment()}" th:text="${r.comment()}">Muy linda experiencia.</p>
+                        <small class="text-muted" th:text="${r.dateLabel()}">Sábado 3 de octubre de 2026</small>
+                    </li>
+                </ul>
+            </section>
+        </div>
+
+        <!-- Reservar (1a: requiere estar autenticado como turista) -->
+        <aside class="detail-aside">
+            <div class="reserve-card">
+                <span class="card-price" th:text="${activity.priceLabel()}">$ 1.500</span>
+                <span class="card-unit">por persona</span>
+
+                <th:block th:switch="${reserveMode.name()}">
+                    <div th:case="'LOGIN'">
+                        <p>Para reservar, iniciá sesión con tu cuenta de turista.</p>
+                        <a class="btn btn-submit w-100" th:href="@{/login}" href="login.html">Iniciar sesión para reservar</a>
+                        <p class="form-text mt-2 mb-0">
+                            ¿No tenés cuenta? <a th:href="@{/register/tourist}" href="register-tourist.html">Creá una gratis</a>.
+                        </p>
+                    </div>
+                    <div th:case="'OTHER_PROFILE'">
+                        <p class="mb-0">Para reservar tenés que ingresar con tu perfil de turista.</p>
+                    </div>
+                    <div th:case="'TOURIST'">
+                        <button type="button" class="btn btn-submit w-100" disabled
+                                th:text="${activity.anyAvailable()} ? 'Reservar' : 'Sin lugares disponibles'">Reservar</button>
+                        <p class="form-text mt-2 mb-0">La reserva online va a estar disponible muy pronto.</p>
+                    </div>
+                </th:block>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<footer class="home-footer">
+    <div class="container-xl">Uruguay Mnatural · Proyectos TIC 2026 · Universidad de Montevideo</div>
+</footer>
+
+</body>
+</html>
