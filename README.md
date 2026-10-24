@@ -42,6 +42,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | --- | --- |
 | Menú inicial (público) | http://localhost:8080/ |
 | Explorar actividades con filtros (CU-05, público) | http://localhost:8080/activities |
+| Detalle de una actividad con fechas, valoraciones y clima (CU-06, público) | `/activities/{id}` (desde la vidriera) |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
 | Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
@@ -96,6 +97,21 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - Los filtros se aplican en memoria (`CatalogService`). Alcanza para este proyecto; con miles de actividades
   convendría pasarlos a la consulta y paginar.
 - **No necesita scripts SQL:** usa `review`, que ya existe en Supabase.
+
+## Detalle de una actividad (CU-06)
+
+- Público. Muestra emprendimiento, descripción, ubicación, duración, precio, tipo, edad mínima, el equipamiento
+  que hay que traer y el que pone el prestador, las próximas fechas con su disponibilidad (y si ya cerraron
+  las reservas por el límite de minutos previos) y las valoraciones.
+- **Clima:** `OpenMeteoWeatherService` usa la API pública de [Open-Meteo](https://open-meteo.com/), sin clave
+  (uso no comercial). Como `locality` no tiene coordenadas, primero busca la localidad por nombre en Uruguay y
+  después pide el pronóstico de los próximos 16 días (el máximo de la API). Guarda las coordenadas en memoria
+  y reutiliza el pronóstico durante una hora.
+- Si la API no responde, no encuentra el lugar o la fecha está a más de 16 días, el detalle se muestra sin
+  clima (5a). El pronóstico se pide **fuera de la transacción**, para no tener ocupada una conexión de Supabase
+  mientras se espera a la API.
+- Para reservar hay que ingresar como turista (1a). El botón queda listo para el CU-14.
+- En los tests, el clima se reemplaza por uno simulado: no dependen de internet.
 
 ## Inicio de sesión y permisos (CU-04)
 

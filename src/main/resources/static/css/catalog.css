@@ -179,9 +179,123 @@
     text-align: right;
 }
 
+/* ---------- Detalle de una actividad (CU-06) ---------- */
+.detail-head { margin: 0.25rem 0 2rem; }
+.detail-head h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    margin: 0.3rem 0 0.75rem;
+}
+.detail-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1.5rem;
+    color: var(--muted);
+    margin: 0;
+}
+.detail-sub .card-rating { margin: 0; color: var(--ink); }
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 2rem;
+    align-items: start;
+}
+.detail-section {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+.detail-section h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+.detail-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.detail-description { white-space: pre-line; }
+.detail-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+.detail-facts dt { color: var(--muted); font-weight: 500; font-size: 0.9rem; }
+.detail-facts dd { margin: 0; font-weight: 600; }
+
+.equipment-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+}
+.equipment-columns ul { margin: 0; padding-left: 1.1rem; }
+
+.detail-dates { list-style: none; padding: 0; margin: 0; }
+.detail-dates li {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+}
+.detail-dates li + li { border-top: 1px solid var(--line); }
+.detail-date-when strong { display: block; }
+.detail-date-when span { color: var(--muted); }
+.detail-date-weather { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; }
+.detail-date-weather small { display: block; color: var(--muted); }
+.weather-icon { font-size: 1.5rem; line-height: 1; }
+.detail-date-status {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--monte);
+    text-align: right;
+    grid-column: 3;
+}
+.detail-dates li.is-unavailable { opacity: 0.6; }
+.detail-dates li.is-unavailable .detail-date-status { color: var(--error); }
+
+/* "ratings-" y no "review-": .review-list ya lo usa main.css para la revisión de prestadores (CU-03) */
+.ratings-list { list-style: none; padding: 0; margin: 0; }
+.ratings-list li { padding: 0.9rem 0; }
+.ratings-list li + li { border-top: 1px solid var(--line); }
+.ratings-head { display: flex; justify-content: space-between; gap: 1rem; }
+
+.detail-aside { position: sticky; top: 1rem; }
+.reserve-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.5rem;
+}
+.reserve-card .card-price { font-size: 1.75rem; }
+.reserve-card .card-unit { display: block; margin-bottom: 1.25rem; }
+.reserve-card .btn-submit { text-decoration: none; }
+.reserve-card .btn-submit:disabled { opacity: 0.6; }
+
 @media (max-width: 991.98px) {
     .catalog-layout { grid-template-columns: 1fr; }
     .catalog-filters { position: static; }
+    .detail-layout { grid-template-columns: 1fr; }
+    /* En el celular, reservar va arriba de todo, después del título */
+    .detail-aside { position: static; order: -1; }
+}
+@media (max-width: 575.98px) {
+    .detail-dates li { grid-template-columns: 1fr auto; }
+    .detail-date-weather { grid-column: 1 / -1; grid-row: 2; }
+    .detail-date-status { grid-column: 2; grid-row: 1; }
+    .detail-section { padding: 1.25rem; }
 }
 @media (max-width: 575.98px) {
     .site-nav { gap: 0.8rem; font-size: 0.95rem; }
