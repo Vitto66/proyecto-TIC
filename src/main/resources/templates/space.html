@@ -39,6 +39,17 @@
 
         <p th:text="${intro}">Descripción del espacio.</p>
 
+        <!-- CU-07: acceso al emprendimiento (solo prestadores aprobados) -->
+        <a class="admin-shortcut" th:if="${businessAccess}" th:href="@{/provider/business}"
+           href="business-form.html">
+            <span class="admin-shortcut-count" aria-hidden="true" th:text="${hasBusiness} ? '✓' : '+'">+</span>
+            <span>
+                <strong th:text="${hasBusiness} ? 'Mi emprendimiento' : 'Registrar mi emprendimiento'">Registrar mi emprendimiento</strong>
+                <small th:text="${hasBusiness} ? 'Mirá los datos de tu emprendimiento.'
+                        : 'Cargá sus datos para poder publicar actividades.'">Cargá sus datos para poder publicar actividades.</small>
+            </span>
+        </a>
+
         <!-- CU-03: acceso a la revisión de prestadores -->
         <a class="admin-shortcut" th:if="${pendingProviders != null}" th:href="@{/admin/providers}"
            href="admin-providers.html">
