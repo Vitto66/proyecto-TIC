@@ -1,0 +1,50 @@
+/* CU-07 Emprendimiento. Se carga después de main.css y home.css y reutiliza su paleta. */
+
+/* Selectores con el mismo aspecto que los campos de texto de main.css */
+.form-select {
+    border-color: var(--line);
+    border-radius: 10px;
+    padding: 0.65rem 2.25rem 0.65rem 0.85rem;
+}
+.form-select:focus {
+    border-color: var(--monte);
+    box-shadow: 0 0 0 3px rgba(31, 77, 58, 0.18);
+}
+textarea.form-control {
+    resize: vertical;
+    min-height: 7rem;
+}
+
+/* Vista del emprendimiento registrado */
+.business-card {
+    max-width: 640px;
+}
+.business-card .alert {
+    margin-bottom: 1.5rem;
+}
+.business-description {
+    white-space: pre-line; /* respeta los saltos de línea que escribió el prestador */
+    margin-bottom: 1.5rem !important;
+}
+.business-data {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid var(--line);
+}
+.business-data dt {
+    font-weight: 600;
+    color: var(--ink);
+}
+.business-data dd {
+    margin: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575.98px) {
+    .business-data { grid-template-columns: 1fr; gap: 0.15rem; }
+    .business-data dd { margin-bottom: 0.6rem; }
+}

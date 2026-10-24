@@ -46,11 +46,22 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
 | Formulario de registro de turistas (CU-01) | http://localhost:8080/register/tourist |
 | Formulario de registro de prestadores (CU-02) | http://localhost:8080/register/provider |
+| Revisar prestadores pendientes (CU-03, administrador) | http://localhost:8080/admin/providers |
+| Registrar / ver mi emprendimiento (CU-07, prestador aprobado) | http://localhost:8080/provider/business |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 
 Las páginas usan Thymeleaf + Bootstrap: las plantillas están en `src/main/resources/templates`
 y los estilos, scripts e imágenes en `src/main/resources/static`.
+
+## Emprendimiento (CU-07)
+
+- Solo un prestador **aprobado** puede registrarlo, y cada prestador tiene **uno solo** (la base lo
+  asegura con `UNIQUE (provider_id)`). Si ya lo registró, la página lo muestra con un aviso.
+- Si el prestador es persona jurídica, el nombre llega precargado con el que puso al registrarse.
+- La ubicación se elige de las tablas `department` y `locality`, que ya tienen datos en Supabase. Si a un
+  departamento le faltan localidades, el formulario lo avisa: hay que cargarlas en Supabase.
+- **No necesita scripts SQL:** usa las tablas `business`, `department` y `locality` que ya existen.
 
 ## Inicio de sesión y permisos (CU-04)
 

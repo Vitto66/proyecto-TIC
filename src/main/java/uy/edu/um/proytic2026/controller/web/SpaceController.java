@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.service.AuthService;
+import uy.edu.um.proytic2026.service.BusinessService;
 import uy.edu.um.proytic2026.service.ProviderReviewService;
 
 /**
@@ -23,6 +24,7 @@ public class SpaceController {
 
     private final AuthService authService;
     private final ProviderReviewService providerReviewService;
+    private final BusinessService businessService;
 
     @GetMapping("/tourist")
     public String tourist(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
@@ -40,8 +42,13 @@ public class SpaceController {
         // Un prestador PENDING entra, pero todavía no puede publicar (CU-02 / CU-03).
         // Uno APPROVED ve el aviso de que ya fue aprobado (CU-03 paso 4: notificación).
         ProviderStatus providerStatus = authService.providerStatus(user.userId()).orElse(null);
+        boolean approved = providerStatus == ProviderStatus.APPROVED;
+        // CU-07: el aprobado ve el acceso a su emprendimiento (registrarlo o verlo si ya lo hizo)
+        boolean hasBusiness = approved && businessService.findForProvider(user.userId()).isPresent();
         model.addAttribute("pendingProvider", providerStatus == ProviderStatus.PENDING);
-        model.addAttribute("approvedProvider", providerStatus == ProviderStatus.APPROVED);
+        model.addAttribute("approvedProvider", approved && !hasBusiness);
+        model.addAttribute("businessAccess", approved);
+        model.addAttribute("hasBusiness", hasBusiness);
         return space(user, model);
     }
 
