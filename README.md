@@ -95,6 +95,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | --- | --- |
 | `2026-10-18_cu02_provider_address.sql` | Domicilio y nombre del emprendimiento del prestador (CU-02) |
 | `2026-10-22_cu01_payment_method.sql` | Tabla `payment_method`: medio de pago opcional del turista (CU-01) |
+| `2026-10-22_cu01_payment_method_existing_table.sql` | Ajuste de `payment_method` si ya existía sin vencimiento (ya corrido en la base del equipo) |
 
 ## Medios de pago
 
