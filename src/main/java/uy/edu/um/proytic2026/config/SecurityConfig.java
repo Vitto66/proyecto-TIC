@@ -2,6 +2,7 @@ package uy.edu.um.proytic2026.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -47,6 +48,8 @@ public class SecurityConfig {
                         // Vidriera pública: se navega sin cuenta (RF-03)
                         .requestMatchers("/", "/login", "/login/**", "/register/**", "/error",
                                 "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        // Vidriera de actividades y su detalle (CU-05, CU-06)
+                        .requestMatchers(HttpMethod.GET, "/activities", "/activities/**").permitAll()
                         // API para otras plataformas (RF-10): de solo lectura y sin usuario
                         .requestMatchers("/api/**").permitAll()
                         // Consola de la base H2, solo existe en desarrollo

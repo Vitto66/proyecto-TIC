@@ -22,4 +22,18 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
             order by a.name
             """)
     List<Activity> findAllByProviderId(@Param("providerId") Long providerId);
+
+    /**
+     * Las actividades publicadas, para la vidriera pública (CU-05), con el emprendimiento, la
+     * ubicación y los tipos ya cargados.
+     */
+    @Query("""
+            select distinct a from Activity a
+            join fetch a.business
+            join fetch a.locality l
+            join fetch l.department
+            left join fetch a.types
+            where a.active = true
+            """)
+    List<Activity> findAllPublished();
 }

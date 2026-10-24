@@ -25,6 +25,7 @@
         <div class="container-xl d-flex align-items-center justify-content-between">
             <a class="brand" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
             <nav class="home-nav" aria-label="Principal">
+                <a th:href="@{/activities}" href="catalog.html">Explorar</a>
                 <th:block th:if="${currentUser == null}">
                     <a th:href="@{/login}" href="login.html">Iniciar sesión</a>
                     <a class="btn-hero" th:href="@{/register/tourist}" href="register-tourist.html">Crear cuenta</a>
@@ -51,11 +52,12 @@
                 departamentos, reunidos en un solo lugar.
             </p>
             <div class="hero-actions" th:if="${currentUser == null}">
-                <a class="btn-hero" th:href="@{/register/tourist}" href="register-tourist.html">Crear mi cuenta</a>
-                <a class="btn-hero btn-hero-outline" th:href="@{/login}" href="login.html">Iniciar sesión</a>
+                <a class="btn-hero" th:href="@{/activities}" href="catalog.html">Explorar actividades</a>
+                <a class="btn-hero btn-hero-outline" th:href="@{/register/tourist}" href="register-tourist.html">Crear mi cuenta</a>
             </div>
             <div class="hero-actions" th:if="${currentUser != null}">
-                <a class="btn-hero" th:href="@{${spacePath}}" href="space.html">Ir a mi espacio</a>
+                <a class="btn-hero" th:href="@{/activities}" href="catalog.html">Explorar actividades</a>
+                <a class="btn-hero btn-hero-outline" th:href="@{${spacePath}}" href="space.html">Ir a mi espacio</a>
             </div>
         </div>
     </main>

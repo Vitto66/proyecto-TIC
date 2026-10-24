@@ -1,9 +1,12 @@
 package uy.edu.um.proytic2026.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uy.edu.um.proytic2026.entity.ActivityInstance;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface ActivityInstanceRepository extends JpaRepository<ActivityInstance, Long> {
@@ -15,4 +18,13 @@ public interface ActivityInstanceRepository extends JpaRepository<ActivityInstan
     /** Las instancias de una actividad que empiezan dentro de una ventana (ambos extremos incluidos). */
     List<ActivityInstance> findByActivityIdAndStartAtBetweenOrderByStartAtAsc(
             Long activityId, LocalDateTime from, LocalDateTime to);
+
+    /** Las instancias de esas actividades que empiezan después de un momento, de la más cercana a la más lejana. */
+    @Query("""
+            select i from ActivityInstance i
+            where i.activity.id in :activityIds and i.startAt > :after
+            order by i.startAt
+            """)
+    List<ActivityInstance> findUpcoming(@Param("activityIds") Collection<Long> activityIds,
+                                        @Param("after") LocalDateTime after);
 }
