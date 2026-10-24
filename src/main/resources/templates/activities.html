@@ -49,7 +49,7 @@
 
         <div class="alert alert-success" role="status" th:if="${published != null}">
             <strong th:text="${published}">Atardecer en kayak</strong> quedó publicada. El próximo paso es
-            definir sus fechas y cupos para que los turistas puedan reservar.
+            definir sus fechas y cupos, desde "Fechas, horarios y cupos", para que los turistas puedan reservar.
         </div>
 
         <!-- Sin actividades todavía -->
@@ -68,6 +68,9 @@
                         <li th:text="${a.durationLabel()}">2 h 30 min</li>
                         <li th:text="${a.minAge() == 0} ? 'Todas las edades' : 'Desde ' + ${a.minAge()} + ' años'">Desde 12 años</li>
                     </ul>
+                    <!-- CU-09 -->
+                    <a class="activity-link" th:href="@{/provider/activities/{id}/dates(id=${a.id()})}"
+                       href="activity-dates.html">Fechas, horarios y cupos</a>
                 </div>
                 <div class="activity-side">
                     <span class="activity-price" th:text="${a.priceLabel()}">$ 1.500</span>

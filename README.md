@@ -49,6 +49,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Revisar prestadores pendientes (CU-03, administrador) | http://localhost:8080/admin/providers |
 | Registrar / ver mi emprendimiento (CU-07, prestador aprobado) | http://localhost:8080/provider/business |
 | Mis actividades y publicar una nueva (CU-08, con emprendimiento) | http://localhost:8080/provider/activities |
+| Fechas, horarios y cupos de una actividad (CU-09) | `/provider/activities/{id}/dates` (desde "Mis actividades") |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 
@@ -73,6 +74,16 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - La actividad queda publicada (`active = true`) y sin fechas: las fechas y cupos son el CU-09.
 - **No necesita scripts SQL:** usa `activity`, `activity_activity_type`, `activity_equipment`,
   `activity_type` y `equipment_type`, que ya existen en Supabase.
+
+## Fechas y cupos (CU-09)
+
+- Cada fecha (`activity_instance`) dura lo que dura la actividad. El cupo máximo es opcional: vacío = sin límite.
+- Solo se aceptan fechas futuras, en **hora de Uruguay** (`ClockConfig`), aunque el servidor esté en otra zona.
+- Si una fecha nueva se pisa con otra de la misma actividad, se avisa y se pide confirmación. Dos fechas que
+  empiezan exactamente a la misma hora no se permiten (la base tiene `UNIQUE (activity_id, start_at)`).
+- Los lugares ocupados son los de las reservas **confirmadas o finalizadas**: una reserva pendiente todavía no
+  ocupa lugar (CU-14) y una vencida ya no (CU-16).
+- **No necesita scripts SQL:** usa `activity_instance` y `reservation`, que ya existen en Supabase.
 
 ## Inicio de sesión y permisos (CU-04)
 

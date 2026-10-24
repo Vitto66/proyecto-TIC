@@ -179,6 +179,14 @@
     color: var(--muted);
     font-size: 0.95rem;
 }
+.activity-link {
+    display: inline-block;
+    margin-top: 0.85rem;
+    color: var(--monte);
+    font-weight: 600;
+    text-underline-offset: 4px;
+}
+.activity-link::after { content: " ›"; }
 .activity-side {
     display: flex;
     flex-direction: column;

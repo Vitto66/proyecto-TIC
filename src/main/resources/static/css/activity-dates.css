@@ -1,0 +1,94 @@
+/* CU-09 Fechas, horarios y cupos. Se carga después de main.css, home.css y activities.css. */
+
+.dates-eyebrow {
+    color: var(--monte);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+.dates-meta {
+    color: var(--muted);
+    margin: 0.5rem 0 0;
+}
+
+.dates-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+.dates-list,
+.dates-form {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.75rem;
+}
+.dates-list h2,
+.dates-form h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+.dates-empty {
+    color: var(--muted);
+    margin: 0;
+}
+
+.date-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.date-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 0;
+}
+.date-item + .date-item { border-top: 1px solid var(--line); }
+.date-item strong { display: block; }
+.date-item span { color: var(--muted); }
+.date-capacity {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--monte) !important;
+    text-align: right;
+}
+.date-item.is-full .date-capacity { color: var(--error) !important; }
+.date-item.is-past { opacity: 0.75; }
+
+.dates-past {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+}
+.dates-past summary {
+    cursor: pointer;
+    color: var(--monte);
+    font-weight: 500;
+}
+
+.overlap-warning ul { margin-bottom: 0.5rem; padding-left: 1.2rem; }
+.overlap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+    .dates-layout { grid-template-columns: 1fr; }
+    /* En el celular el formulario va primero: es lo que se viene a hacer */
+    .dates-form { order: -1; }
+}
+@media (max-width: 575.98px) {
+    .date-item { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+    .date-capacity { text-align: left; }
+    .dates-list, .dates-form { padding: 1.25rem; }
+}
