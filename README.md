@@ -48,6 +48,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Formulario de registro de prestadores (CU-02) | http://localhost:8080/register/provider |
 | Revisar prestadores pendientes (CU-03, administrador) | http://localhost:8080/admin/providers |
 | Registrar / ver mi emprendimiento (CU-07, prestador aprobado) | http://localhost:8080/provider/business |
+| Mis actividades y publicar una nueva (CU-08, con emprendimiento) | http://localhost:8080/provider/activities |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 
@@ -62,6 +63,16 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - La ubicación se elige de las tablas `department` y `locality`, que ya tienen datos en Supabase. Si a un
   departamento le faltan localidades, el formulario lo avisa: hay que cargarlas en Supabase.
 - **No necesita scripts SQL:** usa las tablas `business`, `department` y `locality` que ya existen.
+
+## Actividades (CU-08)
+
+- Para publicar, el prestador tiene que estar aprobado y tener su emprendimiento registrado.
+- Se eligen uno o más **tipos de actividad** y, opcionalmente, el **equipamiento**, indicando si lo pone
+  el prestador o lo trae el turista. Solo se ofrecen los tipos activos que definió el administrador.
+- La duración se carga en minutos y el precio por persona en pesos uruguayos.
+- La actividad queda publicada (`active = true`) y sin fechas: las fechas y cupos son el CU-09.
+- **No necesita scripts SQL:** usa `activity`, `activity_activity_type`, `activity_equipment`,
+  `activity_type` y `equipment_type`, que ya existen en Supabase.
 
 ## Inicio de sesión y permisos (CU-04)
 

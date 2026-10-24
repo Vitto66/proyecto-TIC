@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mis actividades · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html">Uruguay <span>Mnatural</span></a>
+        <span class="space-user" th:text="${currentUser.displayName}">Nombre</span>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <a class="back-link" th:href="@{/provider}" href="space.html">Volver a mi espacio</a>
+
+    <!-- Precondición: prestador aprobado -->
+    <section class="sent-card" role="status" th:if="${access.name() == 'NOT_APPROVED'}">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>Todavía no podés publicar actividades</h1>
+        <p>Tu cuenta de prestador tiene que estar aprobada por un administrador.</p>
+    </section>
+
+    <!-- Precondición: emprendimiento registrado (CU-07) -->
+    <section class="sent-card" role="status" th:if="${access.name() == 'NO_BUSINESS'}">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>Primero registrá tu emprendimiento</h1>
+        <p>Las actividades se publican a nombre de tu emprendimiento, así que primero tenés que registrarlo.</p>
+        <div class="space-actions">
+            <a class="btn btn-submit" th:href="@{/provider/business}" href="business-form.html">Registrar mi emprendimiento</a>
+        </div>
+    </section>
+
+    <th:block th:if="${access.name() == 'ALLOWED'}">
+        <div class="activities-head">
+            <h1>Mis actividades</h1>
+            <a class="btn btn-submit" th:href="@{/provider/activities/new}" href="activity-form.html">Publicar nueva actividad</a>
+        </div>
+
+        <div class="alert alert-success" role="status" th:if="${published != null}">
+            <strong th:text="${published}">Atardecer en kayak</strong> quedó publicada. El próximo paso es
+            definir sus fechas y cupos para que los turistas puedan reservar.
+        </div>
+
+        <!-- Sin actividades todavía -->
+        <section class="empty-state" th:if="${activities.isEmpty()}">
+            <h2>Todavía no publicaste actividades</h2>
+            <p>Publicá la primera para que aparezca en el portal.</p>
+        </section>
+
+        <ul class="activity-list" th:unless="${activities.isEmpty()}">
+            <li class="activity-item" th:each="a : ${activities}">
+                <div class="activity-main">
+                    <h2 th:text="${a.name()}">Atardecer en kayak por la laguna</h2>
+                    <p class="activity-types" th:text="${a.typesLabel()}">Actividades acuáticas · Turismo de naturaleza</p>
+                    <ul class="activity-facts">
+                        <li th:text="${a.location()}">La Paloma, Rocha</li>
+                        <li th:text="${a.durationLabel()}">2 h 30 min</li>
+                        <li th:text="${a.minAge() == 0} ? 'Todas las edades' : 'Desde ' + ${a.minAge()} + ' años'">Desde 12 años</li>
+                    </ul>
+                </div>
+                <div class="activity-side">
+                    <span class="activity-price" th:text="${a.priceLabel()}">$ 1.500</span>
+                    <span class="activity-status" th:classappend="${a.active()} ? 'is-active' : 'is-inactive'"
+                          th:text="${a.active()} ? 'Publicada' : 'Dada de baja'">Publicada</span>
+                </div>
+            </li>
+        </ul>
+    </th:block>
+</main>
+
+</body>
+</html>
