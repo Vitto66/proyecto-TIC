@@ -1,0 +1,195 @@
+/* CU-05 Vidriera de actividades y CU-06 detalle. Se carga después de main.css, home.css y business.css. */
+
+/* ---------- Encabezado de las páginas públicas ---------- */
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+.site-nav a:not(.btn) {
+    color: var(--monte);
+    font-weight: 500;
+    text-decoration: none;
+}
+.site-nav a:not(.btn):hover { text-decoration: underline; text-underline-offset: 4px; }
+.btn-sm-nav {
+    padding: 0.45rem 1.1rem;
+    text-decoration: none;
+}
+
+/* ---------- Vidriera ---------- */
+.catalog {
+    padding-bottom: 4rem;
+}
+.catalog-head {
+    margin: 0.5rem 0 2rem;
+}
+.catalog-head h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.35rem;
+}
+.catalog-head p {
+    color: var(--muted);
+    margin: 0;
+}
+
+.catalog-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+/* Filtros */
+.catalog-filters {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.25rem 1.25rem 1.5rem;
+    position: sticky;
+    top: 1rem;
+}
+.catalog-filters summary {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: pointer;
+    list-style: none;
+    margin-bottom: 1rem;
+}
+.catalog-filters summary::-webkit-details-marker { display: none; }
+.catalog-filters legend.form-label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.price-range span { color: var(--muted); }
+.filter-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+.filter-actions .btn-outline-monte {
+    padding: 0.7rem 1.2rem;
+}
+
+/* Resultados */
+.results-count {
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+.catalog-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+.catalog-grid > li { display: flex; }
+.catalog-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.4rem 1.4rem 1.2rem;
+    color: var(--ink);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.catalog-card::before {
+    /* el horizonte, como en los paneles de registro */
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--monte), var(--celeste));
+}
+.catalog-card:hover {
+    border-color: var(--monte);
+    box-shadow: 0 10px 24px rgba(22, 56, 41, 0.10);
+    transform: translateY(-2px);
+}
+.catalog-card:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+.catalog-card h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
+    margin: 0.15rem 0 0;
+}
+.card-types {
+    color: var(--monte);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.card-business { font-weight: 500; }
+.card-location { color: var(--muted); font-size: 0.95rem; }
+.card-rating {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+}
+.card-rating span:last-child { color: var(--muted); }
+.card-rating.is-empty { color: var(--muted); }
+.stars { color: var(--sol); }
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    margin-top: 1rem;
+}
+.card-price {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+.card-unit { color: var(--muted); font-size: 0.85rem; }
+.card-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+@media (max-width: 991.98px) {
+    .catalog-layout { grid-template-columns: 1fr; }
+    .catalog-filters { position: static; }
+}
+@media (max-width: 575.98px) {
+    .site-nav { gap: 0.8rem; font-size: 0.95rem; }
+    /* En el celular no entran todos: queda "Iniciar sesión", que también lleva a crear cuenta */
+    .site-nav .nav-optional { display: none; }
+    .catalog-head { margin-bottom: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .catalog-card { transition: none; }
+    .catalog-card:hover { transform: none; }
+}

@@ -41,6 +41,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Qué | Dónde |
 | --- | --- |
 | Menú inicial (público) | http://localhost:8080/ |
+| Explorar actividades con filtros (CU-05, público) | http://localhost:8080/activities |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
 | Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
@@ -84,6 +85,17 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - Los lugares ocupados son los de las reservas **confirmadas o finalizadas**: una reserva pendiente todavía no
   ocupa lugar (CU-14) y una vencida ya no (CU-16).
 - **No necesita scripts SQL:** usa `activity_instance` y `reservation`, que ya existen en Supabase.
+
+## Explorar actividades (CU-05)
+
+- Es público: no hace falta cuenta. Muestra solo actividades publicadas (`active = true`).
+- Sin filtros, ordena de mejor a peor calificadas (promedio de `review`); las que no tienen valoraciones van al final.
+- Filtros: departamento, localidad, tipo, fecha (actividades con una fecha ese día que todavía tenga lugar),
+  rango de precio, calificación mínima y palabra clave (nombre, descripción y emprendimiento, sin importar
+  mayúsculas ni tildes). Van en la URL, así una búsqueda se puede compartir.
+- Los filtros se aplican en memoria (`CatalogService`). Alcanza para este proyecto; con miles de actividades
+  convendría pasarlos a la consulta y paginar.
+- **No necesita scripts SQL:** usa `review`, que ya existe en Supabase.
 
 ## Inicio de sesión y permisos (CU-04)
 
