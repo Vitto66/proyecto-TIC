@@ -1,17 +1,18 @@
 /* Uruguay Mnatural — estilos base.
-   Paleta: verde de monte nativo, celeste de la bandera y un dorado de sol usado solo como detalle. */
+   Paleta del logo de OASIS: azul marino (principal), celeste (acento frío) y dorado de sol.
+   Los nombres de las variables (--monte, --celeste, --sol) se mantienen para no tocar cada hoja. */
 :root {
-    --monte: #1F4D3A;        /* verde principal */
-    --monte-dark: #163829;
-    --celeste: #7FB2DE;      /* acento frío */
-    --sol: #E8A93A;          /* detalle puntual */
-    --paper: #F3F6F2;        /* fondo de página */
-    --ink: #18261F;          /* texto */
-    --muted: #55655C;
-    --line: #CBD6CE;
+    --monte: #0E3A63;        /* azul marino del logo: color principal */
+    --monte-dark: #082845;
+    --celeste: #4E9DD9;      /* celeste del logo */
+    --sol: #EFA724;          /* dorado del logo */
+    --paper: #F8F6F0;        /* fondo de página, arena muy clara */
+    --ink: #14243A;          /* texto */
+    --muted: #586577;
+    --line: #D6DCE4;
     --error: #B3261E;
 
-    --font-display: "Familjen Grotesk", system-ui, sans-serif;
+    --font-display: "Bricolage Grotesque", system-ui, sans-serif;
     --font-body: "Public Sans", system-ui, sans-serif;
 
     --bs-body-font-family: var(--font-body);
@@ -38,11 +39,19 @@ body {
     padding: 1.25rem 0;
 }
 .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.35rem;
     color: var(--monte);
     letter-spacing: -0.01em;
+}
+.brand-mark {
+    width: 2.1rem;
+    height: 2.1rem;
+    flex-shrink: 0;
 }
 .brand span {
     color: var(--celeste);
@@ -62,7 +71,7 @@ body {
 /* Panel lateral: qué pasa después */
 .register-aside {
     background: var(--monte);
-    color: #E6EFE9;
+    color: #E7EEF6;
     padding: 2.5rem 2rem;
     position: relative;
 }
@@ -84,7 +93,7 @@ body {
     margin-bottom: 1rem;
 }
 .lead-text {
-    color: #C9DACF;
+    color: #C9D7E6;
     max-width: 34ch;
     margin-bottom: 2rem;
 }
@@ -136,7 +145,7 @@ body {
     font-weight: 600;
 }
 .steps span {
-    color: #B9CCBF;
+    color: #B6C7DA;
     font-size: 0.925rem;
 }
 
@@ -167,7 +176,7 @@ body {
 }
 .form-control:focus {
     border-color: var(--monte);
-    box-shadow: 0 0 0 3px rgba(31, 77, 58, 0.18);
+    box-shadow: 0 0 0 3px rgba(14, 58, 99, 0.18);
 }
 .form-text {
     color: var(--muted);
@@ -211,7 +220,7 @@ body {
 }
 .person-type input:checked + .person-type-body {
     border-color: var(--monte);
-    background: #EAF2EC;
+    background: #E8F1FA;
     box-shadow: inset 0 0 0 1px var(--monte);
 }
 .person-type input:focus-visible + .person-type-body {
@@ -405,7 +414,7 @@ body {
     font-weight: 600;
 }
 .status-pending  { background: #FBEFD8; color: #7A5410; }
-.status-approved { background: #E1EFE5; color: var(--monte-dark); }
+.status-approved { background: #E1EDF8; color: var(--monte-dark); }
 .status-rejected { background: #F7E1DF; color: var(--error); }
 
 .review-data {
@@ -519,3 +528,48 @@ body {
     color: var(--monte);
     font-weight: 600;
 }
+
+/* ---------- Pie de página común (fragments/site.html) ---------- */
+.site-footer {
+    background: var(--monte-dark);
+    color: #C9D7E6;
+    padding: 3rem 0 2rem;
+    font-size: 0.95rem;
+}
+.site-footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+.site-footer-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #fff;
+}
+.site-footer-name span { color: #9CCBF0; }
+.site-footer-brand p { margin: 0.4rem 0 0; max-width: 40ch; }
+.site-footer-dev {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.site-footer-label {
+    font-size: 0.85rem;
+    color: #9FB3CA;
+}
+.site-footer-dev img {
+    width: 132px;
+    height: auto;
+}
+.site-footer-credits {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.8rem;
+    color: #8FA4BD;
+}
+.site-footer-credits a { color: #C9D7E6; }
+.site-footer-credits a:hover { color: #fff; }

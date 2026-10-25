@@ -120,7 +120,7 @@
 }
 .catalog-card:hover {
     border-color: var(--monte);
-    box-shadow: 0 10px 24px rgba(22, 56, 41, 0.10);
+    box-shadow: 0 10px 24px rgba(8, 40, 69, 0.10);
     transform: translateY(-2px);
 }
 .catalog-card:focus-visible {

@@ -130,10 +130,16 @@ Se usa **Spring Security** (`config/SecurityConfig`). Las reglas del login está
   toda la API es pública.
 - Los formularios nuevos tienen que usar `th:action` para que Thymeleaf agregue el token CSRF solo.
 
-### Fondos del menú inicial
+### Inicio: fotos, mapa y logo
 
-Los tres paisajes son ilustraciones propias en `static/img/landscape-*.svg`. Para usar fotos, copiarlas a
-`static/img/` y cambiar las tres líneas `.hero-slide[data-scene=...]` de `static/css/home.css`.
+- **Fotos de la portada:** son de Wikimedia Commons y se cargan desde su servidor (`static/css/landing.css`).
+  Los créditos están en el pie de página (`templates/fragments/site.html`). Para cambiar una foto, reemplazar
+  la URL en `landing.css` y su enlace en el pie.
+- **Mapa:** los trazos de los 19 departamentos salen de Natural Earth (dominio público) y están en
+  `src/main/resources/map/uruguay-departments.txt`. `HomeService` cuenta las actividades publicadas por
+  departamento y cada etiqueta lleva a `/activities?departmentId=...`.
+- **Logo de OASIS:** `static/img/oasis-logo.png` (fondo transparente), `oasis-logo-light.png` (para fondos
+  oscuros), `oasis-mark.png` (solo el sol, en el encabezado) y `favicon.png`.
 
 ## Scripts SQL de Supabase
 

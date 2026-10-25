@@ -45,3 +45,19 @@
         else if (!reducedMotion.matches) start();
     });
 })();
+
+// Mapa del inicio: al pasar por una etiqueta se resalta su departamento, y al revés.
+(function () {
+    const figure = document.querySelector('.map-figure');
+    if (!figure) return;
+
+    function setHighlight(iso, on) {
+        figure.querySelectorAll('[data-iso="' + iso + '"]').forEach(el => el.classList.toggle('is-highlighted', on));
+    }
+
+    figure.querySelectorAll('.map-pin[data-iso], .dep.has-activities[data-iso]').forEach(el => {
+        const iso = el.dataset.iso;
+        ['mouseenter', 'focus'].forEach(evt => el.addEventListener(evt, () => setHighlight(iso, true)));
+        ['mouseleave', 'blur'].forEach(evt => el.addEventListener(evt, () => setHighlight(iso, false)));
+    });
+})();

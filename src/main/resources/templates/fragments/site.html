@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Pie de página común: quién desarrolló la plataforma y créditos de las fotos.
+     Uso: <footer th:replace="~{fragments/site :: footer}"></footer> -->
+<footer th:fragment="footer" class="site-footer">
+    <div class="container-xl site-footer-inner">
+        <div class="site-footer-brand">
+            <span class="site-footer-name">Uruguay <span>Mnatural</span></span>
+            <p>Turismo de naturaleza en todo el país. Proyectos TIC 2026 · Universidad de Montevideo.</p>
+        </div>
+        <div class="site-footer-dev">
+            <span class="site-footer-label">Desarrollado por</span>
+            <img th:src="@{/img/oasis-logo-light.png}" src="../../static/img/oasis-logo-light.png"
+                 alt="OASIS, ingeniería de software, Uruguay" width="132" height="118" loading="lazy">
+        </div>
+    </div>
+    <div class="container-xl site-footer-credits">
+        Fotos de Wikimedia Commons:
+        <a href="https://commons.wikimedia.org/wiki/File:Faro_de_Cabo_Polonio,_Uruguay_03.jpg">Faro de Cabo Polonio</a>,
+        <a href="https://commons.wikimedia.org/wiki/File:Quebrada_de_los_Cuervos_Treinta_y_Tres_(6).jpg">Quebrada de los Cuervos</a>,
+        <a href="https://commons.wikimedia.org/wiki/File:Calle_de_los_Suspiros,_Colonia_del_Sacramento,_Uruguay_-_panoramio.jpg">Calle de los Suspiros</a> y
+        <a href="https://commons.wikimedia.org/wiki/File:Dunas_y_Playa_de_Valizas_Rocha_Uruguay_-_panoramio.jpg">Dunas de Valizas</a>.
+        Autores y licencias en la página de cada foto. Mapa: Natural Earth.
+    </div>
+</footer>
+
+</body>
+</html>
