@@ -1,0 +1,129 @@
+package uy.edu.um.proytic2026.controller;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+import uy.edu.um.proytic2026.dto.HomeOverview;
+import uy.edu.um.proytic2026.entity.*;
+import uy.edu.um.proytic2026.repository.*;
+
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * El inicio: el mapa marca los departamentos con actividades publicadas y enlaza a la vidriera
+ * filtrada; las tarjetas muestran los tipos de actividad. Contra H2 y con Spring Security activo.
+ */
+@SpringBootTest
+@Transactional
+class HomePageIntegrationTest {
+
+    @Autowired private WebApplicationContext context;
+    @Autowired private UserRepository userRepository;
+    @Autowired private ProviderRepository providerRepository;
+    @Autowired private BusinessRepository businessRepository;
+    @Autowired private DepartmentRepository departmentRepository;
+    @Autowired private LocalityRepository localityRepository;
+    @Autowired private ActivityTypeRepository activityTypeRepository;
+    @Autowired private ActivityRepository activityRepository;
+
+    private MockMvc mockMvc;
+    private Department rocha;
+    private Locality laPaloma;
+    private ActivityType acuaticas;
+    private ActivityType cabalgatas;
+    private Business laguna;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        rocha = departmentRepository.save(Department.builder().name("Rocha").build());
+        departmentRepository.save(Department.builder().name("Maldonado").build());
+        laPaloma = localityRepository.save(Locality.builder().department(rocha).name("La Paloma").build());
+        acuaticas = activityTypeRepository.save(ActivityType.builder().name("Actividades acuáticas").build());
+        cabalgatas = activityTypeRepository.save(ActivityType.builder().name("Cabalgatas").build());
+
+        User user = userRepository.save(User.builder().email("laguna@mail.com").passwordHash("x").build());
+        Provider provider = providerRepository.save(Provider.builder().user(user).personType(PersonType.PHYSICAL)
+                .status(ProviderStatus.APPROVED).firstName("Juan").lastName("R").document("11111111").address("x").build());
+        laguna = businessRepository.save(Business.builder().provider(provider).locality(laPaloma)
+                .name("Kayak Laguna").description("x").address("x").phone("099").email("laguna@mail.com").build());
+    }
+
+    private void activity(String name, ActivityType type, boolean active) {
+        Activity a = Activity.builder().business(laguna).locality(laPaloma).name(name)
+                .description("Una linda salida").durationMinutes(120).price(new BigDecimal("1500"))
+                .minAge(0).bookingCutoffMinutes(0).active(active).build();
+        a.getTypes().add(type);
+        activityRepository.save(a);
+    }
+
+    private HomeOverview overview() throws Exception {
+        MvcResult result = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn();
+        return (HomeOverview) result.getModelAndView().getModel().get("overview");
+    }
+
+    @Test
+    void map_marksDepartmentsWithPublishedActivitiesAndLinksToTheCatalog() throws Exception {
+        activity("Atardecer en kayak", acuaticas, true);
+        activity("Paseo por la laguna", acuaticas, true);
+        activity("Dada de baja", acuaticas, false);
+
+        HomeOverview overview = overview();
+        assertThat(overview.totalActivities()).isEqualTo(2);
+        assertThat(overview.pins()).singleElement().satisfies(pin -> {
+            assertThat(pin.name()).isEqualTo("Rocha");
+            assertThat(pin.activityCount()).isEqualTo(2);
+            assertThat(pin.departmentId()).isEqualTo(rocha.getId());
+        });
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Mapa de los departamentos de Uruguay")))
+                .andExpect(content().string(containsString("/activities?departmentId=" + rocha.getId())))
+                .andExpect(content().string(containsString("2 actividades en 1 departamento")));
+    }
+
+    @Test
+    void map_withoutActivities_saysThereIsNothingYet() throws Exception {
+        assertThat(overview().pins()).isEmpty();
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Todavía no hay actividades publicadas")))
+                .andExpect(content().string(not(containsString("class=\"map-pin\""))));
+    }
+
+    @Test
+    void typeCards_showTypesWithMostActivitiesFirstAndLinkToTheCatalog() throws Exception {
+        activity("Atardecer en kayak", acuaticas, true);
+
+        HomeOverview overview = overview();
+        assertThat(overview.types()).extracting(HomeOverview.TypeCard::name)
+                .startsWith("Actividades acuáticas");
+        assertThat(overview.types().get(0).icon()).isEqualTo("waves");
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Elegí tu forma de recorrer Uruguay")))
+                .andExpect(content().string(containsString("/activities?typeId=" + acuaticas.getId())))
+                .andExpect(content().string(containsString("/activities?typeId=" + cabalgatas.getId())));
+    }
+
+    @Test
+    void footer_showsOasisLogoAndPhotoCredits() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("/img/oasis-logo-light.png")))
+                .andExpect(content().string(containsString("Desarrollado por")))
+                .andExpect(content().string(containsString("Wikimedia Commons")));
+    }
+}

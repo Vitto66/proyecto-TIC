@@ -30,9 +30,6 @@
 .hero-slide.is-active {
     opacity: 1;
 }
-.hero-slide[data-scene="sierras"] { background-image: url("../img/landscape-sierras.svg"); }
-.hero-slide[data-scene="costa"]   { background-image: url("../img/landscape-costa.svg"); }
-.hero-slide[data-scene="palmar"]  { background-image: url("../img/landscape-palmar.svg"); }
 
 /* Velo verde para que el texto blanco se lea sobre cualquier paisaje */
 .hero::before {
@@ -41,9 +38,9 @@
     inset: 0;
     z-index: -1;
     background: linear-gradient(180deg,
-        rgba(22, 56, 41, 0.78) 0%,
-        rgba(22, 56, 41, 0.38) 48%,
-        rgba(22, 56, 41, 0.80) 100%);
+        rgba(8, 40, 69, 0.78) 0%,
+        rgba(8, 40, 69, 0.38) 48%,
+        rgba(8, 40, 69, 0.80) 100%);
 }
 
 .home-header {
@@ -96,7 +93,7 @@
     font-size: 0.95rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #E6EFE9;
+    color: #E7EEF6;
     margin-bottom: 1.1rem;
 }
 .hero-eyebrow::before {
@@ -121,7 +118,7 @@
 .hero-lead {
     font-size: 1.15rem;
     max-width: 46ch;
-    color: #E6EFE9;
+    color: #E7EEF6;
     margin-bottom: 2rem;
 }
 .hero-actions {
@@ -140,7 +137,7 @@
 }
 .btn-hero:hover,
 .btn-hero:focus-visible {
-    background: #EAF2EC;
+    background: #E8F1FA;
     color: var(--monte-dark);
 }
 .btn-hero-outline {
@@ -293,7 +290,7 @@
 }
 .btn-outline-monte:hover,
 .btn-outline-monte:focus-visible {
-    background: #EAF2EC;
+    background: #E8F1FA;
     color: var(--monte-dark);
 }
 .space-user {
