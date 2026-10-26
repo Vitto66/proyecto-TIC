@@ -45,4 +45,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     /** CU-18 1a: si esa reserva ya fue valorada. */
     boolean existsByReservationId(Long reservationId);
+
+    /** CU-24: las valoraciones que hizo un turista, de la más nueva a la más vieja, con su actividad. */
+    @Query("""
+            select r from Review r
+            join fetch r.reservation res
+            join fetch res.instance i
+            join fetch i.activity a
+            join fetch a.business
+            where res.tourist.id = :touristId
+            order by r.createdAt desc, r.id desc
+            """)
+    List<Review> findAllOfTourist(@Param("touristId") Long touristId);
 }

@@ -24,6 +24,7 @@ import uy.edu.um.proytic2026.service.ReviewService;
  * CU-18 Valorar y comentar una actividad: "/tourist/reservations/{id}/review".
  * Pasos 2 y 3: el formulario con la puntuación y el comentario. Paso 4: se guarda y vuelve a la
  * reserva. 1a: si ya la valoró se le informa (una sola por reserva); 3a: sin puntuación se le pide.
+ * También CU-24 "Mis valoraciones" ("/tourist/reviews").
  */
 @Controller
 @RequiredArgsConstructor
@@ -56,6 +57,15 @@ public class ReviewPageController {
         }
         // Post/Redirect/Get: si recarga, no se reenvía
         return "redirect:/tourist/reservations/" + reservationId + "?reviewed";
+    }
+
+    /** CU-24 Consultar mis valoraciones: lo que le falta valorar y lo que ya valoró. */
+    @GetMapping("/tourist/reviews")
+    public String myReviews(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
+        model.addAttribute("reviews", reviewService.mine(user.userId()));
+        model.addAttribute("currentUser", user);
+        model.addAttribute("spacePath", "/tourist");
+        return "my-reviews";
     }
 
     /** La reserva, la valoración que ya tenga y si todavía se puede valorar. */

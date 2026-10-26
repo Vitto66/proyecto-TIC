@@ -47,6 +47,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Mis reservas: calendario con filtros (CU-17, turista) | `/tourist/reservations` (`?month=2026-11&day=2026-11-01&type=3`, todos opcionales) |
 | Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
 | Valorar una reserva finalizada (CU-18, turista) | `/tourist/reservations/{id}/review` (botón "Valorar" de la reserva o de Mis reservas) |
+| Mis valoraciones: lo que falta valorar y lo ya valorado (CU-24, turista) | `/tourist/reviews` (tarjeta del espacio del turista) |
 | Pagar una reserva (CU-15, turista) | `/tourist/reservations/{id}/pay` (botón "Pagar" de la reserva) |
 | Avisos del turista, por ejemplo una reserva vencida (CU-16) | Arriba en `/tourist`; "Marcar como vistos" hace `POST /tourist/notifications/read` |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
@@ -211,6 +212,23 @@ para simular que el servicio no responde) y responde igual que el sandbox.
 - **Necesita el script** `2026-10-26_cu14_cu15_participants_payments.sql`.
 - Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
   como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
+
+## Mis valoraciones (CU-24, agregado por el equipo)
+
+Caso de uso nuevo, que no estaba en la letra (se suma al RF-09 Valoraciones y comentarios):
+
+> **CU-24 Consultar mis valoraciones**
+> - **Actor:** Turista
+> - **Precondición:** el turista tiene sesión iniciada
+> - **Flujo:** 1. El turista ingresa a "Mis valoraciones". 2. El sistema muestra las reservas FINALIZADAS que todavía
+>   no valoró. 3. El sistema muestra las valoraciones que ya hizo, con la actividad, la puntuación, el comentario y la
+>   fecha. 4. El turista elige una reserva para valorarla (CU-18) o una valoración para ver la actividad o la reserva.
+> - **Alternativos:** 2a. No tiene reservas por valorar → se informa. 3a. No tiene reservas finalizadas ni
+>   valoraciones → se informa y se ofrece explorar actividades.
+> - **Postcondición:** ninguna; consulta sin efectos sobre el sistema.
+
+En la app es `/tourist/reviews` (tarjeta "Mis valoraciones" del espacio del turista). Si una actividad se dio de baja,
+su valoración se sigue viendo pero sin enlace a la actividad.
 
 ## Valorar (CU-18)
 

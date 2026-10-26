@@ -189,12 +189,13 @@
                     <small>Tu calendario con cada reserva y su estado. Desde acá pagás las pendientes.</small>
                     <span class="space-card-more">Ir →</span>
                 </a>
-                <div class="space-card is-soon">
+                <!-- CU-24: lo que le falta valorar y lo que ya valoró -->
+                <a class="space-card tone-navy" th:href="@{/tourist/reviews}" href="my-reviews.html">
                     <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('star')}"></svg></span>
                     <strong>Mis valoraciones</strong>
-                    <small>Después de cada actividad vas a poder contar cómo te fue.</small>
-                    <span class="space-card-more">Próximamente</span>
-                </div>
+                    <small>Contá cómo te fue en las actividades que hiciste y mirá lo que ya valoraste.</small>
+                    <span class="space-card-more">Ir →</span>
+                </a>
             </th:block>
 
             <!-- Prestador: reservas recibidas, más adelante -->

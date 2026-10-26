@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uy.edu.um.proytic2026.dto.MyReviews;
 import uy.edu.um.proytic2026.dto.ReviewRequest;
 import uy.edu.um.proytic2026.dto.ReviewView;
+import uy.edu.um.proytic2026.entity.Activity;
 import uy.edu.um.proytic2026.entity.Reservation;
 import uy.edu.um.proytic2026.entity.ReservationStatus;
 import uy.edu.um.proytic2026.entity.Review;
@@ -17,6 +19,7 @@ import uy.edu.um.proytic2026.repository.ReviewRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -69,6 +72,31 @@ public class ReviewService {
         } catch (DataIntegrityViolationException ex) {
             throw new AlreadyReviewedException();
         }
+    }
+
+    /**
+     * CU-24 Consultar mis valoraciones: las reservas finalizadas que le falta valorar (paso 2) y las
+     * valoraciones que ya hizo (paso 3). Es solo una consulta.
+     */
+    @Transactional(readOnly = true)
+    public MyReviews mine(Long touristId) {
+        List<MyReviews.ToReview> pending = reservationRepository.findFinishedWithoutReview(touristId).stream()
+                .map(r -> {
+                    Activity a = r.getInstance().getActivity();
+                    return new MyReviews.ToReview(r.getId(), a.getName(), a.getBusiness().getName(),
+                            r.getInstance().getStartAt());
+                })
+                .toList();
+        List<MyReviews.Done> done = reviewRepository.findAllOfTourist(touristId).stream()
+                .map(rv -> {
+                    Reservation r = rv.getReservation();
+                    Activity a = r.getInstance().getActivity();
+                    return new MyReviews.Done(r.getId(), a.getId(), a.getName(), a.getBusiness().getName(),
+                            a.isActive(), r.getInstance().getStartAt(),
+                            new ReviewView("Vos", rv.getRating(), rv.getComment(), rv.getCreatedAt()));
+                })
+                .toList();
+        return new MyReviews(pending, done);
     }
 
     /** La reserva, si es de este turista. Si no existe o es de otro, es lo mismo: 404. */
