@@ -206,7 +206,7 @@ class ReservationPageIntegrationTest {
     void confirm_createsAPendingReservationAndShowsIt() throws Exception {
         MvcResult result = mockMvc.perform(confirm(date, 2))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(startsWith("/tourist/reservations/")))
+                .andExpect(header().string("Location", startsWith("/tourist/reservations/")))
                 .andReturn();
 
         Reservation saved = reservationRepository.findAll().get(0);
@@ -280,7 +280,7 @@ class ReservationPageIntegrationTest {
         mockMvc.perform(post("/login").session(session).with(csrf())
                         .param("email", "ana@mail.com").param("password", PASSWORD))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(startsWith(target)));
+                .andExpect(header().string("Location", startsWith(target)));
     }
 
     @Test

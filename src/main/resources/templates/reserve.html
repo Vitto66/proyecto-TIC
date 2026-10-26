@@ -39,7 +39,10 @@
     </header>
 
     <!-- Sin fechas con lugar: no hay nada para elegir -->
-    <section class="empty-state" role="status" th:unless="${options.anyAvailable()}">
+    <section class="empty-state" role="status" th:unless="${options.anyAvailable()}" th:object="${form}">
+        <!-- Si la fecha elegida se llenó mientras tanto, se dice por qué no se pudo reservar -->
+        <div class="alert alert-danger text-start" role="alert" th:if="${#fields.hasErrors('*')}"
+             th:text="${#strings.capitalize(#fields.errors('*')[0])}">esa fecha ya no tiene lugares. Elegí otra</div>
         <h2>No hay fechas disponibles para reservar</h2>
         <p>Todas las fechas están completas o ya cerraron las reservas.
             <a th:href="@{/activities}" href="catalog.html">Mirá otras actividades</a>.</p>
