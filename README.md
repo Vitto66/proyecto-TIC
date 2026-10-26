@@ -46,6 +46,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Reservar una actividad (CU-14, turista) | `/tourist/activities/{id}/reserve` (botón "Reservar" del detalle) |
 | Mis reservas: calendario con filtros (CU-17, turista) | `/tourist/reservations` (`?month=2026-11&day=2026-11-01&type=3`, todos opcionales) |
 | Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
+| Valorar una reserva finalizada (CU-18, turista) | `/tourist/reservations/{id}/review` (botón "Valorar" de la reserva o de Mis reservas) |
 | Pagar una reserva (CU-15, turista) | `/tourist/reservations/{id}/pay` (botón "Pagar" de la reserva) |
 | Avisos del turista, por ejemplo una reserva vencida (CU-16) | Arriba en `/tourist`; "Marcar como vistos" hace `POST /tourist/notifications/read` |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
@@ -211,6 +212,19 @@ para simular que el servicio no responde) y responde igual que el sandbox.
 - Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
   como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
 
+## Valorar (CU-18)
+
+Con una reserva **FINALIZADA** (la pasa el CU-16 cuando termina la fecha), el turista ve "Valorar" en la reserva y en
+Mis reservas. Elige de 1 a 5 estrellas y, si quiere, escribe un comentario (hasta 1000 caracteres).
+
+- Se publica enseguida en el detalle de la actividad (CU-06) con el nombre y la inicial del apellido. El promedio no se
+  guarda aparte: se calcula con las valoraciones, así que la vidriera (CU-05) y el detalle quedan al día solos.
+- **3a:** sin puntuación no se guarda y se le pide elegirla (lo que escribió no se pierde).
+- **1a:** una sola valoración por reserva. Si ya la valoró, se le muestra la suya y se le explica. Si la columna
+  `review.reservation_id` es única en la base (como dice la entidad), también se frena un doble envío simultáneo.
+- Una reserva que todavía no terminó o que es de otro turista no se puede valorar (la de otro da 404).
+- No necesita scripts nuevos: la tabla `review` ya existía.
+
 ## Mis reservas (CU-17)
 
 `/tourist/reservations` (tarjeta "Mis reservas" del espacio del turista) muestra un **calendario del mes** con cada
@@ -220,7 +234,7 @@ reserva y su estado en colores: pendiente de pago, confirmada, finalizada, venci
   aparecen los tipos de lo que reservó). Debajo del calendario está la lista del mes o del día elegido.
 - **Detalle (paso 4):** cada reserva lleva a `/tourist/reservations/{id}`, que ahora tiene "Mis reservas" para volver.
 - **4a:** si está pendiente y todavía se puede pagar, aparece "Pagar" (CU-15).
-- **4b:** si está finalizada y no tiene valoración, aparece "Valorar" deshabilitado hasta que esté el CU-18.
+- **4b:** si está finalizada y no tiene valoración, aparece "Valorar" (CU-18).
 - **2a:** sin reservas, se ofrece explorar actividades. Arriba se muestra la próxima reserva pendiente o confirmada.
 - Es solo una consulta: no cambia nada. En el celular el calendario muestra puntos y los datos quedan en la lista.
 
