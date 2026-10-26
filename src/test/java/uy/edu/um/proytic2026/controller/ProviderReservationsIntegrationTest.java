@@ -75,6 +75,7 @@ class ProviderReservationsIntegrationTest {
         Provider p = providerRepository.save(Provider.builder().user(user).personType(PersonType.PHYSICAL)
                 .status(ProviderStatus.APPROVED).firstName("Juan").lastName("R")
                 .document(String.valueOf(document++)).address("x").build());
+        user.setProvider(p);
         businessRepository.save(Business.builder().provider(p).locality(laPaloma).name(businessName)
                 .description("x").address("x").phone("099").email("a@b.uy").build());
         return p;
