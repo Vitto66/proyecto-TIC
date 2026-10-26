@@ -27,15 +27,14 @@ public class CompanionForm {
     @Pattern(regexp = "\\d{7,8}", message = "debe tener 7 u 8 dígitos, sin puntos ni guion")
     private String nationalId;
 
-    /** Celular o fijo: dígitos, espacios y un + al principio. Ej.: 099 123 456 o +598 99 123 456. */
+    /** Celular (9 números, ej. 099123456) o fijo (8 números, ej. 24001234): solo dígitos. */
     @NotBlank(message = "es obligatorio")
-    @Pattern(regexp = "\\+?[0-9 ]{8,20}", message = "ingresá un teléfono válido, por ejemplo 099 123 456")
+    @Pattern(regexp = "\\d{8,9}", message = "tiene que tener 8 o 9 números, sin espacios")
     private String phone;
 
     /** Sin espacios de más, para guardar y comparar. */
     public CompanionForm trimmed() {
-        return new CompanionForm(trim(firstName), trim(lastName), trim(nationalId),
-                phone == null ? null : phone.trim().replaceAll("\\s+", " "));
+        return new CompanionForm(trim(firstName), trim(lastName), trim(nationalId), trim(phone));
     }
 
     private static String trim(String value) {

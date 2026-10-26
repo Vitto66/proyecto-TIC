@@ -49,8 +49,8 @@ public class RegisterTouristRequest {
     @ToString.Exclude
     private String confirmPassword;
 
-    /** Opcional. */
-    @Size(max = 30)
+    /** Opcional. Celular (9 números) o fijo (8 números): solo dígitos, sin espacios. */
+    @Pattern(regexp = "(\\d{8,9})?", message = "tiene que tener 8 o 9 números, sin espacios")
     private String phone;
 
     // --- Medio de pago, opcional (CU-01 paso 3). Si se completa uno, se piden los tres. ---

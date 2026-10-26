@@ -96,7 +96,8 @@
             <section class="detail-section companions-section" id="companions-section"
                      th:hidden="${form.expectedCompanions() == 0}"><fieldset>
                 <legend><h2>3. ¿Quiénes van?</h2></legend>
-                <p class="form-text mt-0">Completá nombre, apellido, cédula y teléfono de cada persona.</p>
+                <p class="form-text mt-0">Completá nombre, apellido, cédula y teléfono de cada persona. El teléfono va
+                    solo con números (8 o 9), sin espacios.</p>
 
                 <div class="companion-me" th:if="${me != null}">
                     <span class="companion-number" aria-hidden="true">1</span>
@@ -141,7 +142,7 @@
                             <div class="col-sm-6">
                                 <label class="form-label" th:for="|companions${it.index}.phone|">Teléfono</label>
                                 <input class="form-control" type="tel" th:field="*{companions[__${it.index}__].phone}"
-                                       maxlength="20" placeholder="099 123 456" autocomplete="off" required
+                                       inputmode="numeric" data-digits-only pattern="\d{8,9}" minlength="8" maxlength="9" placeholder="099123456" autocomplete="off" required
                                        th:classappend="${#fields.hasErrors('companions[__${it.index}__].phone')} ? 'is-invalid'">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('companions[__${it.index}__].phone')}"
                                      th:text="${#fields.errors('companions[__${it.index}__].phone')[0]}">ingresá un teléfono válido</div>
@@ -179,7 +180,7 @@
                         <div class="col-sm-6">
                             <label class="form-label" for="companions__I__.phone">Teléfono</label>
                             <input class="form-control" type="tel" id="companions__I__.phone"
-                                   name="companions[__I__].phone" maxlength="20" placeholder="099 123 456"
+                                   name="companions[__I__].phone" inputmode="numeric" data-digits-only pattern="\d{8,9}" minlength="8" maxlength="9" placeholder="099123456"
                                    autocomplete="off" required>
                         </div>
                     </div>

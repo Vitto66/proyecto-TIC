@@ -68,7 +68,9 @@ public class BusinessService {
             form.setName(provider.getBusinessName());
         }
         form.setEmail(provider.getUser().getEmail());
-        form.setPhone(provider.getUser().getPhone());
+        // Solo los números: una cuenta vieja puede tener el teléfono guardado con espacios
+        String phone = provider.getUser().getPhone();
+        form.setPhone(phone == null ? null : phone.replaceAll("\\D", ""));
         return form;
     }
 

@@ -137,7 +137,7 @@ class BusinessPageIntegrationTest {
                 .param("departmentId", departmentId == null ? "" : departmentId.toString())
                 .param("localityId", localityId == null ? "" : localityId.toString())
                 .param("address", "Ruta 10 km 264")
-                .param("phone", "099 123 456")
+                .param("phone", "099123456")
                 .param("email", "info@laguna.uy")
                 .param("description", "Salidas en kayak por la laguna.");
     }

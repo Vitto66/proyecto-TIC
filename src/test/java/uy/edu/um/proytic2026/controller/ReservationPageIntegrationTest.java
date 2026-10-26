@@ -131,7 +131,7 @@ class ReservationPageIntegrationTest {
             request.param("companions[" + i + "].firstName", "Persona" + (i + 2))
                     .param("companions[" + i + "].lastName", "Gómez")
                     .param("companions[" + i + "].nationalId", "4000000" + i)
-                    .param("companions[" + i + "].phone", "099 123 45" + i);
+                    .param("companions[" + i + "].phone", "09912345" + i);
         }
         return request;
     }
@@ -385,7 +385,7 @@ class ReservationPageIntegrationTest {
         mockMvc.perform(get(result.getResponse().getRedirectedUrl()).with(touristSession()))
                 .andExpect(content().string(containsString("Quiénes van")))
                 .andExpect(content().string(containsString("Persona3 Gómez")))
-                .andExpect(content().string(containsString("Tel. 099 123 451")));
+                .andExpect(content().string(containsString("Tel. 099123451")));
     }
 
     @Test
