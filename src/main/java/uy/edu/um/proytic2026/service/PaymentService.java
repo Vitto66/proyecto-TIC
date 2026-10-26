@@ -60,6 +60,20 @@ public class PaymentService {
     public record PayResult(Outcome outcome, String message) {
     }
 
+    /** Cómo terminó la devolución del dinero de una reserva cancelada (CU-10). */
+    public enum RefundOutcome {
+        /** No había nada cobrado. */
+        NOTHING_TO_REFUND,
+        /** Se devolvió el 100%. */
+        REFUNDED,
+        /** El servicio de pagos no respondió: queda pendiente para reintentar. */
+        PENDING
+    }
+
+    /** Lo necesario de un pago guardado, leído dentro de una transacción. */
+    private record StoredPayment(Long id, PaymentStatus status, String transactionId, BigDecimal amount) {
+    }
+
     /** Lo que necesita la página de pago. */
     public record PayPage(ReservationView reservation, boolean cardForm, String publicKey, String payerEmail) {
     }
@@ -163,6 +177,71 @@ public class PaymentService {
         }));
         return result.approved() ? confirmOrRefund(reservationId, last.getId(), result)
                 : new PayResult(Outcome.REJECTED, result.rejectionMessage());
+    }
+
+    /**
+     * CU-10 2a: devuelve el 100% de lo cobrado de una reserva (que ya se canceló). Se puede llamar
+     * más de una vez: lo ya devuelto no se vuelve a devolver. Un pago que estaba en revisión se
+     * consulta primero, y si un intento quedó sin respuesta se busca si llegó a cobrarse.
+     */
+    public RefundOutcome refundAll(Long reservationId) {
+        List<StoredPayment> payments = tx.execute(s -> paymentRepository.findByReservationIdOrderByIdAsc(reservationId)
+                .stream().map(p -> new StoredPayment(p.getId(), p.getStatus(), p.getTransactionId(), p.getAmount()))
+                .toList());
+        boolean pending = false;
+        boolean refunded = false;
+        boolean anyCharged = false;
+
+        for (StoredPayment p : payments) {
+            PaymentStatus status = p.status();
+            if (status == PaymentStatus.IN_PROCESS && p.transactionId() != null) {
+                PaymentResult current = gateway.status(p.transactionId());
+                if (current.status() == PaymentStatus.UNAVAILABLE || current.status() == PaymentStatus.IN_PROCESS) {
+                    pending = true;
+                    continue;
+                }
+                status = current.status();
+                updateStatus(p.id(), status, current.detail());
+            }
+            if (status == PaymentStatus.APPROVED && p.transactionId() != null) {
+                anyCharged = true;
+                if (refundOne(p.id(), p.transactionId())) refunded = true;
+                else pending = true;
+            }
+            if (status == PaymentStatus.REFUNDED) anyCharged = true;
+        }
+
+        // Un intento sin respuesta puede haberse cobrado igual
+        boolean hadNoAnswer = payments.stream().anyMatch(p -> p.status() == PaymentStatus.UNAVAILABLE);
+        if (hadNoAnswer && !anyCharged) {
+            Optional<PaymentResult> found = gateway.findApproved("reserva-" + reservationId);
+            if (found.isPresent() && !found.get().approved()) {
+                pending = true;
+            } else if (found.isPresent()) {
+                BigDecimal amount = payments.get(payments.size() - 1).amount();
+                Long id = record(reservationId, amount, found.get());
+                if (refundOne(id, found.get().transactionId())) refunded = true;
+                else pending = true;
+            }
+        }
+        return pending ? RefundOutcome.PENDING : refunded ? RefundOutcome.REFUNDED : RefundOutcome.NOTHING_TO_REFUND;
+    }
+
+    private boolean refundOne(Long paymentId, String transactionId) {
+        PaymentResult result = gateway.refund(transactionId, "refund-" + paymentId);
+        if (result.status() != PaymentStatus.REFUNDED) {
+            log.warn("No se pudo devolver el pago {}: queda pendiente para reintentar", transactionId);
+            return false;
+        }
+        updateStatus(paymentId, PaymentStatus.REFUNDED, "activity_cancelled");
+        return true;
+    }
+
+    private void updateStatus(Long paymentId, PaymentStatus status, String detail) {
+        tx.executeWithoutResult(s -> paymentRepository.findById(paymentId).ifPresent(p -> {
+            p.setStatus(status);
+            p.setStatusDetail(truncate(detail));
+        }));
     }
 
     // ---------- Pasos ----------

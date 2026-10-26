@@ -39,6 +39,21 @@ public record ReservationView(Long id, Long activityId, String activityName, Str
         return status == ReservationStatus.CONFIRMED;
     }
 
+    /** El prestador dio de baja la actividad (CU-10). */
+    public boolean cancelled() {
+        return status == ReservationStatus.CANCELLED;
+    }
+
+    /** Se le devolvió el pago al cancelarse (CU-10 2a). */
+    public boolean refunded() {
+        return lastPayment == PaymentStatus.REFUNDED;
+    }
+
+    /** Estaba paga, se canceló y la devolución todavía no se pudo hacer. */
+    public boolean refundPending() {
+        return cancelled() && (lastPayment == PaymentStatus.APPROVED || lastPayment == PaymentStatus.IN_PROCESS);
+    }
+
     /** El último pago quedó en revisión del servicio: se puede consultar si ya se aprobó. */
     public boolean paymentInProcess() {
         return pending() && lastPayment == PaymentStatus.IN_PROCESS;
@@ -56,6 +71,7 @@ public record ReservationView(Long id, Long activityId, String activityName, Str
             case CONFIRMED -> "Confirmada";
             case FINISHED -> "Finalizada";
             case EXPIRED -> "Vencida";
+            case CANCELLED -> "Cancelada";
         };
     }
 }

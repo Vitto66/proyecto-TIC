@@ -54,6 +54,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Revisar prestadores pendientes (CU-03, administrador) | http://localhost:8080/admin/providers |
 | Registrar / ver mi emprendimiento (CU-07, prestador aprobado) | http://localhost:8080/provider/business |
 | Mis actividades y publicar una nueva (CU-08, con emprendimiento) | http://localhost:8080/provider/activities |
+| Modificar o dar de baja una actividad (CU-10) | `/provider/activities/{id}/edit` y `/provider/activities/{id}/cancel` (desde "Mis actividades") |
 | Fechas, horarios y cupos de una actividad (CU-09) | `/provider/activities/{id}/dates` (desde "Mis actividades") |
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
@@ -79,6 +80,26 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - La actividad queda publicada (`active = true`) y sin fechas: las fechas y cupos son el CU-09.
 - **No necesita scripts SQL:** usa `activity`, `activity_activity_type`, `activity_equipment`,
   `activity_type` y `equipment_type`, que ya existen en Supabase.
+
+## Modificar o dar de baja una actividad (CU-10)
+
+- Desde "Mis actividades", cada actividad publicada tiene **Modificar** y **Dar de baja**.
+- **Modificar** usa el mismo formulario que publicar, con los datos actuales. Si cambia el precio, rige solo para
+  reservas nuevas (3a): cada reserva guarda su precio total al crearse. Un tipo o equipamiento que el administrador
+  desactivó después se puede mantener, pero no agregar.
+- **Dar de baja** primero muestra cuántas reservas en fechas futuras se ven afectadas y pide confirmación (2a). Al
+  confirmar (`ActivityCancellationService`):
+  - la actividad queda con `active = false` y sale del portal;
+  - las reservas **confirmadas** pasan a **CANCELLED** y se le pide a Mercado Pago (o al pago simulado) el
+    **reembolso del 100%** (2a);
+  - las **pendientes** pasan a **CANCELLED** (2b). Si un intento de pago había quedado en revisión o sin respuesta,
+    se consulta y, si se llegó a cobrar, también se devuelve;
+  - se avisa a cada turista (`TouristNotifier`: hoy en el log y en la pantalla de su reserva, que muestra
+    "Cancelada" y si se le devolvió el dinero).
+- Si el servicio de pagos no responde, la reserva igual queda cancelada y la devolución queda **pendiente**: en
+  "Mis actividades" aparece **Reintentar devolución**.
+- Las reservas de fechas que ya pasaron no se tocan. Una actividad dada de baja no se puede modificar.
+- **Necesita el script** `2026-10-26_cu10_cancel_activity.sql`, que agrega el estado `CANCELLED` a las reservas.
 
 ## Fechas y cupos (CU-09)
 
@@ -229,6 +250,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-22_cu01_payment_method_existing_table.sql` | Ajuste de `payment_method` si ya existía sin vencimiento (ya corrido en la base del equipo) |
 | `2026-10-24_localities.sql` | 122 localidades de los 19 departamentos (ciudades y destinos turísticos). Se puede correr más de una vez |
 | `2026-10-26_cu14_cu15_participants_payments.sql` | Tablas `reservation_participant` (acompañantes de una reserva) y `reservation_payment` (intentos de pago). **Sin este script la app no arranca con Supabase** |
+| `2026-10-26_cu10_cancel_activity.sql` | Agrega el estado `CANCELLED` a `reservation.status` (CU-10). Sin él, dar de baja una actividad con reservas da error |
 
 ## Medios de pago
 

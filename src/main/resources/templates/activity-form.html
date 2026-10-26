@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Publicar actividad · Uruguay Mnatural</title>
+    <title th:text="${editingId == null} ? 'Publicar actividad · Uruguay Mnatural' : 'Modificar actividad · Uruguay Mnatural'">Publicar actividad · Uruguay Mnatural</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,9 +28,18 @@
 
     <div class="register-shell activity-shell">
         <section class="register-main">
-            <h1 class="form-title">Publicar una actividad</h1>
+            <h1 class="form-title" th:if="${editingId == null}">Publicar una actividad</h1>
+            <!-- CU-10: el mismo formulario, con los datos actuales -->
+            <th:block th:if="${editingId != null}">
+                <h1 class="form-title">Modificar <span th:text="${editingName}">Atardecer en kayak</span></h1>
+                <p class="form-text mt-0">
+                    Si cambiás el precio, el nuevo rige solo para las reservas nuevas: las que ya se hicieron
+                    mantienen el precio con el que se reservaron.
+                </p>
+            </th:block>
 
-            <form th:action="@{/provider/activities}" th:object="${form}" method="post"
+            <form th:action="${editingId == null} ? @{/provider/activities} : @{/provider/activities/{id}(id=${editingId})}"
+                  th:object="${form}" method="post"
                   id="activity-form" class="needs-validation" novalidate>
 
                 <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('*')}">
@@ -209,7 +218,10 @@
                 </fieldset>
 
                 <div class="pt-2">
-                    <button type="submit" class="btn btn-submit">Publicar actividad</button>
+                    <button type="submit" class="btn btn-submit"
+                            th:text="${editingId == null} ? 'Publicar actividad' : 'Guardar cambios'">Publicar actividad</button>
+                    <a class="btn-outline-monte ms-2" th:if="${editingId != null}" th:href="@{/provider/activities}"
+                       href="activities.html">Cancelar</a>
                 </div>
             </form>
         </section>

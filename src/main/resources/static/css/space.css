@@ -12,7 +12,7 @@
     background-color: var(--monte-dark);
     background-size: cover;
     background-position: center 60%;
-    padding-bottom: 4.5rem;
+    padding-bottom: 3rem;
 }
 .space-banner::before {
     content: "";
@@ -73,9 +73,12 @@
 /* ---------- Contenido ---------- */
 .space-main {
     position: relative;
-    margin-top: -2.5rem;
+    padding-top: 2rem;
     padding-bottom: 4rem;
 }
+/* El primer título queda separado de la foto: antes se montaba sobre la barra azul */
+.space-main > section:first-child > .space-section-title,
+.space-main > .space-notice:first-child { margin-top: 0; }
 .space-section-title {
     font-family: var(--font-display);
     font-weight: 700;
@@ -236,7 +239,7 @@ a.tone-celeste:hover, a.tone-celeste:focus-visible { color: var(--monte-dark); }
     .progress-steps li:nth-child(2)::before { display: none; }
 }
 @media (max-width: 575.98px) {
-    .space-banner { padding-bottom: 4rem; }
+    .space-banner { padding-bottom: 2.5rem; }
     .space-banner-body { padding-top: 1.25rem; }
     .progress-steps { grid-template-columns: 1fr; }
     .progress-steps li::before { display: none; }
