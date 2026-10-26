@@ -10,6 +10,7 @@ import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.service.AuthService;
 import uy.edu.um.proytic2026.service.BusinessService;
 import uy.edu.um.proytic2026.service.ProviderReviewService;
+import uy.edu.um.proytic2026.service.TypeProposalService;
 
 /**
  * Espacio de cada perfil: a donde se llega después de iniciar sesión (CU-04).
@@ -25,6 +26,7 @@ public class SpaceController {
     private final AuthService authService;
     private final ProviderReviewService providerReviewService;
     private final BusinessService businessService;
+    private final TypeProposalService typeProposalService;
 
     @GetMapping("/tourist")
     public String tourist(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
@@ -61,6 +63,7 @@ public class SpaceController {
         model.addAttribute("intro", "Desde acá vas a revisar los prestadores pendientes y mantener "
                 + "los tipos de actividad y de equipamiento.");
         model.addAttribute("pendingProviders", providerReviewService.countPending());
+        model.addAttribute("pendingProposals", typeProposalService.countPending());
         return space(user, model);
     }
 

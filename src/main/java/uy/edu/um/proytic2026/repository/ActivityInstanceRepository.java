@@ -37,4 +37,13 @@ public interface ActivityInstanceRepository extends JpaRepository<ActivityInstan
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from ActivityInstance i where i.id = :id")
     java.util.Optional<ActivityInstance> findLockedById(@Param("id") Long id);
+
+    /** CU-11: todas las fechas de las actividades de un prestador, con la actividad ya cargada. */
+    @Query("""
+            select i from ActivityInstance i
+            join fetch i.activity a
+            where a.business.provider.id = :providerId
+            order by i.startAt
+            """)
+    List<ActivityInstance> findAllByProviderId(@Param("providerId") Long providerId);
 }

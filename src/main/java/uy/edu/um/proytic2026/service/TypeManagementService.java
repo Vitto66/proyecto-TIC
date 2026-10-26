@@ -123,6 +123,18 @@ public class TypeManagementService {
         };
     }
 
+    /** CU-12 2a: el tipo de esa lista que ya tiene ese nombre (sin distinguir mayúsculas), si existe. */
+    @Transactional(readOnly = true)
+    public java.util.Optional<TypeRow> findByName(TypeCategory category, String rawName) {
+        String name = normalize(rawName);
+        return switch (category) {
+            case ACTIVITY -> activityTypeRepository.findFirstByNameIgnoreCase(name)
+                    .map(t -> new TypeRow(t.getId(), t.getName(), t.isActive(), 0));
+            case EQUIPMENT -> equipmentTypeRepository.findFirstByNameIgnoreCase(name)
+                    .map(t -> new TypeRow(t.getId(), t.getName(), t.isActive(), 0));
+        };
+    }
+
     /** Saca los espacios de los extremos y deja uno solo entre palabras: "  Kayak   doble " → "Kayak doble". */
     static String normalize(String rawName) {
         String name = rawName == null ? "" : rawName.strip().replaceAll("\\s+", " ");

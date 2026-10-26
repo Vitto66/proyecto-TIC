@@ -45,7 +45,11 @@
     <th:block th:if="${access.name() == 'ALLOWED'}">
         <div class="activities-head">
             <h1>Mis actividades</h1>
-            <a class="btn btn-submit" th:href="@{/provider/activities/new}" href="activity-form.html">Publicar nueva actividad</a>
+            <div class="d-flex flex-wrap gap-2">
+                <!-- CU-11 -->
+                <a class="btn-outline-monte" th:href="@{/provider/reservations}" href="provider-reservations.html">Ver reservas</a>
+                <a class="btn btn-submit" th:href="@{/provider/activities/new}" href="activity-form.html">Publicar nueva actividad</a>
+            </div>
         </div>
 
         <div class="alert alert-success" role="status" th:if="${published != null}">

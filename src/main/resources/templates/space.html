@@ -109,6 +109,24 @@
                 <span class="space-card-more">Ir →</span>
             </a>
 
+            <!-- CU-11: reservas recibidas (con el emprendimiento ya registrado) -->
+            <a class="space-card tone-celeste" th:if="${hasBusiness}" th:href="@{/provider/reservations}"
+               href="provider-reservations.html">
+                <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('users')}"></svg></span>
+                <strong>Reservas de mis actividades</strong>
+                <small>Mirá quién reservó cada fecha, cuántas personas van y los lugares libres.</small>
+                <span class="space-card-more">Ir →</span>
+            </a>
+
+            <!-- CU-12: proponer un tipo (prestador aprobado) -->
+            <a class="space-card tone-blue" th:if="${businessAccess}" th:href="@{/provider/proposals}"
+               href="provider-proposals.html">
+                <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('leaf')}"></svg></span>
+                <strong>Proponer un tipo</strong>
+                <small>¿Falta un tipo de actividad o de equipamiento? Proponelo y mirá si lo aceptaron.</small>
+                <span class="space-card-more">Ir →</span>
+            </a>
+
             <!-- CU-03: acceso a la revisión de prestadores -->
             <a class="space-card tone-navy" th:if="${pendingProviders != null}" th:href="@{/admin/providers}"
                href="admin-providers.html">
@@ -123,8 +141,11 @@
             <a class="space-card tone-blue" th:if="${role == 'admin'}" th:href="@{/admin/types}"
                href="admin-types.html">
                 <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('leaf')}"></svg></span>
+                <span class="space-card-count" th:if="${pendingProposals != null and pendingProposals > 0}" th:text="${pendingProposals}">1</span>
                 <strong>Tipos de actividad y equipamiento</strong>
-                <small>Agregá, renombrá, desactivá o eliminá los tipos que eligen los prestadores.</small>
+                <small th:text="${pendingProposals != null and pendingProposals > 0}
+                        ? 'Hay propuestas de prestadores para revisar.'
+                        : 'Agregá, renombrá, desactivá o eliminá los tipos que eligen los prestadores.'">Agregá, renombrá, desactivá o eliminá los tipos que eligen los prestadores.</small>
                 <span class="space-card-more">Ir →</span>
             </a>
 

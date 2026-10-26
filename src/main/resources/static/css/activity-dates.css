@@ -92,3 +92,100 @@
     .date-capacity { text-align: left; }
     .dates-list, .dates-form { padding: 1.25rem; }
 }
+
+/* ---------- CU-11: reservas de las actividades del prestador ---------- */
+.res-date {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+.res-date-link {
+    color: inherit;
+    text-decoration: none;
+    flex: 1 1 16rem;
+}
+.res-date-link:hover strong { text-decoration: underline; }
+.res-date-link:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+.res-activity {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--monte) !important;
+}
+.res-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    text-align: right;
+}
+.res-count {
+    font-weight: 600;
+    color: var(--monte) !important;
+}
+.res-count.is-zero { color: var(--muted) !important; font-weight: 500; }
+.res-summary {
+    margin: 0 0 1rem;
+    color: var(--muted);
+}
+.res-summary strong { color: var(--ink); }
+.res-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.res-item { padding: 1.1rem 1.25rem; }
+.res-item + .res-item { border-top: 1px solid var(--line); }
+.res-item-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+.res-item-head strong { display: block; }
+.res-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+.res-item-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+}
+.res-people { color: var(--muted); font-size: 0.9rem; }
+.res-companions {
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed var(--line);
+    font-size: 0.92rem;
+}
+.res-companions-title {
+    display: block;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+}
+.res-companions ul { list-style: none; padding: 0; margin: 0; }
+.res-companions li { display: flex; flex-wrap: wrap; gap: 0 0.75rem; }
+.res-meta-inline { color: var(--muted); }
+@media (max-width: 575.98px) {
+    .res-side, .res-item-side { align-items: flex-start; text-align: left; }
+}

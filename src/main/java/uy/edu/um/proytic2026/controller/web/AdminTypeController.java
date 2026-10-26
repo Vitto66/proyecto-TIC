@@ -14,10 +14,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.dto.TypeForm;
 import uy.edu.um.proytic2026.entity.TypeCategory;
+import uy.edu.um.proytic2026.dto.ProposalView;
+import uy.edu.um.proytic2026.exception.ProposalAlreadyResolvedException;
+import uy.edu.um.proytic2026.exception.ProposalNotFoundException;
 import uy.edu.um.proytic2026.exception.TypeInUseException;
 import uy.edu.um.proytic2026.exception.TypeNameTakenException;
 import uy.edu.um.proytic2026.exception.TypeNotFoundException;
 import uy.edu.um.proytic2026.service.TypeManagementService;
+import uy.edu.um.proytic2026.service.TypeProposalService;
 
 /**
  * Páginas del administrador para el CU-13 Gestionar tipos de actividad y de equipamiento.
@@ -34,6 +38,7 @@ public class AdminTypeController {
     static final String VIEW = "admin-types";
 
     private final TypeManagementService typeService;
+    private final TypeProposalService proposalService;
 
     @ModelAttribute("currentUser")
     AuthenticatedUser currentUser(@AuthenticationPrincipal AuthenticatedUser user) {
@@ -140,10 +145,48 @@ public class AdminTypeController {
         return redirectTo(c);
     }
 
+    /** 2a: aceptar una propuesta de un prestador. El tipo se crea y queda disponible. */
+    @PostMapping("/proposals/{proposalId}/accept")
+    public String accept(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long proposalId,
+                         @RequestParam(defaultValue = "activity") String category, RedirectAttributes redirect) {
+        TypeCategory c = categoryOr404(category);
+        try {
+            ProposalView p = proposalService.accept(user.userId(), proposalId);
+            redirect.addFlashAttribute("notice", "Aceptaste la propuesta: se agregó \"" + p.name()
+                    + "\" y ya lo pueden usar los prestadores.");
+        } catch (TypeNameTakenException ex) {
+            redirect.addFlashAttribute("error", "No se aceptó: ya existe un " + c.singular()
+                    + " con ese nombre. Podés rechazar la propuesta.");
+        } catch (ProposalAlreadyResolvedException ex) {
+            redirect.addFlashAttribute("error", ex.getMessage() + ". No se hizo ningún cambio.");
+        } catch (ProposalNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return redirectTo(c);
+    }
+
+    /** 2a: rechazar una propuesta. El tipo no se crea y el prestador lo ve en sus propuestas. */
+    @PostMapping("/proposals/{proposalId}/reject")
+    public String reject(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long proposalId,
+                         @RequestParam(defaultValue = "activity") String category, RedirectAttributes redirect) {
+        TypeCategory c = categoryOr404(category);
+        try {
+            ProposalView p = proposalService.reject(user.userId(), proposalId);
+            redirect.addFlashAttribute("notice", "Rechazaste la propuesta \"" + p.name()
+                    + "\". El prestador lo va a ver en sus propuestas.");
+        } catch (ProposalAlreadyResolvedException ex) {
+            redirect.addFlashAttribute("error", ex.getMessage() + ". No se hizo ningún cambio.");
+        } catch (ProposalNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return redirectTo(c);
+    }
+
     private String show(TypeCategory category, Model model) {
         model.addAttribute("category", category);
         model.addAttribute("categories", TypeCategory.values());
         model.addAttribute("types", typeService.list(category));
+        model.addAttribute("proposals", proposalService.pending(category));
         return VIEW;
     }
 

@@ -666,3 +666,17 @@ body {
     .type-create-row { flex-direction: column; }
     .type-actions { width: 100%; }
 }
+.type-section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+}
+.type-proposals { margin-bottom: 1.5rem; }
+.type-hint {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
