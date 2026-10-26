@@ -13,6 +13,7 @@
     <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
     <link th:href="@{/css/catalog.css}" href="../static/css/catalog.css" rel="stylesheet">
     <link th:href="@{/css/reserve.css}" href="../static/css/reserve.css" rel="stylesheet">
+    <link th:href="@{/css/review.css}" href="../static/css/review.css" rel="stylesheet">
 </head>
 <body>
 
@@ -28,6 +29,10 @@
 <main class="container-xl catalog">
     <div class="alert alert-success" role="status" th:if="${param.created != null}">
         <strong>¡Listo! Tu reserva quedó creada.</strong> El siguiente paso es pagarla.
+    </div>
+    <!-- CU-18 paso 4: la valoración quedó publicada -->
+    <div class="alert alert-success" role="status" th:if="${param.reviewed != null}">
+        <strong>¡Gracias por tu valoración!</strong> Ya se ve en la página de la actividad.
     </div>
     <!-- Resultado del pago (CU-15) -->
     <div class="alert" role="status" th:if="${paymentMessage != null}"
@@ -111,6 +116,20 @@
             <p class="mb-0"><strong>Tu lugar está asegurado.</strong> Te esperamos el
                 <span th:text="${reservation.date().dayLabel()}">domingo 25 de octubre</span>.</p>
         </div>
+
+        <!-- CU-18: finalizada → valorarla, o ver la valoración que ya hizo -->
+        <th:block th:if="${reservation.status().name() == 'FINISHED'}">
+            <div class="pay-box" th:if="${myReview == null}">
+                <p class="mb-2"><strong>¿Cómo te fue?</strong> Contales a otros turistas qué te pareció la actividad.</p>
+                <a class="btn btn-submit" th:href="@{/tourist/reservations/{id}/review(id=${reservation.id()})}"
+                   href="review.html">Valorar</a>
+            </div>
+            <div class="my-review" th:if="${myReview != null}">
+                <strong>Tu valoración</strong>
+                <span class="stars" th:text="${myReview.stars()}" th:attr="aria-label=${myReview.rating()} + ' de 5'">★★★★☆</span>
+                <p class="mb-0" th:if="${myReview.hasComment()}" th:text="${myReview.comment()}">Muy lindo paseo.</p>
+            </div>
+        </th:block>
 
         <div class="summary-actions">
             <!-- CU-17: volver al calendario, en el mes de esta reserva -->

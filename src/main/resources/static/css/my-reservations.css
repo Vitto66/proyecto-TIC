@@ -202,9 +202,6 @@ a.calendar-day:hover, a.calendar-day:focus-visible { box-shadow: inset 0 0 0 1.5
 .reservation-item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
 .reservation-item-actions .btn-submit,
 .reservation-item-actions .btn-outline-monte { padding: 0.5rem 1.1rem; text-decoration: none; }
-.review-soon { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; }
-.review-soon small { color: var(--muted); font-size: 0.78rem; }
-.review-soon button:disabled { opacity: 0.55; cursor: not-allowed; }
 
 /* En el celular el calendario muestra puntos de colores; los datos quedan en la lista */
 @media (max-width: 575.98px) {

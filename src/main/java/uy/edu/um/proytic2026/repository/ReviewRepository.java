@@ -39,4 +39,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     /** CU-17 4b: cuáles de esas reservas ya tienen su valoración (hay una sola por reserva). */
     @Query("select r.reservation.id from Review r where r.reservation.id in :reservationIds")
     List<Long> findReviewedReservationIds(@Param("reservationIds") java.util.Collection<Long> reservationIds);
+
+    /** CU-18: la valoración de una reserva, si ya la tiene. */
+    java.util.Optional<Review> findByReservationId(Long reservationId);
+
+    /** CU-18 1a: si esa reserva ya fue valorada. */
+    boolean existsByReservationId(Long reservationId);
 }

@@ -23,6 +23,7 @@ import uy.edu.um.proytic2026.exception.DateNotAvailableException;
 import uy.edu.um.proytic2026.exception.NotEnoughSeatsException;
 import uy.edu.um.proytic2026.exception.ReservationNotFoundException;
 import uy.edu.um.proytic2026.service.ReservationService;
+import uy.edu.um.proytic2026.service.ReviewService;
 
 /**
  * Páginas del CU-14 Reservar una actividad. SecurityConfig restringe /tourist/** al perfil
@@ -38,6 +39,7 @@ public class ReservationPageController {
     static final String RESERVATION_VIEW = "reservation";
 
     private final ReservationService reservationService;
+    private final ReviewService reviewService;
 
     @ModelAttribute("currentUser")
     AuthenticatedUser currentUser(@AuthenticationPrincipal AuthenticatedUser user) {
@@ -118,6 +120,8 @@ public class ReservationPageController {
                               Model model) {
         try {
             model.addAttribute("reservation", reservationService.reservation(user.userId(), reservationId));
+            // CU-18: su valoración, o el botón "Valorar" si está finalizada y todavía no la valoró
+            model.addAttribute("myReview", reviewService.ofReservation(user.userId(), reservationId).orElse(null));
         } catch (ReservationNotFoundException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

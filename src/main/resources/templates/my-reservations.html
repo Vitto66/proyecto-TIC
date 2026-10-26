@@ -141,10 +141,8 @@
                     <a class="btn btn-submit" th:if="${e.payable()}"
                        th:href="@{/tourist/reservations/{id}/pay(id=${e.id()})}" href="pay.html">Pagar</a>
                     <!-- 4b: finalizada sin valorar → valorarla (CU-18) -->
-                    <span class="review-soon" th:if="${e.toReview()}">
-                        <button type="button" class="btn btn-outline-monte" disabled>Valorar</button>
-                        <small>Muy pronto vas a poder valorarla.</small>
-                    </span>
+                    <a class="btn btn-submit" th:if="${e.toReview()}"
+                       th:href="@{/tourist/reservations/{id}/review(id=${e.id()})}" href="review.html">Valorar</a>
                     <a class="btn-outline-monte" th:href="@{/tourist/reservations/{id}(id=${e.id()})}"
                        href="reservation.html">Ver detalle</a>
                 </div>

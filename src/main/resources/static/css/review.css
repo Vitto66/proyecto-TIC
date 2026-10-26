@@ -1,0 +1,61 @@
+/* CU-18 Valorar y comentar. Se carga después de main.css, home.css, catalog.css y reserve.css. */
+
+.review-form { margin-top: 1.25rem; }
+.rating-field { border: 0; margin: 0 0 1.5rem; padding: 0; min-width: 0; }
+.rating-field legend { float: none; width: auto; font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+.required-mark { color: var(--error, #B3261E); }
+
+/* Estrellas: los botones van de 5 a 1 y se muestran al revés, así "~" pinta las anteriores */
+.rating-stars {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 0.15rem;
+}
+.rating-stars input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+.rating-stars label {
+    font-size: 2.4rem;
+    line-height: 1;
+    color: #CBD3DD;
+    cursor: pointer;
+    padding: 0.1rem 0.15rem;
+    border-radius: 8px;
+    transition: color 0.12s, transform 0.12s;
+}
+.rating-stars label:hover,
+.rating-stars label:hover ~ label,
+.rating-stars input:checked ~ label { color: #E0A21B; }
+.rating-stars label:hover { transform: scale(1.08); }
+.rating-stars input:focus-visible + label { outline: 3px solid var(--celeste); outline-offset: 2px; }
+.rating-stars.is-invalid label { color: #E8B4B0; }
+.rating-scale {
+    display: flex;
+    justify-content: space-between;
+    width: 15.5rem;
+    max-width: 100%;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* La valoración ya publicada */
+.my-review {
+    background: #F4F7FA;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+}
+.my-review .stars { color: #E0A21B; font-size: 1.4rem; letter-spacing: 0.08em; }
+.my-review small { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+    .rating-stars label { transition: none; }
+    .rating-stars label:hover { transform: none; }
+}
