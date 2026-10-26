@@ -54,6 +54,9 @@
 
             <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('*')}">
                 Revisá lo que está marcado.
+                <th:block th:if="${#fields.hasGlobalErrors()}">
+                    <br><span th:text="${#strings.capitalize(#fields.globalErrors()[0])}">Completá los datos de cada persona que va.</span>
+                </th:block>
             </div>
 
             <!-- Paso 2: fecha y horario -->
@@ -89,6 +92,100 @@
                 <p class="form-text mb-0">Contá también a los niños: el precio es por persona.</p>
             </fieldset></section>
 
+            <!-- Paso 3 (cont.): si va más de una persona, los datos de cada una -->
+            <section class="detail-section companions-section" id="companions-section"
+                     th:hidden="${form.expectedCompanions() == 0}"><fieldset>
+                <legend><h2>3. ¿Quiénes van?</h2></legend>
+                <p class="form-text mt-0">Completá nombre, apellido, cédula y teléfono de cada persona.</p>
+
+                <div class="companion-me" th:if="${me != null}">
+                    <span class="companion-number" aria-hidden="true">1</span>
+                    <span>
+                        <strong th:text="${me.fullName()}">Ana Pérez</strong>
+                        <small>Vos, con los datos de tu cuenta</small>
+                    </span>
+                </div>
+
+                <div id="companions">
+                    <div class="companion-card" data-companion th:each="c, it : *{companions}">
+                        <h3 class="companion-title">
+                            <span class="companion-number" aria-hidden="true" th:text="${it.index + 2}">2</span>
+                            Persona <span th:text="${it.index + 2}">2</span>
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label" th:for="|companions${it.index}.firstName|">Nombre</label>
+                                <input class="form-control" type="text" th:field="*{companions[__${it.index}__].firstName}"
+                                       maxlength="100" autocomplete="off" required
+                                       th:classappend="${#fields.hasErrors('companions[__${it.index}__].firstName')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('companions[__${it.index}__].firstName')}"
+                                     th:text="${#fields.errors('companions[__${it.index}__].firstName')[0]}">es obligatorio</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" th:for="|companions${it.index}.lastName|">Apellido</label>
+                                <input class="form-control" type="text" th:field="*{companions[__${it.index}__].lastName}"
+                                       maxlength="100" autocomplete="off" required
+                                       th:classappend="${#fields.hasErrors('companions[__${it.index}__].lastName')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('companions[__${it.index}__].lastName')}"
+                                     th:text="${#fields.errors('companions[__${it.index}__].lastName')[0]}">es obligatorio</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" th:for="|companions${it.index}.nationalId|">Cédula</label>
+                                <input class="form-control" type="text" th:field="*{companions[__${it.index}__].nationalId}"
+                                       inputmode="numeric" data-digits-only pattern="\d{7,8}" maxlength="8"
+                                       placeholder="12345678" autocomplete="off" required
+                                       th:classappend="${#fields.hasErrors('companions[__${it.index}__].nationalId')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('companions[__${it.index}__].nationalId')}"
+                                     th:text="${#fields.errors('companions[__${it.index}__].nationalId')[0]}">debe tener 7 u 8 dígitos</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" th:for="|companions${it.index}.phone|">Teléfono</label>
+                                <input class="form-control" type="tel" th:field="*{companions[__${it.index}__].phone}"
+                                       maxlength="20" placeholder="099 123 456" autocomplete="off" required
+                                       th:classappend="${#fields.hasErrors('companions[__${it.index}__].phone')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('companions[__${it.index}__].phone')}"
+                                     th:text="${#fields.errors('companions[__${it.index}__].phone')[0]}">ingresá un teléfono válido</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset></section>
+
+            <!-- Molde para las personas que se agregan al cambiar la cantidad (reserve-companions.js).
+                 __I__ es la posición en la lista (0, 1, ...) y __N__ el número de persona (2, 3, ...). -->
+            <template id="companion-template">
+                <div class="companion-card" data-companion>
+                    <h3 class="companion-title">
+                        <span class="companion-number" aria-hidden="true">__N__</span>
+                        Persona __N__
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="companions__I__.firstName">Nombre</label>
+                            <input class="form-control" type="text" id="companions__I__.firstName"
+                                   name="companions[__I__].firstName" maxlength="100" autocomplete="off" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="companions__I__.lastName">Apellido</label>
+                            <input class="form-control" type="text" id="companions__I__.lastName"
+                                   name="companions[__I__].lastName" maxlength="100" autocomplete="off" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="companions__I__.nationalId">Cédula</label>
+                            <input class="form-control" type="text" id="companions__I__.nationalId"
+                                   name="companions[__I__].nationalId" inputmode="numeric" data-digits-only
+                                   pattern="\d{7,8}" maxlength="8" placeholder="12345678" autocomplete="off" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="companions__I__.phone">Teléfono</label>
+                            <input class="form-control" type="tel" id="companions__I__.phone"
+                                   name="companions[__I__].phone" maxlength="20" placeholder="099 123 456"
+                                   autocomplete="off" required>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
             <button type="submit" class="btn btn-submit">Ver el resumen</button>
         </form>
 
@@ -103,6 +200,9 @@
 </main>
 
 <footer th:replace="~{fragments/site :: footer}"></footer>
+
+<script th:src="@{/js/digits-only.js}" src="../static/js/digits-only.js"></script>
+<script th:src="@{/js/reserve-companions.js}" src="../static/js/reserve-companions.js"></script>
 
 </body>
 </html>

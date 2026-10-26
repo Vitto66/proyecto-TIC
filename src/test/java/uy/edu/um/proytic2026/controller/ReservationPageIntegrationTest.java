@@ -114,15 +114,26 @@ class ReservationPageIntegrationTest {
     }
 
     private MockHttpServletRequestBuilder preview(ActivityInstance instance, int participants) {
-        return post(reserveUrl).with(touristSession()).with(csrf())
+        return withCompanions(post(reserveUrl).with(touristSession()).with(csrf())
                 .param("instanceId", instance.getId().toString())
-                .param("participants", String.valueOf(participants));
+                .param("participants", String.valueOf(participants)), participants);
     }
 
     private MockHttpServletRequestBuilder confirm(ActivityInstance instance, int participants) {
-        return post(reserveUrl + "/confirm").with(touristSession()).with(csrf())
+        return withCompanions(post(reserveUrl + "/confirm").with(touristSession()).with(csrf())
                 .param("instanceId", instance.getId().toString())
-                .param("participants", String.valueOf(participants));
+                .param("participants", String.valueOf(participants)), participants);
+    }
+
+    /** Los datos de las personas 2 en adelante (la 1 es el turista). */
+    private static MockHttpServletRequestBuilder withCompanions(MockHttpServletRequestBuilder request, int participants) {
+        for (int i = 0; i < participants - 1; i++) {
+            request.param("companions[" + i + "].firstName", "Persona" + (i + 2))
+                    .param("companions[" + i + "].lastName", "Gómez")
+                    .param("companions[" + i + "].nationalId", "4000000" + i)
+                    .param("companions[" + i + "].phone", "099 123 45" + i);
+        }
+        return request;
     }
 
     private void confirmedReservation(ActivityInstance instance, int participants) {
@@ -303,5 +314,86 @@ class ReservationPageIntegrationTest {
         activity.setActive(false);
 
         mockMvc.perform(get(reserveUrl).with(touristSession())).andExpect(status().isNotFound());
+    }
+
+    // ---------- Paso 3: datos de cada persona que va ----------
+
+    @Test
+    void form_withOnePerson_hidesTheCompanionsSection() throws Exception {
+        mockMvc.perform(get(reserveUrl).with(touristSession()))
+                .andExpect(content().string(containsString("id=\"companions-section\" hidden")))
+                // el molde para agregar personas con JavaScript
+                .andExpect(content().string(containsString("companion-template")))
+                .andExpect(content().string(containsString("Ana Pérez")));
+    }
+
+    @Test
+    void preview_showsWhoIsGoing() throws Exception {
+        mockMvc.perform(preview(date, 3))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reserve-summary"))
+                .andExpect(content().string(containsString("Quiénes van")))
+                .andExpect(content().string(containsString("Persona2 Gómez")))
+                .andExpect(content().string(containsString("Cédula 40000001")))
+                // se mandan de nuevo al confirmar
+                .andExpect(content().string(containsString("name=\"companions[1].phone\"")));
+    }
+
+    @Test
+    void preview_withoutTheCompanionsData_asksForThemAndShowsOneBlockPerPerson() throws Exception {
+        // Por ejemplo, con JavaScript desactivado: dice 3 personas pero no mandó sus datos
+        mockMvc.perform(post(reserveUrl).with(touristSession()).with(csrf())
+                        .param("instanceId", date.getId().toString()).param("participants", "3"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reserve"))
+                .andExpect(content().string(containsString("Completá los datos de cada persona que va")))
+                .andExpect(content().string(containsString("name=\"companions[1].firstName\"")));
+    }
+
+    @Test
+    void preview_withInvalidCompanionData_marksTheFields() throws Exception {
+        mockMvc.perform(post(reserveUrl).with(touristSession()).with(csrf())
+                        .param("instanceId", date.getId().toString()).param("participants", "2")
+                        .param("companions[0].firstName", "Luis").param("companions[0].lastName", "")
+                        .param("companions[0].nationalId", "12a45").param("companions[0].phone", "abc"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reserve"))
+                .andExpect(model().attributeHasFieldErrors("form",
+                        "companions[0].lastName", "companions[0].nationalId", "companions[0].phone"))
+                .andExpect(content().string(containsString("debe tener 7 u 8 dígitos")));
+    }
+
+    @Test
+    void preview_withTheTouristsOwnNationalId_isRejected() throws Exception {
+        mockMvc.perform(post(reserveUrl).with(touristSession()).with(csrf())
+                        .param("instanceId", date.getId().toString()).param("participants", "2")
+                        .param("companions[0].firstName", "Luis").param("companions[0].lastName", "Pérez")
+                        .param("companions[0].nationalId", "12345678").param("companions[0].phone", "099123456"))
+                .andExpect(view().name("reserve"))
+                .andExpect(model().attributeHasFieldErrors("form", "companions[0].nationalId"))
+                .andExpect(content().string(containsString("esa cédula ya está en la reserva")));
+    }
+
+    @Test
+    void confirm_savesTheCompanionsAndTheReservationListsThem() throws Exception {
+        MvcResult result = mockMvc.perform(confirm(date, 3)).andExpect(status().is3xxRedirection()).andReturn();
+
+        Reservation saved = reservationRepository.findAll().get(0);
+        assertThat(saved.getCompanions()).extracting(ReservationParticipant::getPosition).containsExactly(2, 3);
+        assertThat(saved.getCompanions().get(1).getNationalId()).isEqualTo("40000001");
+
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl()).with(touristSession()))
+                .andExpect(content().string(containsString("Quiénes van")))
+                .andExpect(content().string(containsString("Persona3 Gómez")))
+                .andExpect(content().string(containsString("Tel. 099 123 451")));
+    }
+
+    @Test
+    void change_fromTheSummary_keepsWhatWasEntered() throws Exception {
+        mockMvc.perform(withCompanions(post(reserveUrl + "/edit").with(touristSession()).with(csrf())
+                        .param("instanceId", date.getId().toString()).param("participants", "2"), 2))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reserve"))
+                .andExpect(content().string(containsString("value=\"Persona2\"")));
     }
 }

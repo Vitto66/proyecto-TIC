@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.dto.ReservationView;
 import uy.edu.um.proytic2026.dto.ReserveRequest;
+import uy.edu.um.proytic2026.dto.TouristSummary;
 import uy.edu.um.proytic2026.exception.ActivityNotFoundException;
 import uy.edu.um.proytic2026.exception.BookingClosedException;
 import uy.edu.um.proytic2026.exception.DateNotAvailableException;
@@ -48,6 +49,17 @@ public class ReservationPageController {
         return "/tourist";
     }
 
+    /** El turista que reserva: es la persona 1 y no carga sus datos de nuevo. */
+    @ModelAttribute("me")
+    TouristSummary me(@AuthenticationPrincipal AuthenticatedUser user) {
+        if (user == null) return null;
+        try {
+            return reservationService.touristSummary(user.userId());
+        } catch (ReservationNotFoundException ex) {
+            return null;
+        }
+    }
+
     /** Pasos 1 a 3: elegir fecha y horario, y la cantidad de participantes. */
     @GetMapping("/tourist/activities/{activityId}/reserve")
     public String form(@PathVariable Long activityId, @RequestParam(required = false) Long instanceId, Model model) {
@@ -60,8 +72,9 @@ public class ReservationPageController {
 
     /** Pasos 4 y 5: verificar y mostrar el resumen con el precio total. */
     @PostMapping("/tourist/activities/{activityId}/reserve")
-    public String summary(@PathVariable Long activityId, @Valid @ModelAttribute("form") ReserveRequest form,
-                          BindingResult result, Model model) {
+    public String summary(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long activityId,
+                          @Valid @ModelAttribute("form") ReserveRequest form, BindingResult result, Model model) {
+        checkCompanions(user, form, result);
         if (result.hasErrors()) {
             return formView(activityId, model);
         }
@@ -77,6 +90,7 @@ public class ReservationPageController {
     @PostMapping("/tourist/activities/{activityId}/reserve/confirm")
     public String confirm(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long activityId,
                           @Valid @ModelAttribute("form") ReserveRequest form, BindingResult result, Model model) {
+        checkCompanions(user, form, result);
         if (result.hasErrors()) {
             return formView(activityId, model);
         }
@@ -91,6 +105,13 @@ public class ReservationPageController {
         return "redirect:/tourist/reservations/" + reservation.id() + "?created";
     }
 
+    /** "Cambiar" desde el resumen: vuelve al formulario con todo lo que había cargado. */
+    @PostMapping("/tourist/activities/{activityId}/reserve/edit")
+    public String edit(@PathVariable Long activityId, @ModelAttribute("form") ReserveRequest form, Model model) {
+        form.fitCompanions();
+        return formView(activityId, model);
+    }
+
     /** La reserva creada, pendiente de pago. */
     @GetMapping("/tourist/reservations/{reservationId}")
     public String reservation(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long reservationId,
@@ -101,6 +122,26 @@ public class ReservationPageController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return RESERVATION_VIEW;
+    }
+
+    /**
+     * Paso 3: si van varias personas, tiene que haber datos para cada una y sin cédulas repetidas.
+     * Los formatos (cédula, teléfono, obligatorios) ya los marcó @Valid.
+     */
+    private void checkCompanions(AuthenticatedUser user, ReserveRequest form, BindingResult result) {
+        if (form.getParticipants() == null || result.hasFieldErrors("participants")) {
+            form.fitCompanions();
+            return;
+        }
+        if (!form.companionsMatchParticipants()) {
+            // Por ejemplo, cambió la cantidad con JavaScript desactivado: se arma un bloque por persona
+            form.fitCompanions();
+            result.reject("companions", "completá los datos de cada persona que va");
+            return;
+        }
+        for (int i : reservationService.repeatedNationalIds(user.userId(), form)) {
+            result.rejectValue("companions[" + i + "].nationalId", "repeated", "esa cédula ya está en la reserva");
+        }
     }
 
     /** Traduce los problemas del paso 4 a mensajes en el formulario. */

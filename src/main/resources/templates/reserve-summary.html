@@ -43,6 +43,24 @@
             <div class="summary-total"><dt>Total</dt><dd th:text="${quote.totalLabel()}">$ 3.000</dd></div>
         </dl>
 
+        <!-- Quiénes van: el turista y sus acompañantes -->
+        <th:block th:unless="${quote.companions().isEmpty()}">
+            <h2 class="people-title">Quiénes van</h2>
+            <ol class="people-list">
+                <li th:if="${me != null}">
+                    <span class="companion-number" aria-hidden="true">1</span>
+                    <span><strong th:text="${me.fullName()}">Ana Pérez</strong><small>Vos</small></span>
+                </li>
+                <li th:each="c, it : ${quote.companions()}">
+                    <span class="companion-number" aria-hidden="true" th:text="${it.index + 2}">2</span>
+                    <span>
+                        <strong th:text="${c.firstName} + ' ' + ${c.lastName}">Luis Pérez</strong>
+                        <small th:text="'Cédula ' + ${c.nationalId} + ' · Tel. ' + ${c.phone}">Cédula 4567890 · Tel. 099 123 456</small>
+                    </span>
+                </li>
+            </ol>
+        </th:block>
+
         <p class="form-text">
             Al confirmar, la reserva queda pendiente de pago. Los lugares se aseguran recién cuando se paga,
             y tenés 24 horas para hacerlo.
@@ -51,18 +69,33 @@
         <!-- Paso 6: confirmar y avanzar al pago -->
         <div class="summary-actions">
             <form th:action="@{/tourist/activities/{id}/reserve/confirm(id=${quote.activityId()})}" method="post">
-                <input type="hidden" name="instanceId" th:value="${quote.date().id()}">
-                <input type="hidden" name="participants" th:value="${quote.participants()}">
+                <th:block th:replace="~{:: reserve-data}"></th:block>
                 <button type="submit" class="btn btn-submit">Confirmar reserva</button>
             </form>
-            <a class="btn-outline-monte"
-               th:href="@{/tourist/activities/{id}/reserve(id=${quote.activityId()},instanceId=${quote.date().id()})}"
-               href="reserve.html">Cambiar</a>
+            <!-- Vuelve al formulario sin perder lo cargado -->
+            <form th:action="@{/tourist/activities/{id}/reserve/edit(id=${quote.activityId()})}" method="post">
+                <th:block th:replace="~{:: reserve-data}"></th:block>
+                <button type="submit" class="btn-outline-monte">Cambiar</button>
+            </form>
         </div>
     </section>
 </main>
 
 <footer th:replace="~{fragments/site :: footer}"></footer>
+
+<!-- Lo elegido, para mandarlo de nuevo al confirmar o al volver a cambiarlo -->
+<th:block th:remove="all">
+    <th:block th:fragment="reserve-data">
+        <input type="hidden" name="instanceId" th:value="${quote.date().id()}">
+        <input type="hidden" name="participants" th:value="${quote.participants()}">
+        <th:block th:each="c, it : ${quote.companions()}">
+            <input type="hidden" th:name="|companions[${it.index}].firstName|" th:value="${c.firstName}">
+            <input type="hidden" th:name="|companions[${it.index}].lastName|" th:value="${c.lastName}">
+            <input type="hidden" th:name="|companions[${it.index}].nationalId|" th:value="${c.nationalId}">
+            <input type="hidden" th:name="|companions[${it.index}].phone|" th:value="${c.phone}">
+        </th:block>
+    </th:block>
+</th:block>
 
 </body>
 </html>

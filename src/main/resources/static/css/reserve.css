@@ -119,3 +119,97 @@
 @media (prefers-reduced-motion: reduce) {
     .date-option-body { transition: none; }
 }
+
+/* Datos de cada persona que va (CU-14 paso 3) */
+.companions-section .form-text { margin-bottom: 1rem; }
+.companion-me {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: #EEF4FA;
+    margin-bottom: 1rem;
+}
+.companion-me strong { display: block; }
+.companion-me small { color: var(--muted); }
+.companion-card {
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem 1.25rem;
+    animation: companion-in 0.25s ease;
+}
+.companion-card + .companion-card { margin-top: 0.85rem; }
+.companion-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--monte);
+    margin-bottom: 0.85rem !important;
+}
+.companion-number {
+    flex-shrink: 0;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: var(--monte);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+.companion-me .companion-number { background: var(--celeste); }
+@keyframes companion-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .companion-card { animation: none; }
+}
+
+/* Lista de personas en el resumen y en la reserva */
+.people-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+}
+.people-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+}
+.people-list .companion-number { width: 1.6rem; height: 1.6rem; font-size: 0.8rem; align-self: center; }
+.people-list strong { display: block; }
+.people-list small { color: var(--muted); }
+.people-title { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+
+/* Pago (CU-15) */
+.pay-layout { max-width: 640px; margin: 0.5rem auto 0; }
+.pay-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 1rem 0 1.25rem;
+}
+.sandbox-note {
+    background: #EEF4FA;
+    border: 1px dashed #9CC2E5;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    font-size: 0.92rem;
+    margin-bottom: 1.25rem;
+}
+.sandbox-note code { color: var(--monte); font-weight: 700; }
+.sandbox-note ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+#cardPaymentBrick_container { min-height: 120px; }
+.reservation-status.is-expired { background: #F1E3E3; color: #7A1E1E; }
+.pay-box .btn-submit { text-decoration: none; display: inline-block; }
+.summary-actions button.btn-outline-monte { cursor: pointer; }
