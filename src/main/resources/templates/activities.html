@@ -52,6 +52,11 @@
             </div>
         </div>
 
+        <!-- CU-10: resultado de modificar o dar de baja -->
+        <div class="alert" role="status" th:if="${activityMessage != null}"
+             th:classappend="'alert-' + ${activityLevel != null ? activityLevel : 'success'}"
+             th:text="${activityMessage}">Se guardaron los cambios.</div>
+
         <div class="alert alert-success" role="status" th:if="${published != null}">
             <strong th:text="${published}">Atardecer en kayak</strong> quedó publicada. El próximo paso es
             definir sus fechas y cupos, desde "Fechas, horarios y cupos", para que los turistas puedan reservar.
@@ -73,9 +78,24 @@
                         <li th:text="${a.durationLabel()}">2 h 30 min</li>
                         <li th:text="${a.minAge() == 0} ? 'Todas las edades' : 'Desde ' + ${a.minAge()} + ' años'">Desde 12 años</li>
                     </ul>
-                    <!-- CU-09 -->
-                    <a class="activity-link" th:href="@{/provider/activities/{id}/dates(id=${a.id()})}"
-                       href="activity-dates.html">Fechas, horarios y cupos</a>
+                    <div class="activity-actions">
+                        <!-- CU-09 -->
+                        <a class="activity-link" th:href="@{/provider/activities/{id}/dates(id=${a.id()})}"
+                           href="activity-dates.html">Fechas, horarios y cupos</a>
+                        <!-- CU-10 -->
+                        <th:block th:if="${a.active()}">
+                            <a class="activity-link" th:href="@{/provider/activities/{id}/edit(id=${a.id()})}"
+                               href="activity-form.html">Modificar</a>
+                            <a class="activity-link is-danger" th:href="@{/provider/activities/{id}/cancel(id=${a.id()})}"
+                               href="activity-cancel.html">Dar de baja</a>
+                        </th:block>
+                    </div>
+                    <!-- CU-10 2a: devoluciones que el servicio de pagos todavía no hizo -->
+                    <form class="refund-pending" th:if="${pendingRefunds.containsKey(a.id())}"
+                          th:action="@{/provider/activities/{id}/refunds(id=${a.id()})}" method="post">
+                        <span th:text="${pendingRefunds.get(a.id())} == 1 ? '1 devolución pendiente: el servicio de pagos no respondió.' : ${pendingRefunds.get(a.id())} + ' devoluciones pendientes: el servicio de pagos no respondió.'">1 devolución pendiente</span>
+                        <button type="submit" class="btn-outline-monte">Reintentar devolución</button>
+                    </form>
                 </div>
                 <div class="activity-side">
                     <span class="activity-price" th:text="${a.priceLabel()}">$ 1.500</span>

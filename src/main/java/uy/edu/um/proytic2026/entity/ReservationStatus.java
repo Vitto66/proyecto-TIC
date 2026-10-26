@@ -9,5 +9,7 @@ public enum ReservationStatus {
     /** La instancia ya terminó (CU-16). Se puede valorar (CU-18). */
     FINISHED,
     /** Pasaron 24 horas sin pago o se cerraron las reservas de la instancia (CU-16). */
-    EXPIRED
+    EXPIRED,
+    /** El prestador dio de baja la actividad (CU-10): si estaba paga, se devuelve el 100%. */
+    CANCELLED
 }

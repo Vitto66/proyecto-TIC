@@ -1,8 +1,8 @@
 package uy.edu.um.proytic2026.exception;
 
-/** Precondición del CU-09: solo se agregan fechas a una actividad publicada (no dada de baja). */
+/** La actividad está dada de baja: no se le agregan fechas (CU-09) ni se modifica o se vuelve a dar de baja (CU-10). */
 public class ActivityNotPublishedException extends RuntimeException {
     public ActivityNotPublishedException() {
-        super("La actividad está dada de baja: no se le pueden agregar fechas");
+        super("La actividad está dada de baja");
     }
 }

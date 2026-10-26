@@ -27,6 +27,7 @@ public record ProviderReservationRow(Long id, String touristName, String nationa
             case CONFIRMED -> "Confirmada";
             case FINISHED -> "Finalizada";
             case EXPIRED -> "Vencida";
+            case CANCELLED -> "Cancelada";
         };
     }
 
@@ -35,7 +36,7 @@ public record ProviderReservationRow(Long id, String touristName, String nationa
         return switch (status) {
             case PENDING -> "status-pending";
             case CONFIRMED, FINISHED -> "status-approved";
-            case EXPIRED -> "status-rejected";
+            case EXPIRED, CANCELLED -> "status-rejected";
         };
     }
 

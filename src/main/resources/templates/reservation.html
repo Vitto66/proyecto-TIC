@@ -42,7 +42,7 @@
         </p>
 
         <span class="reservation-status"
-              th:classappend="${reservation.pending()} ? 'is-pending' : (${reservation.status().name() == 'EXPIRED'} ? 'is-expired' : 'is-confirmed')"
+              th:classappend="${reservation.pending()} ? 'is-pending' : (${reservation.status().name() == 'EXPIRED' or reservation.cancelled()} ? 'is-expired' : 'is-confirmed')"
               th:text="${reservation.statusLabel()}">Pendiente de pago</span>
 
         <dl class="summary-rows">
@@ -92,13 +92,29 @@
             </p>
         </div>
 
+        <!-- CU-10: el prestador dio de baja la actividad -->
+        <div class="pay-box" role="status" th:if="${reservation.cancelled()}">
+            <p class="mb-1"><strong>El prestador dio de baja esta actividad, así que tu reserva se canceló.</strong></p>
+            <p class="mb-0" th:if="${reservation.refunded()}">
+                Se te devolvió el 100% del pago (<span th:text="${reservation.totalLabel()}">$ 3.000</span>) en la
+                misma tarjeta con la que pagaste.
+            </p>
+            <p class="mb-0" th:if="${reservation.refundPending()}">
+                Estamos gestionando la devolución del 100% del pago con el servicio de pagos.
+            </p>
+            <p class="mb-0" th:unless="${reservation.refunded() or reservation.refundPending()}">
+                No se te cobró nada.
+            </p>
+        </div>
+
         <div class="pay-box" th:if="${reservation.confirmed()}">
             <p class="mb-0"><strong>Tu lugar está asegurado.</strong> Te esperamos el
                 <span th:text="${reservation.date().dayLabel()}">domingo 25 de octubre</span>.</p>
         </div>
 
         <div class="summary-actions">
-            <a class="btn-outline-monte" th:href="@{/activities/{id}(id=${reservation.activityId()})}"
+            <a class="btn-outline-monte" th:unless="${reservation.cancelled()}"
+               th:href="@{/activities/{id}(id=${reservation.activityId()})}"
                href="activity-detail.html">Ver la actividad</a>
             <a class="btn-outline-monte" th:href="@{/activities}" href="catalog.html">Explorar más actividades</a>
         </div>

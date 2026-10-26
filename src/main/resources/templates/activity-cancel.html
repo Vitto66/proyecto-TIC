@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dar de baja la actividad · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <span class="space-user" th:text="${currentUser.displayName}">Nombre</span>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <a class="back-link" th:href="@{/provider/activities}" href="activities.html">Volver a mis actividades</a>
+
+    <!-- CU-10: confirmar la baja -->
+    <section class="sent-card cancel-card" aria-labelledby="cancel-title">
+        <h1 id="cancel-title">¿Dar de baja <span th:text="${preview.activityName()}">Atardecer en kayak</span>?</h1>
+        <p>La actividad deja de aparecer en el portal y ya no se puede reservar. Esto no se puede deshacer.</p>
+
+        <!-- Sin reservas en fechas futuras -->
+        <p class="cancel-none" th:unless="${preview.hasReservations()}">
+            No tiene reservas en fechas futuras, así que no afecta a ningún turista.
+        </p>
+
+        <!-- 2a y 2b: se informa la cantidad y se pide confirmación -->
+        <div class="cancel-impact" role="alert" th:if="${preview.hasReservations()}">
+            <strong>Tiene reservas en fechas futuras:</strong>
+            <ul>
+                <li th:if="${preview.confirmedReservations() > 0}">
+                    <span th:text="${preview.confirmedLabel()}">2 reservas pagas (5 personas)</span>:
+                    se cancelan y <strong>se le devuelve el 100% del pago</strong> a cada turista.
+                </li>
+                <li th:if="${preview.pendingReservations() > 0}">
+                    <span th:text="${preview.pendingLabel()}">1 reserva pendiente de pago</span>: se cancela.
+                </li>
+            </ul>
+            Se le avisa a cada turista que su reserva fue cancelada.
+        </div>
+
+        <div class="space-actions">
+            <form th:action="@{/provider/activities/{id}/cancel(id=${preview.activityId()})}" method="post">
+                <button type="submit" class="btn btn-danger-solid"
+                        th:text="${preview.hasReservations()} ? 'Sí, dar de baja y cancelar las reservas' : 'Sí, dar de baja'">Sí, dar de baja</button>
+            </form>
+            <a class="btn-outline-monte" th:href="@{/provider/activities}" href="activities.html">No, volver</a>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

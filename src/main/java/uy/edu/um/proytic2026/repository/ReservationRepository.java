@@ -53,4 +53,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             order by r.createdAt
             """)
     List<Reservation> findAllForInstance(@Param("instanceId") Long instanceId);
+
+    /**
+     * Las reservas de una actividad en fechas que todavía no empezaron, en esos estados
+     * (CU-10: las que se cancelan al darla de baja).
+     */
+    @Query("""
+            select r from Reservation r
+            join fetch r.instance i
+            join fetch r.tourist t
+            join fetch t.user
+            where i.activity.id = :activityId and i.startAt > :after and r.status in :statuses
+            order by i.startAt, r.id
+            """)
+    List<Reservation> findUpcomingByActivity(@Param("activityId") Long activityId,
+                                             @Param("after") java.time.LocalDateTime after,
+                                             @Param("statuses") Collection<ReservationStatus> statuses);
 }
