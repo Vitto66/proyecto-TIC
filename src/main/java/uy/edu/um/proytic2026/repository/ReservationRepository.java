@@ -6,8 +6,10 @@ import org.springframework.data.repository.query.Param;
 import uy.edu.um.proytic2026.entity.Reservation;
 import uy.edu.um.proytic2026.entity.ReservationStatus;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -69,4 +71,26 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findUpcomingByActivity(@Param("activityId") Long activityId,
                                              @Param("after") java.time.LocalDateTime after,
                                              @Param("statuses") Collection<ReservationStatus> statuses);
+
+    /** Los ids de las reservas en un estado (CU-16 las revisa de a una). */
+    @Query("select r.id from Reservation r where r.status = :status order by r.id")
+    List<Long> findIdsByStatus(@Param("status") ReservationStatus status);
+
+    /** La fecha (instancia) de una reserva, sin cargarla: para bloquear la fecha antes de leer la reserva. */
+    @Query("select r.instance.id from Reservation r where r.id = :id")
+    Optional<Long> findInstanceIdById(@Param("id") Long id);
+
+    /**
+     * El estado actual en la base. Se consulta después de bloquear la fecha para no decidir con un
+     * estado viejo si otra transacción (el pago o el vencimiento) lo cambió mientras tanto.
+     */
+    @Query("select r.status from Reservation r where r.id = :id")
+    Optional<ReservationStatus> findStatusById(@Param("id") Long id);
+
+    /** Las reservas confirmadas de fechas que ya empezaron, con su actividad (CU-16 paso 5). */
+    @Query("""
+            select r from Reservation r join fetch r.instance i join fetch i.activity
+            where r.status = uy.edu.um.proytic2026.entity.ReservationStatus.CONFIRMED and i.startAt <= :now
+            """)
+    List<Reservation> findConfirmedStartedBy(@Param("now") LocalDateTime now);
 }

@@ -46,6 +46,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Reservar una actividad (CU-14, turista) | `/tourist/activities/{id}/reserve` (botón "Reservar" del detalle) |
 | Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
 | Pagar una reserva (CU-15, turista) | `/tourist/reservations/{id}/pay` (botón "Pagar" de la reserva) |
+| Avisos del turista, por ejemplo una reserva vencida (CU-16) | Arriba en `/tourist`; "Marcar como vistos" hace `POST /tourist/notifications/read` |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
 | Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
@@ -209,6 +210,25 @@ para simular que el servicio no responde) y responde igual que el sandbox.
 - Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
   como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
 
+## Actualizar el estado de las reservas (CU-16)
+
+Una tarea programada (`ReservationStatusJob`) revisa las reservas cada 5 minutos (empieza 30 segundos después de arrancar):
+
+| Reserva | Pasa a | Cuándo |
+| --- | --- | --- |
+| PENDING | EXPIRED | Pasaron 24 horas desde que se creó sin pago aprobado, **o** su fecha ya cerró las reservas por el límite de minutos previos |
+| CONFIRMED | FINISHED | Terminó su fecha (inicio + duración de la actividad). Desde ahí se puede valorar (CU-18) |
+
+- **Aviso al turista (paso 4):** cuando una reserva vence se guarda un aviso en `tourist_notification`. El turista lo ve
+  arriba en su espacio (`/tourist`), con el enlace a la reserva, hasta que toca "Marcar como vistos".
+- **Si paga justo cuando vence (2a):** el vencimiento y la confirmación del pago bloquean la misma fecha y miran el
+  estado actual en la base, así que no se pisan. Si ya quedó confirmada, no se vence; si ya venció, el pago no la
+  confirma y se devuelve el dinero.
+- Las vencidas no ocupaban lugar y las finalizadas lo siguen ocupando (cuentan CONFIRMED y FINISHED).
+- Configuración en `application.properties`: `app.reservations.status-job.every-ms` (cada cuánto),
+  `app.reservations.status-job.enabled` (apagarla). En los tests está apagada y se llama directo al servicio.
+- **Necesita el script** `2026-10-26_cu16_tourist_notifications.sql`.
+
 ## Inicio de sesión y permisos (CU-04)
 
 Se usa **Spring Security** (`config/SecurityConfig`). Las reglas del login están en `AuthService`;
@@ -251,6 +271,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-24_localities.sql` | 122 localidades de los 19 departamentos (ciudades y destinos turísticos). Se puede correr más de una vez |
 | `2026-10-26_cu14_cu15_participants_payments.sql` | Tablas `reservation_participant` (acompañantes de una reserva) y `reservation_payment` (intentos de pago). **Sin este script la app no arranca con Supabase** |
 | `2026-10-26_cu10_cancel_activity.sql` | Agrega el estado `CANCELLED` a `reservation.status` (CU-10). Sin él, dar de baja una actividad con reservas da error |
+| `2026-10-26_cu16_tourist_notifications.sql` | Tabla `tourist_notification`: avisos al turista, como las reservas vencidas (CU-16). **Sin este script la app no arranca con Supabase** |
 
 ## Medios de pago
 

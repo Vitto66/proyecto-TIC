@@ -103,6 +103,31 @@
 .space-notice span { color: var(--muted); }
 .space-notice.is-waiting { border-left-color: var(--sol); }
 .space-notice.is-ok { border-left-color: #2F8F5B; }
+.space-notice.is-alert { border-left-color: #B3261E; }
+
+/* Avisos del turista (CU-16) */
+.notifications-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+}
+.notifications-head .link-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--monte);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.notifications-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.notifications-list li { padding: 0.6rem 0; border-top: 1px solid var(--line); }
+.notifications-list li > span { color: var(--ink); display: block; }
+.notifications-list small { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-top: 0.2rem; color: var(--muted); }
+.notifications-list small span { color: inherit; }
+.notifications-list a { color: var(--monte); font-weight: 600; }
 
 /* Pasos del prestador */
 .space-progress {

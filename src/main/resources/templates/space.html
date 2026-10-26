@@ -46,6 +46,28 @@
 
 <main class="container-xl space-main">
 
+    <!-- CU-16 paso 4: avisos al turista (por ejemplo, una reserva que venció) -->
+    <section class="space-notice is-alert space-notifications" role="status" aria-labelledby="notifications-title"
+             th:if="${notifications != null and !notifications.isEmpty()}">
+        <div class="notifications-head">
+            <strong id="notifications-title"
+                    th:text="${notifications.size() == 1} ? 'Tenés un aviso' : 'Tenés ' + ${notifications.size()} + ' avisos'">Tenés un aviso</strong>
+            <form th:action="@{/tourist/notifications/read}" method="post" class="m-0">
+                <button type="submit" class="link-button">Marcar como vistos</button>
+            </form>
+        </div>
+        <ul class="notifications-list">
+            <li th:each="n : ${notifications}">
+                <span th:text="${n.message()}">Tu reserva de «Kayak» para el domingo 1 de noviembre de 2026 a las 10:00 venció porque pasaron 24 horas sin que se aprobara el pago. No se te cobró nada.</span>
+                <small>
+                    <span th:text="${n.createdLabel()}">Lun 26 oct, 10:00</span>
+                    <a th:if="${n.reservationId() != null}" th:href="@{/tourist/reservations/{id}(id=${n.reservationId()})}"
+                       href="reservation.html">Ver la reserva</a>
+                </small>
+            </li>
+        </ul>
+    </section>
+
     <!-- Un prestador PENDING puede entrar, pero todavía no puede publicar -->
     <div class="space-notice is-waiting" role="alert" th:if="${pendingProvider}">
         <strong>Estamos revisando tu cuenta</strong>
