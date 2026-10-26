@@ -43,6 +43,8 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Menú inicial (público) | http://localhost:8080/ |
 | Explorar actividades con filtros (CU-05, público) | http://localhost:8080/activities |
 | Detalle de una actividad con fechas, valoraciones y clima (CU-06, público) | `/activities/{id}` (desde la vidriera) |
+| Reservar una actividad (CU-14, turista) | `/tourist/activities/{id}/reserve` (botón "Reservar" del detalle) |
+| Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
 | Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
@@ -112,6 +114,17 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
   mientras se espera a la API.
 - Para reservar hay que ingresar como turista (1a). El botón queda listo para el CU-14.
 - En los tests, el clima se reemplaza por uno simulado: no dependen de internet.
+
+## Reservar (CU-14)
+
+- Desde el detalle, el turista elige la fecha y cuántas personas van, ve el resumen con el precio total y
+  confirma. La reserva queda **PENDIENTE** (a la espera del pago, CU-15) y **todavía no ocupa cupos**.
+- Se verifica que haya cupos suficientes (si no, se informa cuántos quedan, 4a) y que no hayan cerrado las
+  reservas por el límite de minutos previos (4b). Se verifica al ver el resumen y otra vez al confirmar.
+- El precio total queda guardado en la reserva: si el prestador cambia el precio después, no la afecta (CU-10).
+- Sin sesión, "Reservar" pide iniciarla y después **vuelve a la reserva** (1a, `LoginPageController`). Un
+  prestador o administrador no puede reservar: `/tourist/**` es solo para turistas (1b).
+- **No necesita scripts SQL:** usa `reservation`, que ya existe en Supabase.
 
 ## Inicio de sesión y permisos (CU-04)
 

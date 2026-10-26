@@ -11,6 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,6 +29,7 @@ import uy.edu.um.proytic2026.exception.InvalidCredentialsException;
 import uy.edu.um.proytic2026.exception.ProviderRejectedException;
 import uy.edu.um.proytic2026.service.AuthService;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +53,9 @@ public class LoginPageController {
 
     private final AuthService authService;
     private final SecurityContextRepository securityContextRepository;
+
+    /** Dónde guarda Spring Security la página que se quería ver antes de que pidiera iniciar sesión. */
+    private final RequestCache requestCache = new HttpSessionRequestCache();
 
     /** Una tarjeta de la pantalla "¿Con qué perfil querés ingresar?". */
     public record ProfileOption(String value, String title, String description) {
@@ -144,7 +151,28 @@ public class LoginPageController {
         SecurityContextHolder.getContextHolderStrategy().setContext(context);
         securityContextRepository.saveContext(context, request, response);
 
-        return "redirect:" + RoleHome.pathFor(role);
+        return "redirect:" + afterLogin(role, request, response);
+    }
+
+    /**
+     * A dónde va después de iniciar sesión. Si quería entrar a una página de su perfil y lo
+     * mandaron a iniciar sesión (por ejemplo, tocó "Reservar" sin sesión, CU-14 1a), vuelve a esa
+     * página. Si no, a su espacio.
+     */
+    private String afterLogin(Role role, HttpServletRequest request, HttpServletResponse response) {
+        String home = RoleHome.pathFor(role);
+        SavedRequest saved = requestCache.getRequest(request, response);
+        if (saved == null) {
+            return home;
+        }
+        requestCache.removeRequest(request, response);
+        URI target = URI.create(saved.getRedirectUrl());
+        String path = target.getRawPath();
+        // Solo páginas del propio perfil: un prestador no vuelve a una página de turista
+        if (path == null || !(path.equals(home) || path.startsWith(home + "/"))) {
+            return home;
+        }
+        return target.getRawQuery() == null ? path : path + "?" + target.getRawQuery();
     }
 
     @SuppressWarnings("unchecked")
