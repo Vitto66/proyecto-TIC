@@ -4,14 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uy.edu.um.proytic2026.dto.ActivityDateView;
+import uy.edu.um.proytic2026.dto.CompanionForm;
+import uy.edu.um.proytic2026.dto.CompanionView;
 import uy.edu.um.proytic2026.dto.DetailDate;
 import uy.edu.um.proytic2026.dto.ReservationOptions;
 import uy.edu.um.proytic2026.dto.ReservationQuote;
 import uy.edu.um.proytic2026.dto.ReservationView;
 import uy.edu.um.proytic2026.dto.ReserveRequest;
+import uy.edu.um.proytic2026.dto.TouristSummary;
 import uy.edu.um.proytic2026.entity.Activity;
 import uy.edu.um.proytic2026.entity.ActivityInstance;
+import uy.edu.um.proytic2026.entity.PaymentStatus;
 import uy.edu.um.proytic2026.entity.Reservation;
+import uy.edu.um.proytic2026.entity.ReservationParticipant;
+import uy.edu.um.proytic2026.entity.ReservationPayment;
 import uy.edu.um.proytic2026.entity.ReservationStatus;
 import uy.edu.um.proytic2026.entity.Tourist;
 import uy.edu.um.proytic2026.exception.ActivityNotFoundException;
@@ -21,14 +27,18 @@ import uy.edu.um.proytic2026.exception.NotEnoughSeatsException;
 import uy.edu.um.proytic2026.exception.ReservationNotFoundException;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
 import uy.edu.um.proytic2026.repository.ActivityRepository;
+import uy.edu.um.proytic2026.repository.ReservationPaymentRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +56,7 @@ public class ReservationService {
     private final ActivityInstanceRepository instanceRepository;
     private final ReservationRepository reservationRepository;
     private final TouristRepository touristRepository;
+    private final ReservationPaymentRepository paymentRepository;
     private final Clock clock;
 
     /** Lo que se puede elegir: la actividad publicada y sus próximas fechas (paso 2). */
@@ -86,6 +97,10 @@ public class ReservationService {
         Checked checked = check(activityId, request);
         Tourist tourist = touristRepository.findById(touristId).orElseThrow(ReservationNotFoundException::new);
         ReservationQuote quote = checked.quote();
+        // El controlador ya los validó; esto evita guardar una reserva con datos incompletos igual
+        if (!request.companionsMatchParticipants() || !repeatedNationalIds(tourist, request).isEmpty()) {
+            throw new IllegalArgumentException("Faltan los datos de algún acompañante o hay cédulas repetidas");
+        }
 
         Reservation reservation = reservationRepository.save(Reservation.builder()
                 .tourist(tourist)
@@ -95,7 +110,43 @@ public class ReservationService {
                 .status(ReservationStatus.PENDING)
                 .createdAt(LocalDateTime.now(clock))
                 .build());
-        return toView(reservation, checked.activity(), quote.date());
+        for (CompanionForm c : request.getCompanions()) {
+            CompanionForm data = c.trimmed();
+            reservation.addCompanion(ReservationParticipant.builder().firstName(data.getFirstName())
+                    .lastName(data.getLastName()).nationalId(data.getNationalId()).phone(data.getPhone()).build());
+        }
+        return toView(reservation, checked.activity(), quote.date(), null);
+    }
+
+    /** El turista que reserva, que es la persona 1. */
+    @Transactional(readOnly = true)
+    public TouristSummary touristSummary(Long touristId) {
+        Tourist tourist = touristRepository.findById(touristId).orElseThrow(ReservationNotFoundException::new);
+        return new TouristSummary(tourist.getFirstName() + " " + tourist.getLastName(), tourist.getNationalId());
+    }
+
+    /**
+     * Los acompañantes (por posición en la lista) cuya cédula ya está en la reserva: la del turista
+     * o la de un acompañante anterior. Una misma persona no puede ir dos veces.
+     */
+    @Transactional(readOnly = true)
+    public List<Integer> repeatedNationalIds(Long touristId, ReserveRequest request) {
+        Tourist tourist = touristRepository.findById(touristId).orElseThrow(ReservationNotFoundException::new);
+        return repeatedNationalIds(tourist, request);
+    }
+
+    private static List<Integer> repeatedNationalIds(Tourist tourist, ReserveRequest request) {
+        Set<String> seen = new HashSet<>();
+        seen.add(tourist.getNationalId());
+        List<Integer> repeated = new ArrayList<>();
+        List<CompanionForm> companions = request.getCompanions();
+        for (int i = 0; i < companions.size(); i++) {
+            String id = companions.get(i) == null ? null : companions.get(i).trimmed().getNationalId();
+            if (id != null && !id.isEmpty() && !seen.add(id)) {
+                repeated.add(i);
+            }
+        }
+        return repeated;
     }
 
     /** Una reserva del turista. Si no existe o es de otro turista, no se encuentra. */
@@ -107,7 +158,19 @@ public class ReservationService {
         ActivityInstance instance = r.getInstance();
         Activity activity = instance.getActivity();
         long occupied = occupiedSeats(List.of(instance.getId())).getOrDefault(instance.getId(), 0L);
-        return toView(r, activity, view(activity, instance, occupied));
+        PaymentStatus lastPayment = paymentRepository.findFirstByReservationIdOrderByIdDesc(r.getId())
+                .map(ReservationPayment::getStatus).orElse(null);
+        return toView(r, activity, view(activity, instance, occupied), lastPayment);
+    }
+
+    /**
+     * Si todavía se puede pagar (CU-15): está PENDIENTE, no pasaron las 24 horas desde que se creó
+     * y no cerraron las reservas de esa fecha.
+     */
+    boolean payable(Reservation r, LocalDateTime now) {
+        return r.getStatus() == ReservationStatus.PENDING
+                && now.isBefore(r.getCreatedAt().plusHours(ReservationView.HOURS_TO_PAY))
+                && !bookingClosed(r.getInstance().getActivity(), r.getInstance(), now);
     }
 
     // ---------- Verificaciones del paso 4 ----------
@@ -136,13 +199,15 @@ public class ReservationService {
             throw new NotEnoughSeatsException(date.freeSeats());
         }
 
+        List<CompanionForm> companions = request.getCompanions() == null ? List.of()
+                : request.getCompanions().stream().map(c -> c == null ? new CompanionForm() : c.trimmed()).toList();
         return new Checked(activity, instance, new ReservationQuote(activity.getId(), activity.getName(),
                 activity.getBusiness().getName(), location(activity), date, request.getParticipants(),
-                activity.getPrice()));
+                activity.getPrice(), companions));
     }
 
     /** Las reservas cierran X minutos antes del inicio; con 0, a la hora de comienzo. */
-    private static boolean bookingClosed(Activity activity, ActivityInstance instance, LocalDateTime now) {
+    static boolean bookingClosed(Activity activity, ActivityInstance instance, LocalDateTime now) {
         return !now.isBefore(instance.getStartAt().minusMinutes(activity.getBookingCutoffMinutes()));
     }
 
@@ -164,14 +229,21 @@ public class ReservationService {
                 instance.getStartAt().plusMinutes(activity.getDurationMinutes()), instance.getMaxCapacity(), occupied);
     }
 
-    private static String location(Activity activity) {
+    static String location(Activity activity) {
         String locality = activity.getLocality().getName();
         String department = activity.getLocality().getDepartment().getName();
         return locality.equalsIgnoreCase(department) ? department : locality + ", " + department;
     }
 
-    private static ReservationView toView(Reservation r, Activity activity, ActivityDateView date) {
+    private ReservationView toView(Reservation r, Activity activity, ActivityDateView date, PaymentStatus lastPayment) {
+        List<CompanionView> companions = r.getCompanions().stream()
+                .map(c -> new CompanionView(c.getPosition(), c.getFirstName(), c.getLastName(), c.getNationalId(),
+                        c.getPhone()))
+                .toList();
+        Tourist tourist = r.getTourist();
         return new ReservationView(r.getId(), activity.getId(), activity.getName(), activity.getBusiness().getName(),
-                location(activity), date, r.getParticipants(), r.getTotalPrice(), r.getStatus(), r.getCreatedAt());
+                location(activity), date, r.getParticipants(), r.getTotalPrice(), r.getStatus(), r.getCreatedAt(),
+                tourist.getFirstName() + " " + tourist.getLastName(), companions, lastPayment,
+                payable(r, LocalDateTime.now(clock)));
     }
 }

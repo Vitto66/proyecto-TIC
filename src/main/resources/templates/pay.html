@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pagar la reserva · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/catalog.css}" href="../static/css/catalog.css" rel="stylesheet">
+    <link th:href="@{/css/reserve.css}" href="../static/css/reserve.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <nav class="site-nav" aria-label="Principal">
+            <a class="btn btn-submit btn-sm-nav" th:href="@{${spacePath}}" href="space.html">Mi espacio</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container-xl catalog" th:with="r=${page.reservation()}">
+    <div class="pay-layout">
+        <a class="back-link" th:href="@{/tourist/reservations/{id}(id=${r.id()})}" href="reservation.html">Volver a la reserva</a>
+
+        <div class="alert" role="alert" th:if="${paymentMessage != null}"
+             th:classappend="'alert-' + ${paymentLevel}" th:text="${paymentMessage}">La tarjeta fue rechazada.</div>
+
+        <section class="summary-card" aria-labelledby="pay-title">
+            <p class="card-types">Pagar la reserva</p>
+            <h1 id="pay-title" th:text="${r.activityName()}">Atardecer en kayak por la laguna</h1>
+            <p class="detail-sub mb-0">
+                <span th:text="${r.date().dayLabel()}">Domingo 25 de octubre de 2026</span>
+                <span th:text="${r.date().timeLabel()}">10:00 a 12:30</span>
+                <span th:text="${r.participantsLabel()}">2 personas</span>
+            </p>
+            <div class="pay-amount"><span>Total a pagar</span><span th:text="${r.totalLabel()}">$ 3.000</span></div>
+
+            <!-- ===== Mercado Pago (sandbox o real, según las credenciales) ===== -->
+            <th:block th:if="${page.cardForm()}">
+                <div class="sandbox-note" th:if="${#strings.startsWith(page.publicKey(), 'TEST-')}">
+                    <strong>Modo de prueba de Mercado Pago:</strong> no se cobra plata real. Usá una
+                    <a href="https://www.mercadopago.com.uy/developers/es/docs/checkout-bricks/additional-content/your-integrations/test/cards"
+                       target="_blank" rel="noopener">tarjeta de prueba</a> y elegí el resultado con el nombre del titular:
+                    <ul>
+                        <li><code>APRO</code> aprobado · <code>OTHE</code> rechazado · <code>CONT</code> queda pendiente</li>
+                        <li><code>FUND</code> sin fondos · <code>SECU</code> código de seguridad incorrecto</li>
+                    </ul>
+                </div>
+
+                <p id="mp-loading" class="form-text">Cargando el formulario de pago de Mercado Pago…</p>
+                <div id="cardPaymentBrick_container"
+                     th:attr="data-public-key=${page.publicKey()},data-amount=${r.totalPrice()},data-email=${page.payerEmail()}"></div>
+                <p id="mp-error" class="alert alert-danger mt-3" role="alert" hidden>
+                    No se pudo cargar el formulario de Mercado Pago. Revisá tu conexión y recargá la página.
+                </p>
+
+                <!-- El formulario de Mercado Pago completa estos campos con el token de la tarjeta -->
+                <form id="mp-pay-form" th:action="@{/tourist/reservations/{id}/pay(id=${r.id()})}" method="post" hidden>
+                    <input type="hidden" name="token">
+                    <input type="hidden" name="paymentMethodId">
+                    <input type="hidden" name="issuerId">
+                    <input type="hidden" name="installments">
+                    <input type="hidden" name="documentType">
+                    <input type="hidden" name="documentNumber">
+                </form>
+                <p class="form-text mt-3 mb-0">
+                    Los datos de tu tarjeta los procesa Mercado Pago: Uruguay Mnatural no los ve ni los guarda.
+                </p>
+            </th:block>
+
+            <!-- ===== Pago simulado (sin credenciales de Mercado Pago) ===== -->
+            <th:block th:unless="${page.cardForm()}">
+                <div class="sandbox-note">
+                    <strong>Pago simulado:</strong> la app está corriendo sin las credenciales de Mercado Pago, así que
+                    no se conecta a ningún servicio. El resultado se elige con el nombre del titular, igual que en el
+                    sandbox de Mercado Pago:
+                    <ul>
+                        <li><code>APRO</code> aprobado · <code>OTHE</code> rechazado · <code>FUND</code> sin fondos</li>
+                        <li><code>CONT</code> queda en revisión · <code>ERROR</code> el servicio no responde</li>
+                    </ul>
+                </div>
+                <form th:action="@{/tourist/reservations/{id}/pay(id=${r.id()})}" method="post">
+                    <label class="form-label" for="cardholderName">Titular de la tarjeta</label>
+                    <input class="form-control mb-3" type="text" id="cardholderName" name="cardholderName"
+                           value="APRO" maxlength="60" required autocomplete="off">
+                    <button type="submit" class="btn btn-submit">
+                        Pagar <span th:text="${r.totalLabel()}">$ 3.000</span>
+                    </button>
+                </form>
+            </th:block>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/site :: footer}"></footer>
+
+<th:block th:if="${page.cardForm()}">
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script th:src="@{/js/pay-mercadopago.js}" src="../static/js/pay-mercadopago.js"></script>
+</th:block>
+</body>
+</html>

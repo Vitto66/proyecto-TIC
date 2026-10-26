@@ -29,6 +29,9 @@
     <div class="alert alert-success" role="status" th:if="${param.created != null}">
         <strong>¡Listo! Tu reserva quedó creada.</strong> El siguiente paso es pagarla.
     </div>
+    <!-- Resultado del pago (CU-15) -->
+    <div class="alert" role="status" th:if="${paymentMessage != null}"
+         th:classappend="'alert-' + ${paymentLevel}" th:text="${paymentMessage}">¡Pago aprobado! Tu reserva está confirmada.</div>
 
     <section class="summary-card" aria-labelledby="reservation-title">
         <p class="card-types">Tu reserva</p>
@@ -38,7 +41,8 @@
             <span th:text="${reservation.location()}">La Paloma, Rocha</span>
         </p>
 
-        <span class="reservation-status" th:classappend="${reservation.pending()} ? 'is-pending' : 'is-confirmed'"
+        <span class="reservation-status"
+              th:classappend="${reservation.pending()} ? 'is-pending' : (${reservation.status().name() == 'EXPIRED'} ? 'is-expired' : 'is-confirmed')"
               th:text="${reservation.statusLabel()}">Pendiente de pago</span>
 
         <dl class="summary-rows">
@@ -48,14 +52,49 @@
             <div class="summary-total"><dt>Total</dt><dd th:text="${reservation.totalLabel()}">$ 3.000</dd></div>
         </dl>
 
+        <!-- Quiénes van -->
+        <th:block th:unless="${reservation.companions().isEmpty()}">
+            <h2 class="people-title">Quiénes van</h2>
+            <ol class="people-list">
+                <li>
+                    <span class="companion-number" aria-hidden="true">1</span>
+                    <span><strong th:text="${reservation.touristName()}">Ana Pérez</strong><small>Vos</small></span>
+                </li>
+                <li th:each="c : ${reservation.companions()}">
+                    <span class="companion-number" aria-hidden="true" th:text="${c.position()}">2</span>
+                    <span>
+                        <strong th:text="${c.fullName()}">Luis Pérez</strong>
+                        <small th:text="'Cédula ' + ${c.nationalId()} + ' · Tel. ' + ${c.phone()}">Cédula 4567890 · Tel. 099 123 456</small>
+                    </span>
+                </li>
+            </ol>
+        </th:block>
+
         <!-- Pendiente: falta el pago (CU-15) -->
         <div class="pay-box" th:if="${reservation.pending()}">
-            <p class="mb-2">
-                <strong>Pagá antes del <span th:text="${reservation.payUntilLabel()}">martes 27 de octubre de 2026 a las 10:15</span></strong>
-                para que no venza. Hasta que la pagues, los lugares no quedan guardados.
+            <th:block th:if="${reservation.paymentInProcess()}">
+                <p class="mb-2"><strong>Tu pago se está procesando.</strong> La reserva se confirma cuando el servicio
+                    de pagos lo apruebe.</p>
+                <form th:action="@{/tourist/reservations/{id}/pay/refresh(id=${reservation.id()})}" method="post">
+                    <button type="submit" class="btn btn-submit">Consultar el estado del pago</button>
+                </form>
+            </th:block>
+            <th:block th:if="${!reservation.paymentInProcess() and reservation.payable()}">
+                <p class="mb-2">
+                    <strong>Pagá antes del <span th:text="${reservation.payUntilLabel()}">martes 27 de octubre de 2026 a las 10:15</span></strong>
+                    para que no venza. Hasta que la pagues, los lugares no quedan guardados.
+                </p>
+                <a class="btn btn-submit" th:href="@{/tourist/reservations/{id}/pay(id=${reservation.id()})}"
+                   href="pay.html">Pagar <span th:text="${reservation.totalLabel()}">$ 3.000</span></a>
+            </th:block>
+            <p class="mb-0" th:if="${!reservation.paymentInProcess() and !reservation.payable()}">
+                Esta reserva ya no se puede pagar: pasaron las 24 horas o cerraron las reservas para esa fecha.
             </p>
-            <button type="button" class="btn btn-submit" disabled>Pagar</button>
-            <p class="form-text mt-2 mb-0">El pago online va a estar disponible muy pronto.</p>
+        </div>
+
+        <div class="pay-box" th:if="${reservation.confirmed()}">
+            <p class="mb-0"><strong>Tu lugar está asegurado.</strong> Te esperamos el
+                <span th:text="${reservation.date().dayLabel()}">domingo 25 de octubre</span>.</p>
         </div>
 
         <div class="summary-actions">

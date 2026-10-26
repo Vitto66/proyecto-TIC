@@ -22,7 +22,9 @@ import uy.edu.um.proytic2026.exception.ReservationNotFoundException;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
 import uy.edu.um.proytic2026.repository.ActivityRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
+import uy.edu.um.proytic2026.repository.ReservationPaymentRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
+import uy.edu.um.proytic2026.dto.CompanionForm;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -50,6 +52,7 @@ class ReservationServiceTest {
     @Mock private ActivityInstanceRepository instanceRepository;
     @Mock private ReservationRepository reservationRepository;
     @Mock private TouristRepository touristRepository;
+    @Mock private ReservationPaymentRepository paymentRepository;
 
     private ReservationService service;
     private Activity activity;
@@ -60,7 +63,7 @@ class ReservationServiceTest {
     void setUp() {
         Clock clock = Clock.fixed(NOW.atZone(ClockConfig.URUGUAY).toInstant(), ClockConfig.URUGUAY);
         service = new ReservationService(activityRepository, instanceRepository, reservationRepository,
-                touristRepository, clock);
+                touristRepository, paymentRepository, clock);
 
         Department rocha = Department.builder().id(1).name("Rocha").build();
         Locality laPaloma = Locality.builder().id(10).department(rocha).name("La Paloma").build();
@@ -92,8 +95,18 @@ class ReservationServiceTest {
         when(reservationRepository.occupiedSeats(anyCollection(), anyCollection())).thenReturn(List.of(row));
     }
 
+    /** Una solicitud con los datos de cada acompañante (las personas 2 en adelante). */
     private static ReserveRequest request(Long instanceId, int participants) {
-        return ReserveRequest.builder().instanceId(instanceId).participants(participants).build();
+        ReserveRequest request = ReserveRequest.builder().instanceId(instanceId).participants(participants).build();
+        for (int i = 2; i <= participants; i++) {
+            request.getCompanions().add(companion("Persona" + i, "4000000" + i));
+        }
+        return request;
+    }
+
+    private static CompanionForm companion(String name, String nationalId) {
+        return CompanionForm.builder().firstName(name).lastName("Pérez").nationalId(nationalId)
+                .phone("099 123 456").build();
     }
 
     // ---------- Pasos 4 y 5: verificar y resumir ----------
@@ -177,7 +190,7 @@ class ReservationServiceTest {
 
     @Test
     void reserve_createsAPendingReservationWithFixedTotal() {
-        Tourist tourist = Tourist.builder().id(TOURIST_ID).firstName("Ana").build();
+        Tourist tourist = Tourist.builder().id(TOURIST_ID).firstName("Ana").lastName("Gómez").nationalId("12345678").build();
         when(touristRepository.findById(TOURIST_ID)).thenReturn(Optional.of(tourist));
         when(reservationRepository.save(any(Reservation.class))).thenAnswer(inv -> {
             Reservation r = inv.getArgument(0);
@@ -196,6 +209,16 @@ class ReservationServiceTest {
         assertThat(r.getParticipants()).isEqualTo(2);
         assertThat(r.getTotalPrice()).isEqualByComparingTo("3000");
         assertThat(r.getCreatedAt()).isEqualTo(NOW);
+        // La persona 1 es el turista; la 2 es el acompañante con sus datos
+        assertThat(r.getCompanions()).singleElement().satisfies(c -> {
+            assertThat(c.getPosition()).isEqualTo(2);
+            assertThat(c.getFirstName()).isEqualTo("Persona2");
+            assertThat(c.getNationalId()).isEqualTo("40000002");
+            assertThat(c.getReservation()).isSameAs(r);
+        });
+        assertThat(view.touristName()).isEqualTo("Ana Gómez");
+        assertThat(view.companions()).singleElement()
+                .satisfies(c -> assertThat(c.fullName()).isEqualTo("Persona2 Pérez"));
 
         assertThat(view.id()).isEqualTo(500L);
         assertThat(view.pending()).isTrue();
@@ -241,5 +264,30 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> service.reservation(TOURIST_ID, 500L))
                 .isInstanceOf(ReservationNotFoundException.class);
+    }
+
+    // ---------- Datos de los acompañantes ----------
+
+    @Test
+    void repeatedNationalIds_detectsTheTouristsOwnAndDuplicatedOnes() {
+        Tourist tourist = Tourist.builder().id(TOURIST_ID).nationalId("12345678").build();
+        when(touristRepository.findById(TOURIST_ID)).thenReturn(Optional.of(tourist));
+        ReserveRequest request = ReserveRequest.builder().instanceId(1L).participants(4).build();
+        request.getCompanions().add(companion("Luis", "12345678"));   // la del turista
+        request.getCompanions().add(companion("Sofía", "5555555"));
+        request.getCompanions().add(companion("Sofía bis", " 5555555 "));
+
+        assertThat(service.repeatedNationalIds(TOURIST_ID, request)).containsExactly(0, 2);
+    }
+
+    @Test
+    void reserve_withoutTheCompanionsData_isNotSaved() {
+        Tourist tourist = Tourist.builder().id(TOURIST_ID).nationalId("12345678").build();
+        when(touristRepository.findById(TOURIST_ID)).thenReturn(Optional.of(tourist));
+        ReserveRequest request = ReserveRequest.builder().instanceId(1L).participants(3).build();
+
+        assertThatThrownBy(() -> service.reserve(TOURIST_ID, ACTIVITY_ID, request))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(reservationRepository, never()).save(any());
     }
 }

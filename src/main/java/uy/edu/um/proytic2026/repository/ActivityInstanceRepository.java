@@ -1,6 +1,8 @@
 package uy.edu.um.proytic2026.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uy.edu.um.proytic2026.entity.ActivityInstance;
@@ -27,4 +29,12 @@ public interface ActivityInstanceRepository extends JpaRepository<ActivityInstan
             """)
     List<ActivityInstance> findUpcoming(@Param("activityIds") Collection<Long> activityIds,
                                         @Param("after") LocalDateTime after);
+
+    /**
+     * La instancia bloqueada hasta que termine la transacción (CU-15): si dos turistas pagan los
+     * últimos lugares a la vez, el segundo espera y ve los cupos ya descontados.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select i from ActivityInstance i where i.id = :id")
+    java.util.Optional<ActivityInstance> findLockedById(@Param("id") Long id);
 }

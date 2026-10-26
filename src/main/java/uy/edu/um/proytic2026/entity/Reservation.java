@@ -5,11 +5,13 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Reserva de un turista para una instancia de actividad. La crea el CU-14 y la confirma el
- * pago (CU-15). Por ahora se usa para contar los cupos ocupados de cada instancia (CU-09,
- * CU-06): solo las CONFIRMED y FINISHED ocupan lugar.
+ * Reserva de un turista para una instancia de actividad. La crea el CU-14 (con los datos de
+ * cada acompañante) y la confirma el pago (CU-15). Solo las CONFIRMED y FINISHED ocupan lugar
+ * (CU-09, CU-06).
  */
 @Entity
 @Table(name = "reservation")
@@ -46,4 +48,17 @@ public class Reservation {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    /** Las personas 2 en adelante (la 1 es el turista), con sus datos. */
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position")
+    @Builder.Default
+    private List<ReservationParticipant> companions = new ArrayList<>();
+
+    /** Agrega un acompañante con el número de persona que le sigue. */
+    public void addCompanion(ReservationParticipant companion) {
+        companion.setReservation(this);
+        companion.setPosition(companions.size() + 2);
+        companions.add(companion);
+    }
 }

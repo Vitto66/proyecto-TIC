@@ -45,6 +45,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Detalle de una actividad con fechas, valoraciones y clima (CU-06, público) | `/activities/{id}` (desde la vidriera) |
 | Reservar una actividad (CU-14, turista) | `/tourist/activities/{id}/reserve` (botón "Reservar" del detalle) |
 | Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
+| Pagar una reserva (CU-15, turista) | `/tourist/reservations/{id}/pay` (botón "Pagar" de la reserva) |
 | Iniciar sesión (CU-04) | http://localhost:8080/login |
 | Elegir perfil, si el correo tiene más de uno (CU-04) | http://localhost:8080/login/profile |
 | Espacio del turista / prestador / administrador | `/tourist`, `/provider`, `/admin` (solo con sesión y ese perfil) |
@@ -124,7 +125,68 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - El precio total queda guardado en la reserva: si el prestador cambia el precio después, no la afecta (CU-10).
 - Sin sesión, "Reservar" pide iniciarla y después **vuelve a la reserva** (1a, `LoginPageController`). Un
   prestador o administrador no puede reservar: `/tourist/**` es solo para turistas (1b).
-- **No necesita scripts SQL:** usa `reservation`, que ya existe en Supabase.
+- **Integrantes:** si van 2 o más personas, aparece un bloque por cada acompañante para cargar nombre, apellido,
+  cédula y teléfono (`static/js/reserve-companions.js`). La persona 1 es el turista, que ya está identificado por su
+  cuenta. No se puede repetir una cédula en la misma reserva. Se guardan en `reservation_participant`.
+- **Necesita el script** `2026-10-26_cu14_cu15_participants_payments.sql` (ver abajo).
+
+## Pagar (CU-15) con Mercado Pago
+
+El pago lo procesa un servicio externo: **Mercado Pago**, en su modo de prueba (*sandbox*), donde no se mueve plata
+real. Se usa el *Checkout API* con el formulario de tarjeta de Mercado Pago (*Card Payment Brick*):
+
+1. En la página de pago, el formulario de Mercado Pago (con la **clave pública**) convierte la tarjeta en un *token*.
+   El número y el código de seguridad **no pasan por nuestro servidor**.
+2. El servidor cobra con ese token (`POST /v1/payments`) usando el **access token**, que es secreto.
+3. Solo si Mercado Pago lo **aprueba**, la reserva pasa a **CONFIRMADA** y ocupa los lugares.
+
+Qué pasa en cada caso (`PaymentService`):
+
+| Respuesta | Qué hace la app |
+| --- | --- |
+| Aprobado | Confirma la reserva, bloqueando la fecha para que dos pagos no ocupen el mismo lugar. Si justo se llenó, **devuelve el dinero** |
+| Rechazado (4a) | Sigue PENDIENTE, muestra el motivo (fondos, código de seguridad, ...) y se puede reintentar |
+| En revisión | Sigue PENDIENTE; en la reserva aparece "Consultar el estado del pago" |
+| Sin respuesta o error del servicio (4b) | Sigue PENDIENTE, no se confirma y se puede reintentar. Antes de reintentar se busca si el intento anterior llegó a cobrarse, para **no cobrar dos veces** |
+| Sin lugares (2a), pasaron 24 h o cerraron las reservas (2b) | No se cobra |
+
+Cada intento queda guardado en `reservation_payment`. El monto sale siempre de la reserva, nunca del navegador.
+
+### Cómo probarlo con el sandbox de Mercado Pago
+
+1. Entrá a [Mercado Pago Developers](https://www.mercadopago.com.uy/developers/panel/app) con una cuenta de Mercado
+   Pago (sirve la personal) y tocá **Crear aplicación**. Tipo de pago: *pagos online*, producto: *Checkout API* /
+   *Checkout Bricks*.
+2. En la aplicación, abrí **Credenciales de prueba** y copiá la **Public Key** y el **Access Token** (empiezan con
+   `TEST-`).
+3. En IntelliJ: **Run → Edit Configurations → Proytic2026Application → Environment variables** y agregá (separadas
+   por `;`):
+   `MP_PUBLIC_KEY=TEST-...;MP_ACCESS_TOKEN=TEST-...`
+   Al arrancar, el log dice `Pagos con Mercado Pago (credenciales de prueba)`.
+   **Nunca las pongas en el código ni en el repo**: con el access token se puede cobrar.
+4. Reservá una actividad como turista y tocá **Pagar**. Usá una
+   [tarjeta de prueba de Uruguay](https://www.mercadopago.com.uy/developers/es/docs/checkout-bricks/additional-content/your-integrations/test/cards)
+   (código de seguridad `123`, vencimiento `11/30`) y elegí el resultado con el **nombre del titular**:
+
+   | Titular | Resultado |
+   | --- | --- |
+   | `APRO` | Aprobado |
+   | `OTHE` | Rechazado |
+   | `CONT` | Pendiente (en revisión) |
+   | `FUND` | Rechazado por fondos insuficientes |
+   | `SECU` | Rechazado por código de seguridad |
+
+   Si pide documento, usá cualquier cédula válida. El correo del pagador tiene que ser **distinto** al de tu cuenta de
+   Mercado Pago (por defecto se usa el del turista; para cambiarlo, `MP_PAYER_EMAIL=otro@correo.com`).
+5. Los pagos de prueba se ven en el panel de Mercado Pago, en la sección de pagos de prueba de la aplicación.
+
+**Sin credenciales** (por ejemplo, en los tests o si no querés crear la cuenta), la app usa un **pago simulado**
+que no se conecta a nada: en la página de pago se escribe el titular (`APRO`, `OTHE`, `CONT`, `FUND` o `ERROR`
+para simular que el servicio no responde) y responde igual que el sandbox.
+
+- **Necesita el script** `2026-10-26_cu14_cu15_participants_payments.sql`.
+- Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
+  como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
 
 ## Inicio de sesión y permisos (CU-04)
 
@@ -166,6 +228,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-22_cu01_payment_method.sql` | Tabla `payment_method`: medio de pago opcional del turista (CU-01) |
 | `2026-10-22_cu01_payment_method_existing_table.sql` | Ajuste de `payment_method` si ya existía sin vencimiento (ya corrido en la base del equipo) |
 | `2026-10-24_localities.sql` | 122 localidades de los 19 departamentos (ciudades y destinos turísticos). Se puede correr más de una vez |
+| `2026-10-26_cu14_cu15_participants_payments.sql` | Tablas `reservation_participant` (acompañantes de una reserva) y `reservation_payment` (intentos de pago). **Sin este script la app no arranca con Supabase** |
 
 ## Medios de pago
 
