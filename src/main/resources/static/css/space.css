@@ -1,0 +1,247 @@
+/* Espacio de cada perfil (space.html): bienvenida con foto, pasos del prestador y tarjetas de acceso.
+   Usa la paleta de main.css (--monte, --celeste, --sol) y el encabezado del inicio (home.css).
+   Las fotos son de Wikimedia Commons, las mismas de la portada (créditos en el pie). */
+
+.space-page { background: #F2F6FA; }
+
+/* ---------- Bienvenida ---------- */
+.space-banner {
+    position: relative;
+    isolation: isolate;
+    color: #fff;
+    background-color: var(--monte-dark);
+    background-size: cover;
+    background-position: center 60%;
+    padding-bottom: 4.5rem;
+}
+.space-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg,
+        rgba(8, 40, 69, 0.92) 0%,
+        rgba(14, 58, 99, 0.78) 45%,
+        rgba(31, 111, 184, 0.45) 100%);
+}
+.space-banner.is-tourist {
+    background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Faro_de_Cabo_Polonio,_Uruguay_03.jpg?width=1600");
+}
+.space-banner.is-provider {
+    background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Quebrada_de_los_Cuervos_Treinta_y_Tres_%286%29.jpg?width=1600");
+}
+.space-banner.is-admin {
+    background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Calle_de_los_Suspiros,_Colonia_del_Sacramento,_Uruguay_-_panoramio.jpg?width=1600");
+}
+.space-banner-body { padding-top: 2.5rem; }
+.space-eyebrow {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(124, 195, 236, 0.22);
+    border: 1px solid rgba(124, 195, 236, 0.55);
+    color: #D4ECFA;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.space-banner h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: #fff;
+    margin-bottom: 0.35rem;
+}
+.space-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #A9D3F2;
+    margin-bottom: 1rem;
+}
+.space-intro {
+    max-width: 52ch;
+    color: #E3EEF8;
+    font-size: 1.05rem;
+    margin-bottom: 0;
+}
+
+/* ---------- Contenido ---------- */
+.space-main {
+    position: relative;
+    margin-top: -2.5rem;
+    padding-bottom: 4rem;
+}
+.space-section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--monte);
+    margin: 2.25rem 0 1rem;
+}
+
+/* Avisos de estado del prestador */
+.space-notice {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: #fff;
+    border-radius: 14px;
+    border-left: 6px solid var(--celeste);
+    padding: 1.1rem 1.35rem;
+    box-shadow: 0 10px 30px rgba(8, 40, 69, 0.12);
+    margin-bottom: 1rem;
+}
+.space-notice strong { color: var(--monte); font-size: 1.05rem; }
+.space-notice span { color: var(--muted); }
+.space-notice.is-waiting { border-left-color: var(--sol); }
+.space-notice.is-ok { border-left-color: #2F8F5B; }
+
+/* Pasos del prestador */
+.space-progress {
+    background: #fff;
+    border-radius: 18px;
+    padding: 0.25rem 1.5rem 1.5rem;
+    box-shadow: 0 10px 30px rgba(8, 40, 69, 0.08);
+}
+.space-progress .space-section-title { margin-top: 1.25rem; }
+.progress-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+.progress-steps li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-top: 3rem;
+    color: var(--muted);
+}
+/* línea que une los pasos */
+.progress-steps li::before {
+    content: "";
+    position: absolute;
+    top: 1.05rem;
+    left: 2.4rem;
+    right: -1rem;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--line);
+}
+.progress-steps li:last-child::before { display: none; }
+.progress-steps li.is-done::before { background: var(--celeste); }
+.step-dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    background: #E6EDF4;
+    color: var(--muted);
+}
+.progress-steps strong { color: var(--ink); }
+.progress-steps small { font-size: 0.875rem; line-height: 1.4; }
+.progress-steps .is-done .step-dot { background: var(--celeste); color: #fff; }
+.progress-steps .is-current .step-dot {
+    background: var(--monte);
+    color: #fff;
+    box-shadow: 0 0 0 5px rgba(78, 157, 217, 0.3);
+}
+.progress-steps .is-current strong { color: var(--monte); }
+
+/* Tarjetas de acceso, en la línea de las del inicio */
+.space-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1rem;
+}
+.space-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-height: 210px;
+    padding: 1.4rem;
+    border-radius: 18px;
+    color: #fff;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+a.space-card:hover,
+a.space-card:focus-visible {
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(8, 40, 69, 0.22);
+}
+a.space-card:focus-visible { outline: 3px solid var(--celeste); outline-offset: 3px; }
+.space-card strong {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    margin-top: auto;
+}
+.space-card small { font-size: 0.92rem; opacity: 0.9; }
+.space-card-more { margin-top: 0.6rem; font-weight: 700; font-size: 0.92rem; }
+
+.space-card-icon,
+.space-card-count {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.16);
+    margin-bottom: 1rem;
+}
+.space-card-icon svg { width: 1.6rem; height: 1.6rem; }
+.space-card-count {
+    border-radius: 50%;
+    background: var(--sol);
+    color: var(--monte-dark);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+}
+
+.tone-navy { background: var(--monte); }
+.tone-blue { background: #1F6FB8; }
+.tone-celeste { background: #7CC3EC; color: var(--monte-dark); }
+a.tone-celeste:hover, a.tone-celeste:focus-visible { color: var(--monte-dark); }
+.tone-celeste .space-card-icon { background: rgba(255, 255, 255, 0.45); }
+
+.space-card.is-soon {
+    background: #fff;
+    color: var(--muted);
+    border: 1.5px dashed #BFD0E0;
+}
+.space-card.is-soon strong { color: var(--ink); }
+.space-card.is-soon .space-card-icon { background: #EAF2F9; color: var(--celeste); }
+.space-card.is-soon .space-card-more { color: var(--celeste); font-weight: 600; }
+
+@media (max-width: 767.98px) {
+    .progress-steps { grid-template-columns: 1fr 1fr; row-gap: 1.5rem; }
+    .progress-steps li:nth-child(2)::before { display: none; }
+}
+@media (max-width: 575.98px) {
+    .space-banner { padding-bottom: 4rem; }
+    .space-banner-body { padding-top: 1.25rem; }
+    .progress-steps { grid-template-columns: 1fr; }
+    .progress-steps li::before { display: none; }
+    .space-card { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .space-card { transition: none; }
+}

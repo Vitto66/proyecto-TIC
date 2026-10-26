@@ -73,7 +73,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="nationalId">Cédula</label>
-                        <input class="form-control" type="text" th:field="*{nationalId}" inputmode="numeric"
+                        <input class="form-control" type="text" th:field="*{nationalId}" inputmode="numeric" data-digits-only
                                pattern="\d{7,8}" maxlength="8" placeholder="12345678" required
                                th:classappend="${#fields.hasErrors('nationalId')} ? 'is-invalid'"
                                aria-describedby="nationalId-help">
@@ -171,6 +171,7 @@
     </div>
 </main>
 
+<script th:src="@{/js/digits-only.js}" src="../static/js/digits-only.js"></script>
 <script th:src="@{/js/register-tourist.js}" src="../static/js/register-tourist.js"></script>
 </body>
 </html>

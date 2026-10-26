@@ -13,8 +13,8 @@ import uy.edu.um.proytic2026.service.ProviderReviewService;
 
 /**
  * Espacio de cada perfil: a donde se llega después de iniciar sesión (CU-04).
- * Por ahora son páginas de bienvenida; las funciones de cada perfil se suman con los demás
- * casos de uso. Spring Security (SecurityConfig) garantiza que cada perfil solo entre al suyo.
+ * Es un tablero con los accesos de cada perfil ("role" elige la foto y las tarjetas de space.html);
+ * las funciones que faltan se suman con los demás casos de uso. Spring Security (SecurityConfig) garantiza que cada perfil solo entre al suyo.
  */
 @Controller
 @RequiredArgsConstructor
@@ -29,6 +29,7 @@ public class SpaceController {
     @GetMapping("/tourist")
     public String tourist(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
         model.addAttribute("title", "Tu espacio de turista");
+        model.addAttribute("role", "tourist");
         model.addAttribute("intro", "Desde acá vas a explorar actividades, reservar y ver tus reservas. "
                 + "Estas funciones se van sumando a medida que se terminan.");
         return space(user, model);
@@ -37,6 +38,7 @@ public class SpaceController {
     @GetMapping("/provider")
     public String provider(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
         model.addAttribute("title", "Tu espacio de prestador");
+        model.addAttribute("role", "provider");
         model.addAttribute("intro", "Cuando registres tu emprendimiento vas a poder publicar actividades "
                 + "y ver las reservas que reciban.");
         // Un prestador PENDING entra, pero todavía no puede publicar (CU-02 / CU-03).
@@ -55,6 +57,7 @@ public class SpaceController {
     @GetMapping("/admin")
     public String admin(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
         model.addAttribute("title", "Panel de administración");
+        model.addAttribute("role", "admin");
         model.addAttribute("intro", "Desde acá vas a revisar los prestadores pendientes y mantener "
                 + "los tipos de actividad y de equipamiento.");
         model.addAttribute("pendingProviders", providerReviewService.countPending());

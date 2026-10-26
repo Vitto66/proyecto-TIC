@@ -98,7 +98,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="document">Cédula</label>
-                        <input class="form-control" type="text" th:field="*{document}" inputmode="numeric"
+                        <input class="form-control" type="text" th:field="*{document}" inputmode="numeric" data-digits-only
                                pattern="\d{7,8}" maxlength="8" placeholder="12345678" required
                                th:classappend="${#fields.hasErrors('document')} ? 'is-invalid'"
                                aria-describedby="document-help">
@@ -112,7 +112,7 @@
                 <div class="row g-3 person-section" data-person="LEGAL" hidden>
                     <div class="col-md-6">
                         <label class="form-label" for="rut">RUT</label>
-                        <input class="form-control" type="text" th:field="*{rut}" inputmode="numeric"
+                        <input class="form-control" type="text" th:field="*{rut}" inputmode="numeric" data-digits-only
                                pattern="\d{12}" maxlength="12" placeholder="211234560018" required
                                th:classappend="${#fields.hasErrors('rut')} ? 'is-invalid'"
                                aria-describedby="rut-help">
@@ -187,6 +187,7 @@
     </div>
 </main>
 
+<script th:src="@{/js/digits-only.js}" src="../static/js/digits-only.js"></script>
 <script th:src="@{/js/register-provider.js}" src="../static/js/register-provider.js"></script>
 </body>
 </html>

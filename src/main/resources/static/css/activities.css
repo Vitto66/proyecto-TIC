@@ -55,12 +55,12 @@
     transition: border-color 0.15s, background-color 0.15s;
 }
 .chip-option:hover span { border-color: var(--monte); }
-.chip-option input:checked + span {
+.chip-option input:checked ~ span {
     border-color: var(--monte);
     background: var(--monte);
     color: #fff;
 }
-.chip-option input:focus-visible + span {
+.chip-option input:focus-visible ~ span {
     outline: 3px solid var(--celeste);
     outline-offset: 2px;
 }
