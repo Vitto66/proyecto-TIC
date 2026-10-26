@@ -36,4 +36,20 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
             where a.active = true
             """)
     List<Activity> findAllPublished();
+
+    /** CU-13: cuántas actividades usa cada tipo de actividad. Filas [idDelTipo, cantidad]. */
+    @Query("select t.id, count(a) from Activity a join a.types t group by t.id")
+    List<Object[]> countByActivityType();
+
+    /** CU-13: cuántas actividades usa cada tipo de equipamiento. Filas [idDelTipo, cantidad]. */
+    @Query("select e.equipmentType.id, count(e) from ActivityEquipment e group by e.equipmentType.id")
+    List<Object[]> countByEquipmentType();
+
+    /** CU-13 3a: cuántas actividades usan un tipo de actividad. */
+    @Query("select count(a) from Activity a join a.types t where t.id = :typeId")
+    long countUsingActivityType(@Param("typeId") Integer typeId);
+
+    /** CU-13 3a: cuántas actividades usan un tipo de equipamiento. */
+    @Query("select count(e) from ActivityEquipment e where e.equipmentType.id = :typeId")
+    long countUsingEquipmentType(@Param("typeId") Integer typeId);
 }

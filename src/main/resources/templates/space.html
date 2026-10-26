@@ -119,6 +119,15 @@
                 <span class="space-card-more">Revisar →</span>
             </a>
 
+            <!-- CU-13: tipos de actividad y de equipamiento -->
+            <a class="space-card tone-blue" th:if="${role == 'admin'}" th:href="@{/admin/types}"
+               href="admin-types.html">
+                <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('leaf')}"></svg></span>
+                <strong>Tipos de actividad y equipamiento</strong>
+                <small>Agregá, renombrá, desactivá o eliminá los tipos que eligen los prestadores.</small>
+                <span class="space-card-more">Ir →</span>
+            </a>
+
             <!-- Todos: la vidriera pública (CU-05) -->
             <a class="space-card tone-celeste" th:href="@{/activities}" href="catalog.html">
                 <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('mountain')}"></svg></span>
