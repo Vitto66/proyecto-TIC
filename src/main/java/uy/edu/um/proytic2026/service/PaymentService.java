@@ -295,7 +295,11 @@ public class PaymentService {
             if (r.getStatus() == ReservationStatus.CONFIRMED) return true;
             ActivityInstance instance = instanceRepository.findLockedById(r.getInstance().getId())
                     .orElseThrow(ReservationNotFoundException::new);
-            if (r.getStatus() != ReservationStatus.PENDING || freeSeats(instance) < r.getParticipants()) {
+            // Con la fecha bloqueada se mira el estado actual en la base: si mientras tanto el CU-16
+            // la venció, no se confirma (se devuelve el dinero)
+            ReservationStatus current = reservationRepository.findStatusById(reservationId).orElse(null);
+            if (current == ReservationStatus.CONFIRMED) return true;
+            if (current != ReservationStatus.PENDING || freeSeats(instance) < r.getParticipants()) {
                 return false;
             }
             r.setStatus(ReservationStatus.CONFIRMED);

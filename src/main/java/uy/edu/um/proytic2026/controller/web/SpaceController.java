@@ -9,6 +9,7 @@ import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.service.AuthService;
 import uy.edu.um.proytic2026.service.BusinessService;
+import uy.edu.um.proytic2026.service.NotificationService;
 import uy.edu.um.proytic2026.service.ProviderReviewService;
 import uy.edu.um.proytic2026.service.TypeProposalService;
 
@@ -27,6 +28,7 @@ public class SpaceController {
     private final ProviderReviewService providerReviewService;
     private final BusinessService businessService;
     private final TypeProposalService typeProposalService;
+    private final NotificationService notificationService;
 
     @GetMapping("/tourist")
     public String tourist(@AuthenticationPrincipal AuthenticatedUser user, Model model) {
@@ -34,6 +36,8 @@ public class SpaceController {
         model.addAttribute("role", "tourist");
         model.addAttribute("intro", "Desde acá vas a explorar actividades, reservar y ver tus reservas. "
                 + "Estas funciones se van sumando a medida que se terminan.");
+        // CU-16 paso 4: las reservas que vencieron se avisan acá
+        model.addAttribute("notifications", notificationService.unread(user.userId()));
         return space(user, model);
     }
 
