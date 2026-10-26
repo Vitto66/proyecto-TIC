@@ -2,6 +2,7 @@ package uy.edu.um.proytic2026.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -34,8 +35,9 @@ public class RegisterBusinessRequest {
     @Size(max = 200, message = "no puede superar los 200 caracteres")
     private String address;
 
+    /** Celular (9 números) o fijo (8 números): solo dígitos, sin espacios. */
     @NotBlank(message = "es obligatorio")
-    @Size(max = 30, message = "no puede superar los 30 caracteres")
+    @Pattern(regexp = "\\d{8,9}", message = "tiene que tener 8 o 9 números, sin espacios")
     private String phone;
 
     @NotBlank(message = "es obligatorio")

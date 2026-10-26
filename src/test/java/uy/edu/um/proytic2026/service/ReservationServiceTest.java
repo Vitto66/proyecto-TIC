@@ -106,7 +106,7 @@ class ReservationServiceTest {
 
     private static CompanionForm companion(String name, String nationalId) {
         return CompanionForm.builder().firstName(name).lastName("Pérez").nationalId(nationalId)
-                .phone("099 123 456").build();
+                .phone("099123456").build();
     }
 
     // ---------- Pasos 4 y 5: verificar y resumir ----------

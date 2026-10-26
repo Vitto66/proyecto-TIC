@@ -109,11 +109,12 @@
                     <!-- Contacto: arranca con los datos de la cuenta, se pueden cambiar -->
                     <div class="col-md-6">
                         <label class="form-label" for="phone">Teléfono de contacto</label>
-                        <input class="form-control" type="tel" th:field="*{phone}" maxlength="30"
-                               autocomplete="tel" placeholder="099 123 456" required
-                               th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+                        <input class="form-control" type="tel" th:field="*{phone}" inputmode="numeric" data-digits-only pattern="\d{8,9}" minlength="8" maxlength="9"
+                               autocomplete="tel" placeholder="099123456" required
+                               th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" aria-describedby="phone-help">
+                        <div class="form-text" id="phone-help">Solo números: 8 o 9 dígitos, sin espacios.</div>
                         <div class="invalid-feedback"
-                             th:text="${#fields.hasErrors('phone')} ? ${#fields.errors('phone')[0]} : 'es obligatorio'">es obligatorio</div>
+                             th:text="${#fields.hasErrors('phone')} ? ${#fields.errors('phone')[0]} : 'tiene que tener 8 o 9 números'">tiene que tener 8 o 9 números</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="email">Correo de contacto</label>
@@ -144,6 +145,7 @@
     </div>
 </main>
 
+<script th:src="@{/js/digits-only.js}" src="../static/js/digits-only.js"></script>
 <script th:src="@{/js/business-form.js}" src="../static/js/business-form.js"></script>
 </body>
 </html>
