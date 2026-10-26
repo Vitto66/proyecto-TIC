@@ -1,0 +1,121 @@
+/* CU-14 Reservar una actividad. Se carga después de main.css, home.css y catalog.css. */
+
+.reserve-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 2rem;
+    align-items: start;
+}
+.reserve-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.reserve-form fieldset legend { float: none; width: auto; margin: 0; padding: 0; }
+/* "Mi espacio" no se parte en dos líneas en el celular */
+.site-nav .btn-sm-nav { white-space: nowrap; }
+.reserve-form fieldset legend h2 { margin-bottom: 1rem; }
+
+/* Fechas para elegir: tarjetas con un botón de opción escondido */
+.date-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.75rem;
+}
+.date-option { position: relative; cursor: pointer; }
+.date-option input { position: absolute; opacity: 0; inset: 0; }
+.date-option-body {
+    display: block;
+    height: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.date-option-body strong { display: block; }
+.date-option-body span { display: block; color: var(--muted); }
+.date-option-body small { display: block; margin-top: 0.35rem; color: var(--monte); font-weight: 600; }
+.date-option:hover .date-option-body { border-color: var(--monte); }
+.date-option input:checked + .date-option-body {
+    border-color: var(--monte);
+    background: #EEF4FA;
+    box-shadow: inset 0 0 0 1px var(--monte);
+}
+.date-option input:focus-visible + .date-option-body { outline: 3px solid var(--celeste); outline-offset: 2px; }
+.date-option.is-disabled { cursor: not-allowed; opacity: 0.55; }
+.date-option.is-disabled .date-option-body small { color: var(--error); }
+
+.participants-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.participants-input { max-width: 7rem; }
+
+/* Resumen y reserva creada */
+.summary-card {
+    max-width: 640px;
+    margin: 0.5rem auto 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 2rem;
+}
+.summary-card h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    letter-spacing: -0.02em;
+    margin: 0.25rem 0 0.5rem;
+}
+.summary-rows { margin: 1.25rem 0; }
+.summary-rows > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+}
+.summary-rows dt { font-weight: 500; color: var(--muted); }
+.summary-rows dd { margin: 0; font-weight: 600; text-align: right; }
+.summary-total dt,
+.summary-total dd {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--ink) !important;
+}
+.summary-total { border-bottom: 0 !important; }
+.summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+.summary-actions form { margin: 0; }
+
+.reservation-status {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 0.25rem 0.85rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.reservation-status.is-pending { background: #FFF4DC; color: #7A5200; }
+.reservation-status.is-confirmed { background: #E3F1E7; color: #1E5B34; }
+
+.pay-box {
+    background: #F4F7FA;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+}
+
+@media (max-width: 991.98px) {
+    .reserve-layout { grid-template-columns: 1fr; }
+    .reserve-layout .detail-aside { order: -1; position: static; }
+}
+@media (max-width: 575.98px) {
+    .summary-card { padding: 1.4rem; }
+    .summary-actions .btn-submit, .summary-actions .btn-outline-monte { width: 100%; text-align: center; }
+    .summary-actions form { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .date-option-body { transition: none; }
+}

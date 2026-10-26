@@ -262,7 +262,24 @@
     color: var(--monte);
     text-align: right;
     grid-column: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
 }
+/* CU-14: reservar una fecha puntual */
+.date-reserve {
+    display: inline-block;
+    background: var(--monte);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.date-reserve:hover,
+.date-reserve:focus-visible { background: var(--monte-dark); color: #fff; }
+.date-reserve:focus-visible { outline: 3px solid var(--celeste); outline-offset: 2px; }
 .detail-dates li.is-unavailable { opacity: 0.6; }
 .detail-dates li.is-unavailable .detail-date-status { color: var(--error); }
 

@@ -106,7 +106,13 @@
                                 </small>
                             </span>
                         </div>
-                        <span class="detail-date-status" th:text="${d.statusLabel()}">8 lugares libres</span>
+                        <span class="detail-date-status">
+                            <span th:text="${d.statusLabel()}">8 lugares libres</span>
+                            <!-- CU-14: reservar esta fecha (sin sesión, pasa por el login y vuelve acá) -->
+                            <a class="date-reserve" th:if="${d.available() and reserveMode.name() != 'OTHER_PROFILE'}"
+                               th:href="@{/tourist/activities/{a}/reserve(a=${activity.id()},instanceId=${d.date().id()})}"
+                               href="reserve.html">Reservar</a>
+                        </span>
                     </li>
                 </ul>
 
@@ -148,7 +154,9 @@
                 <th:block th:switch="${reserveMode.name()}">
                     <div th:case="'LOGIN'">
                         <p>Para reservar, iniciá sesión con tu cuenta de turista.</p>
-                        <a class="btn btn-submit w-100" th:href="@{/login}" href="login.html">Iniciar sesión para reservar</a>
+                        <!-- 1a: el enlace a la reserva pide iniciar sesión y, después, vuelve a la reserva -->
+                        <a class="btn btn-submit w-100" th:href="@{/tourist/activities/{a}/reserve(a=${activity.id()})}"
+                           href="login.html">Iniciar sesión para reservar</a>
                         <p class="form-text mt-2 mb-0">
                             ¿No tenés cuenta? <a th:href="@{/register/tourist}" href="register-tourist.html">Creá una gratis</a>.
                         </p>
@@ -157,9 +165,13 @@
                         <p class="mb-0">Para reservar tenés que ingresar con tu perfil de turista.</p>
                     </div>
                     <div th:case="'TOURIST'">
+                        <a class="btn btn-submit w-100" th:if="${activity.anyAvailable()}"
+                           th:href="@{/tourist/activities/{a}/reserve(a=${activity.id()})}" href="reserve.html">Reservar</a>
                         <button type="button" class="btn btn-submit w-100" disabled
-                                th:text="${activity.anyAvailable()} ? 'Reservar' : 'Sin lugares disponibles'">Reservar</button>
-                        <p class="form-text mt-2 mb-0">La reserva online va a estar disponible muy pronto.</p>
+                                th:unless="${activity.anyAvailable()}">Sin lugares disponibles</button>
+                        <p class="form-text mt-2 mb-0" th:if="${activity.anyAvailable()}">
+                            Elegís la fecha y cuántas personas van, y ves el total antes de confirmar.
+                        </p>
                     </div>
                 </th:block>
             </div>
