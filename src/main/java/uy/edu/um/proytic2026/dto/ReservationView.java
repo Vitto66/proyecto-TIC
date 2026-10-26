@@ -66,6 +66,11 @@ public record ReservationView(Long id, Long activityId, String activityName, Str
     }
 
     public String statusLabel() {
+        return statusLabel(status);
+    }
+
+    /** Cómo se muestra cada estado (también en "Mis reservas", CU-17). */
+    public static String statusLabel(ReservationStatus status) {
         return switch (status) {
             case PENDING -> "Pendiente de pago";
             case CONFIRMED -> "Confirmada";

@@ -44,6 +44,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Explorar actividades con filtros (CU-05, público) | http://localhost:8080/activities |
 | Detalle de una actividad con fechas, valoraciones y clima (CU-06, público) | `/activities/{id}` (desde la vidriera) |
 | Reservar una actividad (CU-14, turista) | `/tourist/activities/{id}/reserve` (botón "Reservar" del detalle) |
+| Mis reservas: calendario con filtros (CU-17, turista) | `/tourist/reservations` (`?month=2026-11&day=2026-11-01&type=3`, todos opcionales) |
 | Una reserva del turista (CU-14) | `/tourist/reservations/{id}` |
 | Pagar una reserva (CU-15, turista) | `/tourist/reservations/{id}/pay` (botón "Pagar" de la reserva) |
 | Avisos del turista, por ejemplo una reserva vencida (CU-16) | Arriba en `/tourist`; "Marcar como vistos" hace `POST /tourist/notifications/read` |
@@ -209,6 +210,19 @@ para simular que el servicio no responde) y responde igual que el sandbox.
 - **Necesita el script** `2026-10-26_cu14_cu15_participants_payments.sql`.
 - Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
   como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
+
+## Mis reservas (CU-17)
+
+`/tourist/reservations` (tarjeta "Mis reservas" del espacio del turista) muestra un **calendario del mes** con cada
+reserva y su estado en colores: pendiente de pago, confirmada, finalizada, vencida o cancelada.
+
+- **Filtros (paso 3):** el mes (o las flechas ‹ ›), un día (tocándolo en el calendario) y el tipo de actividad (solo
+  aparecen los tipos de lo que reservó). Debajo del calendario está la lista del mes o del día elegido.
+- **Detalle (paso 4):** cada reserva lleva a `/tourist/reservations/{id}`, que ahora tiene "Mis reservas" para volver.
+- **4a:** si está pendiente y todavía se puede pagar, aparece "Pagar" (CU-15).
+- **4b:** si está finalizada y no tiene valoración, aparece "Valorar" deshabilitado hasta que esté el CU-18.
+- **2a:** sin reservas, se ofrece explorar actividades. Arriba se muestra la próxima reserva pendiente o confirmada.
+- Es solo una consulta: no cambia nada. En el celular el calendario muestra puntos y los datos quedan en la lista.
 
 ## Actualizar el estado de las reservas (CU-16)
 

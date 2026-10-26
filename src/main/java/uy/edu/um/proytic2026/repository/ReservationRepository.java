@@ -93,4 +93,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             where r.status = uy.edu.um.proytic2026.entity.ReservationStatus.CONFIRMED and i.startAt <= :now
             """)
     List<Reservation> findConfirmedStartedBy(@Param("now") LocalDateTime now);
+
+    /**
+     * CU-17: todas las reservas de un turista, con la actividad, el emprendimiento y los tipos ya
+     * cargados, de la fecha más cercana a la más lejana.
+     */
+    @Query("""
+            select distinct r from Reservation r
+            join fetch r.instance i
+            join fetch i.activity a
+            join fetch a.business
+            left join fetch a.types
+            where r.tourist.id = :touristId
+            order by i.startAt, r.id
+            """)
+    List<Reservation> findAllOfTourist(@Param("touristId") Long touristId);
 }

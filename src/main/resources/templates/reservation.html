@@ -113,6 +113,10 @@
         </div>
 
         <div class="summary-actions">
+            <!-- CU-17: volver al calendario, en el mes de esta reserva -->
+            <a class="btn-outline-monte"
+               th:href="@{/tourist/reservations(month=${#temporals.format(reservation.date().startAt(), 'yyyy-MM')})}"
+               href="my-reservations.html">Mis reservas</a>
             <a class="btn-outline-monte" th:unless="${reservation.cancelled()}"
                th:href="@{/activities/{id}(id=${reservation.activityId()})}"
                href="activity-detail.html">Ver la actividad</a>
