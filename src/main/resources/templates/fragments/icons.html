@@ -27,6 +27,20 @@
             <circle cx="18.5" cy="17.5" r="3.5"/>
             <path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2"/>
         </g>
+        <!-- Íconos del espacio de cada perfil (space.html) -->
+        <g th:case="'calendar'">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+        </g>
+        <path th:case="'star'" d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/>
+        <g th:case="'store'">
+            <path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18"/>
+            <path d="M9 20v-6h6v6"/>
+        </g>
+        <g th:case="'users'">
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M22 21v-2a4 4 0 0 0-3-3.9"/>
+        </g>
         <g th:case="*">
             <circle cx="12" cy="12" r="10"/>
             <path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>

@@ -1,11 +1,11 @@
 /* Inicio (home.html). Se carga después de main.css y home.css.
-   Paleta del logo de OASIS: azul marino, celeste y dorado; el mapa en tonos de arena y sol. */
+   Paleta del logo de OASIS: azul marino, celeste y dorado; el mapa en celeste y azul. */
 :root {
-    --map-bg: #F3E6B8;
-    --map-land: #F7C948;
-    --map-active: #EE7B33;
-    --map-active-hover: #D9621B;
-    --pill: #3D4652;
+    --map-bg: #E8F2FB;
+    --map-land: #A9D3F2;
+    --map-active: #1F6FB8;
+    --map-active-hover: #0E3A63;
+    --pill: #0E3A63;
     --tone-0: #2B8A1E;   /* verde campo */
     --tone-1: #0E3A63;   /* azul marino del logo */
     --tone-2: #FFC629;   /* sol */
@@ -98,19 +98,19 @@
     font-size: clamp(2rem, 4vw, 3.1rem);
     line-height: 1.05;
     letter-spacing: -0.02em;
-    color: #1A1A1A;
+    color: var(--monte);
     margin-bottom: 1.5rem;
 }
 .map-copy h2 strong { font-weight: 800; }
 .map-copy p {
-    color: #3A3A36;
+    color: #34465C;
     font-size: 1.05rem;
     line-height: 1.7;
     max-width: 52ch;
 }
 .map-summary {
     font-weight: 700;
-    color: #1A1A1A !important;
+    color: var(--monte) !important;
     margin: 1.5rem 0 1.25rem;
 }
 .map-summary.is-empty { font-weight: 500; font-style: italic; }
@@ -156,13 +156,13 @@
     line-height: 1;
     white-space: nowrap;
     text-decoration: none;
-    box-shadow: 0 0 0 10px rgba(61, 70, 82, 0.18);
+    box-shadow: 0 0 0 10px rgba(14, 58, 99, 0.16);
     transition: background-color 0.15s ease, transform 0.15s ease;
 }
 a.map-pin:hover,
 a.map-pin:focus-visible,
 .map-pin.is-highlighted {
-    background: var(--monte);
+    background: var(--map-active);
     color: #fff;
     transform: translate(-50%, -50%) scale(1.05);
 }
@@ -172,8 +172,8 @@ a.map-pin:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
     height: 1.6rem;
     padding: 0 0.4rem;
     border-radius: 999px;
-    background: var(--sol);
-    color: #1A1A1A;
+    background: #7CC3EC;
+    color: var(--monte-dark);
     display: inline-grid;
     place-items: center;
     font-size: 0.85rem;
