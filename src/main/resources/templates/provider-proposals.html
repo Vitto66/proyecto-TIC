@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Proponer un tipo · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+    <link th:href="@{/css/business.css}" href="../static/css/business.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <span class="space-user" th:text="${currentUser.displayName}">Nombre</span>
+    </div>
+</header>
+
+<main class="container-xl register admin-page">
+    <a class="back-link" th:href="@{/provider/activities}" href="activities.html">Volver a mis actividades</a>
+
+    <div class="admin-heading">
+        <h1>Proponer un tipo</h1>
+        <p>¿No encontrás el tipo de actividad o el equipamiento que necesitás? Proponelo y un administrador
+            lo va a revisar. Si lo acepta, queda disponible para todos los prestadores.</p>
+    </div>
+
+    <!-- Precondición: prestador aprobado -->
+    <section class="sent-card" role="status" th:unless="${allowed}">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>Todavía no podés proponer tipos</h1>
+        <p>Tu cuenta de prestador tiene que estar aprobada por un administrador.</p>
+    </section>
+
+    <th:block th:if="${allowed}">
+        <div class="alert alert-success" role="status" th:if="${notice}" th:text="${notice}">Enviaste la propuesta.</div>
+
+        <!-- 2a. Ya existe un tipo con ese nombre → se informa y se ofrece el existente -->
+        <div class="alert alert-info" role="status" th:if="${existing}">
+            <th:block th:if="${existing.active}">
+                <strong th:text="'Ya existe “' + ${existing.existingName} + '”.'">Ya existe “Trekking”.</strong>
+                No hace falta proponerlo: ya lo podés elegir al
+                <a th:href="@{/provider/activities/new}" href="activity-form.html">publicar una actividad</a>.
+            </th:block>
+            <th:block th:unless="${existing.active}">
+                <strong th:text="'Ya existe “' + ${existing.existingName} + '”, pero está desactivado.'">Ya existe “Trekking”, pero está desactivado.</strong>
+                Un administrador lo desactivó para actividades nuevas. Si lo necesitás, pedile que lo vuelva a activar.
+            </th:block>
+        </div>
+
+        <!-- Paso 2: nombre y una breve descripción -->
+        <form class="type-create" th:action="@{/provider/proposals}" th:object="${form}" method="post" novalidate>
+            <div class="alert alert-warning" role="alert" th:if="${#fields.hasGlobalErrors()}"
+                 th:text="${#fields.globalErrors()[0]}">No podés proponer.</div>
+
+            <fieldset class="mb-3">
+                <legend class="form-label">¿Qué querés proponer?</legend>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check" th:each="c : ${categories}">
+                        <input class="form-check-input" type="radio" th:field="*{category}" th:value="${c.name()}">
+                        <label class="form-check-label" th:for="${#ids.prev('category')}"
+                               th:text="${c.name() == 'ACTIVITY'} ? 'Un tipo de actividad' : 'Un tipo de equipamiento'">Un tipo de actividad</label>
+                    </div>
+                </div>
+                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('category')}" th:text="${#fields.errors('category')[0]}">elegí</div>
+            </fieldset>
+
+            <div class="mb-3">
+                <label class="form-label" for="name">Nombre</label>
+                <input class="form-control" type="text" th:field="*{name}" maxlength="100" required
+                       placeholder="Ej.: Avistamiento de ballenas"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:text="${#fields.errors('name')[0]}">es obligatorio</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="description">Descripción</label>
+                <textarea class="form-control" th:field="*{description}" rows="3" maxlength="500" required
+                          placeholder="Contale al administrador de qué se trata y en qué actividad lo vas a usar."
+                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:text="${#fields.errors('description')[0]}">es obligatoria</div>
+            </div>
+
+            <button type="submit" class="btn btn-submit">Enviar propuesta</button>
+        </form>
+
+        <!-- 3a: el prestador ve el resultado de sus propuestas -->
+        <section aria-labelledby="mine-title" th:unless="${proposals.isEmpty()}">
+            <h2 id="mine-title" class="type-section-title">Mis propuestas</h2>
+            <ul class="review-list type-list">
+                <li class="type-row" th:each="p : ${proposals}">
+                    <div class="type-main">
+                        <strong th:text="${p.name()}">Avistamiento de ballenas</strong>
+                        <span class="type-meta">
+                            <span class="status-pill" th:classappend="${p.statusClass()}" th:text="${p.statusLabel()}">Pendiente</span>
+                            <span th:text="${p.categoryLabel()}">Tipo de actividad</span>
+                        </span>
+                        <span class="type-hint" th:text="${p.statusHint()}">Un administrador la va a revisar.</span>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </th:block>
+</main>
+
+</body>
+</html>

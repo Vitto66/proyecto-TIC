@@ -56,6 +56,29 @@
         </form>
     </div>
 
+    <!-- 2a: propuestas pendientes de los prestadores (CU-12) -->
+    <section class="type-proposals" aria-labelledby="proposals-title" th:unless="${proposals.isEmpty()}">
+        <h2 id="proposals-title" class="type-section-title"
+            th:text="${proposals.size() == 1} ? '1 propuesta pendiente' : ${proposals.size()} + ' propuestas pendientes'">2 propuestas pendientes</h2>
+        <ul class="review-list type-list">
+            <li class="type-row" th:each="p : ${proposals}">
+                <div class="type-main">
+                    <strong th:text="${p.name()}">Avistamiento de ballenas</strong>
+                    <span class="type-meta" th:text="'Propuesto por ' + ${p.providerName()}">Propuesto por Juan Rodríguez</span>
+                    <span class="type-hint" th:text="${p.description()}">Salidas en Rocha para ver ballenas francas.</span>
+                </div>
+                <div class="type-actions">
+                    <form th:action="@{/admin/types/proposals/{id}/accept(id=${p.id()},category=${category.slug()})}" method="post" class="m-0">
+                        <button type="submit" class="btn-outline-monte type-btn">Aceptar</button>
+                    </form>
+                    <form th:action="@{/admin/types/proposals/{id}/reject(id=${p.id()},category=${category.slug()})}" method="post" class="m-0">
+                        <button type="submit" class="type-link type-delete">Rechazar</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </section>
+
     <!-- Paso 3: alta -->
     <form class="type-create" th:action="@{/admin/types/{slug}(slug=${category.slug()})}" th:object="${form}" method="post" novalidate>
         <label class="form-label" for="name" th:text="'Nuevo ' + ${category.singular()}">Nuevo tipo de actividad</label>

@@ -162,6 +162,12 @@
                     <p class="alert alert-warning mb-0" th:if="${options.activityTypes().isEmpty()}">
                         Todavía no hay tipos de actividad activos. Pedile a un administrador que los cargue.
                     </p>
+                    <!-- 3a. No existe el tipo que necesita → puede proponer uno nuevo (CU-12) -->
+                    <p class="form-text mb-0">
+                        ¿No está el tipo que necesitás?
+                        <a th:href="@{/provider/proposals(category='activity')}" href="provider-proposals.html" target="_blank" rel="noopener">Proponé uno nuevo</a>
+                        (se abre en otra pestaña, así no perdés lo que cargaste).
+                    </p>
                     <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('activityTypeIds')}"
                          th:text="${#fields.errors('activityTypeIds')[0]}">elegí al menos un tipo de actividad</div>
                     <div class="invalid-feedback" id="types-feedback">Elegí al menos un tipo de actividad.</div>
@@ -195,6 +201,10 @@
                     </div>
                     <p class="form-text" th:if="${options.equipmentTypes().isEmpty()}">
                         Todavía no hay tipos de equipamiento cargados.
+                    </p>
+                    <p class="form-text mb-0">
+                        ¿Falta algún equipamiento?
+                        <a th:href="@{/provider/proposals(category='equipment')}" href="provider-proposals.html" target="_blank" rel="noopener">Proponé uno nuevo</a>.
                     </p>
                 </fieldset>
 

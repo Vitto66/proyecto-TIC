@@ -16,6 +16,9 @@ public interface ActivityTypeRepository extends JpaRepository<ActivityType, Inte
     /** CU-13 3b: nombre repetido, sin distinguir mayúsculas. */
     boolean existsByNameIgnoreCase(String name);
 
+    /** CU-12 2a: el tipo existente con ese nombre, para ofrecerlo. */
+    java.util.Optional<ActivityType> findFirstByNameIgnoreCase(String name);
+
     /** CU-13 3b al modificar: otro tipo (no este) ya tiene ese nombre. */
     boolean existsByNameIgnoreCaseAndIdNot(String name, Integer id);
 }

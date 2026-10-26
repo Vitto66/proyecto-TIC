@@ -15,4 +15,21 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Compilar y correr tests
-        run: ./mvnw -B verify
+        run: |
+          set -o pipefail
+          ./mvnw -B verify 2>&1 | tee build.log
+      # Si algo falla, deja los errores de compilación y los tests que fallaron en el resumen
+      # del build (pestaña Summary / Annotations), para verlos sin abrir el log completo.
+      - name: Resumen de errores
+        if: failure()
+        run: |
+          {
+            grep -E '^\[ERROR\] .*\.java|COMPILATION ERROR|Tests run:.*(Failures: [1-9]|Errors: [1-9])|<<< (FAILURE|ERROR)!|expected|Expected|but was|Caused by' build.log \
+              | grep -v 'Help 1\|Re-run Maven\|full stack trace' | head -40
+          } > errors.txt || true
+          echo "### Errores del build" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat errors.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' errors.txt | cut -c1-60000)
+          echo "::error title=Errores del build::${msg}"

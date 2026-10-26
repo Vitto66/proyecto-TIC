@@ -16,6 +16,9 @@ public interface EquipmentTypeRepository extends JpaRepository<EquipmentType, In
     /** CU-13 3b: nombre repetido, sin distinguir mayúsculas. */
     boolean existsByNameIgnoreCase(String name);
 
+    /** CU-12 2a: el tipo existente con ese nombre, para ofrecerlo. */
+    java.util.Optional<EquipmentType> findFirstByNameIgnoreCase(String name);
+
     /** CU-13 3b al modificar: otro tipo (no este) ya tiene ese nombre. */
     boolean existsByNameIgnoreCaseAndIdNot(String name, Integer id);
 }

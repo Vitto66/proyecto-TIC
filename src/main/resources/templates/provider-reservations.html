@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reservas de mis actividades · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
+    <link th:href="@{/css/activity-dates.css}" href="../static/css/activity-dates.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <span class="space-user" th:text="${currentUser.displayName}">Nombre</span>
+    </div>
+</header>
+
+<main class="container-xl register">
+    <a class="back-link" th:href="@{/provider}" href="space.html">Volver a mi espacio</a>
+
+    <!-- Precondiciones: prestador aprobado y con emprendimiento -->
+    <section class="sent-card" role="status" th:if="${access.name() == 'NOT_APPROVED'}">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>Todavía no tenés reservas</h1>
+        <p>Tu cuenta de prestador tiene que estar aprobada por un administrador.</p>
+    </section>
+    <section class="sent-card" role="status" th:if="${access.name() == 'NO_BUSINESS'}">
+        <div class="sent-sun" aria-hidden="true"></div>
+        <h1>Primero registrá tu emprendimiento</h1>
+        <p>Para recibir reservas tenés que registrar tu emprendimiento y publicar actividades con fechas.</p>
+        <div class="space-actions">
+            <a class="btn btn-submit" th:href="@{/provider/business}" href="business-form.html">Registrar mi emprendimiento</a>
+        </div>
+    </section>
+
+    <th:block th:if="${access.name() == 'ALLOWED'}">
+        <div class="activities-head">
+            <div>
+                <h1>Reservas de mis actividades</h1>
+                <p class="dates-meta mb-0" th:if="${overview.hasDates()}"
+                   th:text="${overview.totalReservations() == 0} ? 'Todavía no recibiste reservas.'
+                          : (${overview.totalReservations() == 1} ? 'Recibiste 1 reserva.'
+                          : 'Recibiste ' + ${overview.totalReservations()} + ' reservas.')">Recibiste 4 reservas.</p>
+            </div>
+        </div>
+
+        <!-- Precondición: al menos una actividad con fechas -->
+        <section class="empty-state" th:unless="${overview.hasDates()}">
+            <h2>Todavía no tenés fechas publicadas</h2>
+            <p>Los turistas reservan fechas concretas. Definilas desde "Mis actividades" → "Fechas, horarios y cupos".</p>
+            <div class="space-actions">
+                <a class="btn btn-submit" th:href="@{/provider/activities}" href="activities.html">Ir a mis actividades</a>
+            </div>
+        </section>
+
+        <!-- 2a. Sin reservas registradas -->
+        <div class="alert alert-secondary" role="status" th:if="${overview.hasDates() and overview.totalReservations() == 0}">
+            Ninguna de tus fechas tiene reservas todavía. Cuando un turista reserve, la vas a ver acá.
+        </div>
+
+        <!-- Paso 2: las fechas con sus cupos -->
+        <section class="dates-list" aria-labelledby="upcoming-title" th:if="${overview.hasDates()}">
+            <h2 id="upcoming-title">Próximas fechas</h2>
+            <p class="dates-empty" th:if="${overview.upcoming().isEmpty()}">No tenés fechas próximas.</p>
+            <ul class="date-items" th:unless="${overview.upcoming().isEmpty()}">
+                <li class="date-item res-date" th:each="r : ${overview.upcoming()}" th:classappend="${r.date().full()} ? 'is-full'">
+                    <a class="res-date-link" th:href="@{/provider/reservations/{id}(id=${r.date().id()})}" href="provider-reservation-detail.html">
+                        <span class="res-activity" th:text="${r.activityName()}">Atardecer en kayak</span>
+                        <strong th:text="${r.date().dayLabel()}">Sábado 31 de octubre de 2026</strong>
+                        <span th:text="${r.date().timeLabel()}">18:00 a 20:30</span>
+                    </a>
+                    <span class="res-side">
+                        <span class="date-capacity" th:text="${r.date().capacityLabel()}">8 lugares libres de 12</span>
+                        <span class="res-count" th:classappend="${r.reservations() == 0} ? 'is-zero'" th:text="${r.reservationsLabel()}">2 reservas</span>
+                    </span>
+                </li>
+            </ul>
+
+            <details class="dates-past" th:unless="${overview.past().isEmpty()}">
+                <summary th:text="'Fechas pasadas (' + ${overview.past().size()} + ')'">Fechas pasadas (3)</summary>
+                <ul class="date-items">
+                    <li class="date-item res-date is-past" th:each="r : ${overview.past()}">
+                        <a class="res-date-link" th:href="@{/provider/reservations/{id}(id=${r.date().id()})}" href="provider-reservation-detail.html">
+                            <span class="res-activity" th:text="${r.activityName()}">Atardecer en kayak</span>
+                            <strong th:text="${r.date().dayLabel()}">Sábado 17 de octubre de 2026</strong>
+                            <span th:text="${r.date().timeLabel()}">18:00 a 20:30</span>
+                        </a>
+                        <span class="res-side">
+                            <span class="date-capacity" th:text="${r.date().capacityLabel()}">Sin límite de cupos</span>
+                            <span class="res-count" th:classappend="${r.reservations() == 0} ? 'is-zero'" th:text="${r.reservationsLabel()}">Sin reservas</span>
+                        </span>
+                    </li>
+                </ul>
+            </details>
+        </section>
+    </th:block>
+</main>
+
+</body>
+</html>

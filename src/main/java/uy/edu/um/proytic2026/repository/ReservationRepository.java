@@ -26,4 +26,31 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<OccupiedSeats> occupiedSeats(@Param("instanceIds") Collection<Long> instanceIds,
                                       @Param("statuses") Collection<ReservationStatus> statuses);
+
+    /** CU-11: cantidad de reservas de cada instancia, en esos estados. */
+    interface ReservationCount {
+        Long getInstanceId();
+
+        Long getReservations();
+    }
+
+    @Query("""
+            select r.instance.id as instanceId, count(r) as reservations
+            from Reservation r
+            where r.instance.id in :instanceIds and r.status in :statuses
+            group by r.instance.id
+            """)
+    List<ReservationCount> countByInstance(@Param("instanceIds") Collection<Long> instanceIds,
+                                           @Param("statuses") Collection<ReservationStatus> statuses);
+
+    /** CU-11 paso 4: las reservas de una instancia, con el turista y sus acompañantes ya cargados. */
+    @Query("""
+            select distinct r from Reservation r
+            join fetch r.tourist t
+            join fetch t.user
+            left join fetch r.companions
+            where r.instance.id = :instanceId
+            order by r.createdAt
+            """)
+    List<Reservation> findAllForInstance(@Param("instanceId") Long instanceId);
 }
