@@ -59,3 +59,9 @@
     .rating-stars label { transition: none; }
     .rating-stars label:hover { transform: none; }
 }
+
+/* CU-24 Mis valoraciones */
+.done-review { display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.6rem; }
+.done-review .stars { color: #E0A21B; font-size: 1.15rem; letter-spacing: 0.08em; }
+.done-review p { color: var(--ink); }
+.done-review small { color: var(--muted); }

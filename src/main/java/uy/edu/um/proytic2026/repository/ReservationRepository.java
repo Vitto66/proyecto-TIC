@@ -108,4 +108,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             order by i.startAt, r.id
             """)
     List<Reservation> findAllOfTourist(@Param("touristId") Long touristId);
+
+    /** CU-24 paso 2: las reservas FINALIZADAS del turista que todavía no tienen valoración. */
+    @Query("""
+            select r from Reservation r
+            join fetch r.instance i
+            join fetch i.activity a
+            join fetch a.business
+            where r.tourist.id = :touristId
+              and r.status = uy.edu.um.proytic2026.entity.ReservationStatus.FINISHED
+              and not exists (select 1 from Review rv where rv.reservation = r)
+            order by i.startAt desc, r.id desc
+            """)
+    List<Reservation> findFinishedWithoutReview(@Param("touristId") Long touristId);
 }
