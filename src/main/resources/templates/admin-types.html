@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${category.title()} + ' · Uruguay Mnatural'">Tipos de actividad · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="space-user admin-user" th:text="${currentUser.displayName}">Administrador</span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="link-logout">Cerrar sesión</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="container-xl admin-page">
+    <a class="back-link" th:href="@{/admin}" href="space.html">Volver al panel</a>
+
+    <div class="admin-heading">
+        <h1>Datos generales</h1>
+        <p>Los tipos que los prestadores eligen al publicar una actividad y que los turistas usan para filtrar.</p>
+    </div>
+
+    <!-- Paso 2: elige la lista -->
+    <nav class="type-tabs" aria-label="Listas de datos generales">
+        <a th:each="c : ${categories}" class="type-tab"
+           th:classappend="${c == category} ? 'is-active'"
+           th:attr="aria-current=${c == category} ? 'page' : null"
+           th:href="@{/admin/types/{slug}(slug=${c.slug()})}" th:text="${c.title()}" href="#">Tipos de actividad</a>
+    </nav>
+
+    <div class="alert alert-success" role="status" th:if="${notice}" th:text="${notice}">Se agregó "Kayak".</div>
+    <div class="alert alert-warning" role="alert" th:if="${error}" th:text="${error}">No se cambió el nombre.</div>
+
+    <!-- 3a: está en uso → no se elimina y se ofrece desactivarlo -->
+    <div class="alert alert-warning type-in-use" role="alert" th:if="${inUse}">
+        <p class="mb-2">
+            <strong th:text="'No se puede eliminar “' + ${inUse.typeName} + '”: está en uso por ' + ${inUse.usageLabel} + '.'">No se puede eliminar "Kayak": está en uso por 2 actividades.</strong>
+            Podés desactivarlo: deja de ofrecerse al publicar actividades nuevas y las que ya lo tienen lo conservan.
+        </p>
+        <form th:action="@{/admin/types/{slug}/{id}/deactivate(slug=${category.slug()},id=${inUse.typeId})}" method="post" class="m-0">
+            <button type="submit" class="btn-outline-monte type-btn">Desactivar</button>
+        </form>
+    </div>
+
+    <!-- Paso 3: alta -->
+    <form class="type-create" th:action="@{/admin/types/{slug}(slug=${category.slug()})}" th:object="${form}" method="post" novalidate>
+        <label class="form-label" for="name" th:text="'Nuevo ' + ${category.singular()}">Nuevo tipo de actividad</label>
+        <div class="type-create-row">
+            <input class="form-control" type="text" th:field="*{name}" maxlength="100" required
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                   th:placeholder="${category.slug() == 'activity'} ? 'Ej.: Avistamiento de aves' : 'Ej.: Linterna frontal'">
+            <button type="submit" class="btn btn-submit">Agregar</button>
+        </div>
+        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('name')}" th:text="${#fields.errors('name')[0]}">ya existe</div>
+    </form>
+
+    <div class="admin-empty" th:if="${types.isEmpty()}">
+        <p>Todavía no hay tipos cargados. Agregá el primero con el formulario de arriba.</p>
+    </div>
+
+    <!-- Paso 3: consulta, modificación, activación y eliminación -->
+    <ul class="review-list type-list" th:unless="${types.isEmpty()}">
+        <li class="type-row" th:each="t : ${types}" th:classappend="${t.active()} ? '' : 'is-inactive'">
+            <div class="type-main">
+                <strong th:text="${t.name()}">Senderismo</strong>
+                <span class="type-meta">
+                    <span class="status-pill" th:classappend="${t.active()} ? 'status-approved' : 'status-rejected'"
+                          th:text="${t.active()} ? 'Activo' : 'Inactivo'">Activo</span>
+                    <span th:text="${t.usageLabel()}">2 actividades</span>
+                </span>
+            </div>
+
+            <div class="type-actions">
+                <details class="type-edit">
+                    <summary class="type-link">Cambiar nombre</summary>
+                    <form th:action="@{/admin/types/{slug}/{id}/rename(slug=${category.slug()},id=${t.id()})}" method="post" class="type-edit-form">
+                        <label class="visually-hidden" th:for="'rename-' + ${t.id()}" th:text="'Nuevo nombre para ' + ${t.name()}">Nuevo nombre</label>
+                        <input class="form-control form-control-sm" type="text" name="name" maxlength="100" required
+                               th:id="'rename-' + ${t.id()}" th:value="${t.name()}">
+                        <button type="submit" class="btn-outline-monte type-btn">Guardar</button>
+                    </form>
+                </details>
+
+                <form th:if="${t.active()}" th:action="@{/admin/types/{slug}/{id}/deactivate(slug=${category.slug()},id=${t.id()})}" method="post" class="m-0">
+                    <button type="submit" class="type-link">Desactivar</button>
+                </form>
+                <form th:unless="${t.active()}" th:action="@{/admin/types/{slug}/{id}/activate(slug=${category.slug()},id=${t.id()})}" method="post" class="m-0">
+                    <button type="submit" class="type-link">Activar</button>
+                </form>
+
+                <form th:action="@{/admin/types/{slug}/{id}/delete(slug=${category.slug()},id=${t.id()})}" method="post" class="m-0"
+                      onsubmit="return confirm('¿Eliminar este tipo? No se puede deshacer.')">
+                    <button type="submit" class="type-link type-delete">Eliminar</button>
+                </form>
+            </div>
+        </li>
+    </ul>
+</main>
+
+</body>
+</html>

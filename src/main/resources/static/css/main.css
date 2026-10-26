@@ -573,3 +573,96 @@ body {
 }
 .site-footer-credits a { color: #C9D7E6; }
 .site-footer-credits a:hover { color: #fff; }
+
+/* ---------- Datos generales: tipos de actividad y de equipamiento (CU-13) ---------- */
+.type-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+}
+.type-tab {
+    padding: 0.6rem 1rem;
+    margin-bottom: -1px;
+    color: var(--muted);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+}
+.type-tab:hover { color: var(--monte); }
+.type-tab.is-active {
+    color: var(--monte);
+    border-bottom-color: var(--monte);
+}
+.type-tab:focus-visible,
+.type-link:focus-visible,
+.type-edit summary:focus-visible {
+    outline: 3px solid var(--celeste);
+    outline-offset: 2px;
+}
+.type-create {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.type-create-row {
+    display: flex;
+    gap: 0.75rem;
+}
+.type-create-row .btn-submit { flex-shrink: 0; }
+.type-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding: 1rem 1.25rem;
+}
+.type-row + .type-row { border-top: 1px solid var(--line); }
+.type-row.is-inactive .type-main strong { color: var(--muted); }
+.type-main strong { display: block; }
+.type-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+.type-meta .status-pill { font-size: 0.8rem; padding: 0.15rem 0.65rem; }
+.type-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.5rem 1.25rem;
+}
+.type-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--monte);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.type-link:hover { color: var(--monte-dark); }
+.type-delete { color: var(--error); }
+.type-delete:hover { color: #8C1D17; }
+.type-edit summary { list-style: none; }
+.type-edit summary::-webkit-details-marker { display: none; }
+.type-edit[open] summary { margin-bottom: 0.5rem; }
+.type-edit-form {
+    display: flex;
+    gap: 0.5rem;
+}
+.type-btn { padding: 0.35rem 0.9rem; }
+.type-in-use p { margin: 0; }
+@media (max-width: 575.98px) {
+    .type-create-row { flex-direction: column; }
+    .type-actions { width: 100%; }
+}
