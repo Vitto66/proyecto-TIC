@@ -35,4 +35,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             order by r.createdAt desc
             """)
     List<Review> findByActivityId(@Param("activityId") Long activityId);
+
+    /** CU-17 4b: cuáles de esas reservas ya tienen su valoración (hay una sola por reserva). */
+    @Query("select r.reservation.id from Review r where r.reservation.id in :reservationIds")
+    List<Long> findReviewedReservationIds(@Param("reservationIds") java.util.Collection<Long> reservationIds);
 }

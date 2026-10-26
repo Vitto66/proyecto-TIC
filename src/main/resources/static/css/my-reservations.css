@@ -1,0 +1,233 @@
+/* CU-17 Mis reservas. Se carga después de main.css, home.css, activities.css, catalog.css y reserve.css. */
+
+/* Colores de cada estado: la etiqueta, los puntos del calendario y la leyenda */
+.my-reservations {
+    --st-pending: #B7791F;
+    --st-confirmed: #2F8F5B;
+    --st-finished: var(--monte);
+    --st-expired: #8A94A3;
+    --st-cancelled: #B3261E;
+}
+.reservation-status.is-finished { background: #E6EEF7; color: var(--monte); }
+.reservation-status.is-cancelled { background: #F1E3E3; color: #7A1E1E; }
+.reservation-status.is-expired { background: #ECEEF1; color: #4A5462; }
+
+.empty-state .btn-submit { margin-top: 1.25rem; display: inline-block; }
+
+/* La próxima reserva */
+.next-reservation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    background: var(--monte);
+    color: #fff;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+}
+.next-reservation:hover, .next-reservation:focus-visible { background: var(--monte-dark); color: #fff; }
+.next-reservation .next-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+.next-reservation strong { font-size: 1.15rem; }
+
+/* Filtros */
+.reservations-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+}
+.reservations-filters .form-control,
+.reservations-filters .form-select { min-width: 12rem; }
+.filters-actions { display: flex; align-items: center; gap: 1rem; }
+.link-clear { color: var(--monte); font-weight: 600; white-space: nowrap; }
+
+/* Calendario */
+.calendar {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+}
+.calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.calendar-head h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    margin: 0;
+}
+.calendar-nav {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    color: var(--monte);
+    font-size: 1.4rem;
+    line-height: 1;
+    text-decoration: none;
+}
+.calendar-nav:hover, .calendar-nav:focus-visible { border-color: var(--monte); background: #EEF4FA; }
+.calendar-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.35rem;
+}
+.calendar-row + .calendar-row { margin-top: 0.35rem; }
+.calendar-weekdays span {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding-bottom: 0.25rem;
+}
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-height: 5.5rem;
+    border-radius: 10px;
+    background: #F7F9FB;
+    padding: 0.35rem;
+    color: var(--ink);
+    text-decoration: none;
+    min-width: 0;
+}
+.calendar-day.is-outside { opacity: 0.45; }
+a.calendar-day { background: #EEF4FA; }
+a.calendar-day:hover, a.calendar-day:focus-visible { box-shadow: inset 0 0 0 1.5px var(--monte); }
+.calendar-day.is-selected { box-shadow: inset 0 0 0 2px var(--monte); }
+.calendar-number { font-size: 0.85rem; font-weight: 600; }
+.calendar-number.is-today {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--monte);
+    color: #fff;
+}
+.calendar-chip {
+    display: block;
+    border-left: 3px solid var(--st-confirmed);
+    background: #fff;
+    border-radius: 4px;
+    padding: 0.1rem 0.3rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.calendar-more { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.calendar-chip.is-pending, .legend-dot.is-pending { border-color: var(--st-pending); --dot: var(--st-pending); }
+.calendar-chip.is-confirmed, .legend-dot.is-confirmed { border-color: var(--st-confirmed); --dot: var(--st-confirmed); }
+.calendar-chip.is-finished, .legend-dot.is-finished { border-color: var(--st-finished); --dot: var(--st-finished); }
+.calendar-chip.is-expired, .legend-dot.is-expired { border-color: var(--st-expired); --dot: var(--st-expired); }
+.calendar-chip.is-cancelled, .legend-dot.is-cancelled { border-color: var(--st-cancelled); --dot: var(--st-cancelled); }
+.calendar-chip.is-expired .chip-text,
+.calendar-chip.is-cancelled .chip-text { text-decoration: line-through; color: var(--muted); }
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+.legend-dot {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--dot);
+    margin-right: 0.35rem;
+    vertical-align: -0.05rem;
+}
+
+/* Lista */
+.list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin-bottom: 0.75rem;
+}
+.list-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; margin: 0; }
+.list-head a { color: var(--monte); font-weight: 600; }
+.list-empty { color: var(--muted); }
+.reservation-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+}
+.reservation-item + .reservation-item { margin-top: 0.75rem; }
+.reservation-item-main { min-width: 0; flex: 1 1 20rem; }
+.reservation-item h3 { font-size: 1.1rem; font-weight: 700; margin: 0.45rem 0 0.25rem; }
+.reservation-item h3 a { color: var(--ink); text-decoration: none; }
+.reservation-item h3 a:hover { color: var(--monte); text-decoration: underline; }
+.reservation-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 1.1rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+.reservation-item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.reservation-item-actions .btn-submit,
+.reservation-item-actions .btn-outline-monte { padding: 0.5rem 1.1rem; text-decoration: none; }
+.review-soon { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+.review-soon small { color: var(--muted); font-size: 0.78rem; }
+.review-soon button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* En el celular el calendario muestra puntos de colores; los datos quedan en la lista */
+@media (max-width: 575.98px) {
+    .calendar { padding: 0.9rem 0.6rem; }
+    .calendar-row { gap: 0.2rem; }
+    .calendar-day { min-height: 3.1rem; align-items: center; padding: 0.3rem 0.1rem; }
+    .calendar-chip {
+        width: 0.5rem;
+        height: 0.5rem;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: var(--dot, var(--st-confirmed));
+        display: inline-block;
+    }
+    .calendar-chip.is-pending { --dot: var(--st-pending); }
+    .calendar-chip.is-confirmed { --dot: var(--st-confirmed); }
+    .calendar-chip.is-finished { --dot: var(--st-finished); }
+    .calendar-chip.is-expired { --dot: var(--st-expired); }
+    .calendar-chip.is-cancelled { --dot: var(--st-cancelled); }
+    .calendar-chip .chip-text { display: none; }
+    .calendar-more { font-size: 0.65rem; }
+    .reservations-filters > div { flex: 1 1 100%; }
+    .reservations-filters .form-control, .reservations-filters .form-select { min-width: 0; width: 100%; }
+    .reservation-item-actions { width: 100%; }
+}
