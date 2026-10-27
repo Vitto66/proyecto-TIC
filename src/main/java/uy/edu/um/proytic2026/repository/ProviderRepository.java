@@ -5,6 +5,7 @@ import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProviderRepository extends JpaRepository<Provider, Long> {
 
@@ -18,4 +19,10 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     boolean existsByDocument(String document);
 
     boolean existsByRut(String rut);
+
+    /** CU-22: el prestador con ese documento (persona física). */
+    Optional<Provider> findByDocument(String document);
+
+    /** CU-22: el prestador con ese RUT (persona jurídica). */
+    Optional<Provider> findByRut(String rut);
 }

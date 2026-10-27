@@ -331,4 +331,44 @@ class PublicApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parameter").value("departmentId"));
     }
+
+    // ---------- CU-22 Verificar un emprendimiento ----------
+
+    @Test
+    void verifyBusiness_approvedByDocument_returnsRegisteredAndApproved() throws Exception {
+        business("Kayak Laguna de Rocha", "kayak@mail.com", "45678901", ProviderStatus.APPROVED);
+
+        mockMvc.perform(get("/api/businesses/verify").param("document", "4.567.890-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registered").value(true))
+                .andExpect(jsonPath("$.approved").value(true))
+                .andExpect(jsonPath("$.status").value("APPROVED"))
+                .andExpect(jsonPath("$.businessName").value("Kayak Laguna de Rocha"));
+    }
+
+    @Test
+    void verifyBusiness_rejected_returnsItsStatus() throws Exception {
+        business("Rechazado S.A.", "rechazado@mail.com", "22222222", ProviderStatus.REJECTED);
+
+        mockMvc.perform(get("/api/businesses/verify").param("document", "22222222"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registered").value(true))
+                .andExpect(jsonPath("$.approved").value(false))
+                .andExpect(jsonPath("$.status").value("REJECTED"));
+    }
+
+    @Test
+    void verifyBusiness_notRegistered_returns200WithRegisteredFalse() throws Exception {
+        mockMvc.perform(get("/api/businesses/verify").param("rut", "219999990018"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registered").value(false))
+                .andExpect(jsonPath("$.approved").value(false));
+    }
+
+    @Test
+    void verifyBusiness_withoutParameters_returns400() throws Exception {
+        mockMvc.perform(get("/api/businesses/verify"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parameter").value("rut"));
+    }
 }
