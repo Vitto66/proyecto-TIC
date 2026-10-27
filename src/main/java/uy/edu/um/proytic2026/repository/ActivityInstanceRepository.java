@@ -46,4 +46,37 @@ public interface ActivityInstanceRepository extends JpaRepository<ActivityInstan
             order by i.startAt
             """)
     List<ActivityInstance> findAllByProviderId(@Param("providerId") Long providerId);
+
+    /**
+     * CU-20: las fechas de actividades publicadas de un departamento que empiezan entre from
+     * (incluido) y to (excluido), con la actividad, el emprendimiento y la ubicación ya cargados.
+     */
+    @Query("""
+            select i from ActivityInstance i
+            join fetch i.activity a
+            join fetch a.business
+            join fetch a.locality l
+            join fetch l.department d
+            where a.active = true and d.id = :departmentId
+              and i.startAt >= :from and i.startAt < :to
+            order by i.startAt, a.name
+            """)
+    List<ActivityInstance> findPublishedInDepartment(@Param("departmentId") Integer departmentId,
+                                                     @Param("from") LocalDateTime from,
+                                                     @Param("to") LocalDateTime to);
+
+    /** CU-20: lo mismo, pero de una localidad. */
+    @Query("""
+            select i from ActivityInstance i
+            join fetch i.activity a
+            join fetch a.business
+            join fetch a.locality l
+            join fetch l.department
+            where a.active = true and l.id = :localityId
+              and i.startAt >= :from and i.startAt < :to
+            order by i.startAt, a.name
+            """)
+    List<ActivityInstance> findPublishedInLocality(@Param("localityId") Integer localityId,
+                                                   @Param("from") LocalDateTime from,
+                                                   @Param("to") LocalDateTime to);
 }

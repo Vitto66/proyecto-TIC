@@ -63,6 +63,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
 | API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 | API: listar emprendimientos aprobados (CU-19, pública) | `GET /api/businesses` |
+| API: actividades de un día por departamento o localidad (CU-20, pública) | `GET /api/activities?date=2026-11-05&departmentId=3` (o `&localityId=10`) |
 
 Las páginas usan Thymeleaf + Bootstrap: las plantillas están en `src/main/resources/templates`
 y los estilos, scripts e imágenes en `src/main/resources/static`.
