@@ -66,6 +66,7 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | API: actividades de un día por departamento o localidad (CU-20, pública) | `GET /api/activities?date=2026-11-05&departmentId=3` (o `&localityId=10`) |
 | API: top 3 de actividades del mes por departamento (CU-21, pública) | `GET /api/activities/top?departmentId=3&month=2026-10` |
 | API: verificar un emprendimiento por RUT o documento (CU-22, pública) | `GET /api/businesses/verify?rut=211234560018` (o `?document=45678901`) |
+| API: buscar actividades por palabra clave (CU-23, pública) | `GET /api/activities/search?keyword=kayak` |
 
 Las páginas usan Thymeleaf + Bootstrap: las plantillas están en `src/main/resources/templates`
 y los estilos, scripts e imágenes en `src/main/resources/static`.

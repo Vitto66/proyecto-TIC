@@ -371,4 +371,45 @@ class PublicApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parameter").value("rut"));
     }
+
+    // ---------- CU-23 Buscar actividades por palabra clave ----------
+
+    @Test
+    void searchActivities_returnsPublishedMatchesBestRatedFirst() throws Exception {
+        Business laguna = business("Kayak Laguna de Rocha", "kayak@mail.com", "45678901", ProviderStatus.APPROVED);
+        Activity kayak = activity(laguna, laPaloma, "Atardecer en kayak", true);
+        Activity paddle = activity(laguna, laPaloma, "Paddle en la laguna", true);
+        activity(laguna, laPaloma, "Laguna dada de baja", false);
+        Business caballos = business("Cabalgatas del Este", "caballos@mail.com", "12345678", ProviderStatus.APPROVED);
+        activity(caballos, puntaDelEste, "Paseo a caballo", true);
+        LocalDateTime october = LocalDateTime.of(2030, 10, 10, 12, 0);
+        review(kayak, 3, october);
+        review(paddle, 5, october);
+
+        // "laguna" está en el nombre de Paddle y en el emprendimiento de las dos; la dada de baja no sale
+        mockMvc.perform(get("/api/activities/search").param("keyword", "LAGUNA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].name").value("Paddle en la laguna"))
+                .andExpect(jsonPath("$[0].averageRating").value(5.0))
+                .andExpect(jsonPath("$[1].name").value("Atardecer en kayak"))
+                .andExpect(jsonPath("$[1].business").value("Kayak Laguna de Rocha"));
+    }
+
+    @Test
+    void searchActivities_noMatches_returnsEmptyList() throws Exception {
+        mockMvc.perform(get("/api/activities/search").param("keyword", "paracaidismo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void searchActivities_emptyKeyword_returns400WithParameter() throws Exception {
+        mockMvc.perform(get("/api/activities/search").param("keyword", "  "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parameter").value("keyword"));
+        mockMvc.perform(get("/api/activities/search"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parameter").value("keyword"));
+    }
 }

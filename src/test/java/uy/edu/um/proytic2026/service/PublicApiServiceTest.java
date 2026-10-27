@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.ActivitySearchResult;
 import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
@@ -349,5 +350,70 @@ class PublicApiServiceTest {
         assertThatThrownBy(() -> service.verifyBusiness(null, "abc"))
                 .isInstanceOf(InvalidApiParameterException.class)
                 .hasFieldOrPropertyWithValue("parameter", "document");
+    }
+
+    // ---------- CU-23 Buscar actividades por palabra clave ----------
+
+    private Activity described(long id, String name, String description) {
+        Activity a = activity(id, name);
+        a.setDescription(description);
+        return a;
+    }
+
+    @Test
+    void searchActivities_matchesNameDescriptionOrBusinessIgnoringCaseAndAccents() {
+        Activity kayak = described(20L, "Atardecer en kayak", "Remamos por la laguna");
+        Activity cabalgata = described(21L, "Cabalgata al faro", "Recorrido a caballo");
+        Activity vino = described(22L, "Cata de vinos", "Bodega familiar");
+        when(activityRepository.findAllPublished()).thenReturn(List.of(kayak, cabalgata, vino));
+        when(reviewRepository.ratingStats()).thenReturn(List.of());
+
+        // Por el nombre, sin importar mayúsculas ni tildes
+        assertThat(service.searchActivities("CABALGÁTA")).extracting(ActivitySearchResult::name)
+                .containsExactly("Cabalgata al faro");
+        // Por la descripción
+        assertThat(service.searchActivities("remamos")).extracting(ActivitySearchResult::name)
+                .containsExactly("Atardecer en kayak");
+        // Por el nombre del emprendimiento: las tres son de "Kayak Laguna de Rocha"
+        assertThat(service.searchActivities("rocha")).hasSize(3);
+        // Varias palabras: tienen que aparecer todas
+        assertThat(service.searchActivities("kayak atardecer")).extracting(ActivitySearchResult::name)
+                .containsExactly("Atardecer en kayak");
+    }
+
+    @Test
+    void searchActivities_sortsBestRatedFirstAndUnratedLast() {
+        when(activityRepository.findAllPublished()).thenReturn(List.of(
+                described(20L, "Atardecer en kayak", null), described(21L, "Paddle", null),
+                described(22L, "Surf", null), described(23L, "Buceo", null)));
+        when(reviewRepository.ratingStats()).thenReturn(List.of(stats(20L, 4.0, 3), stats(21L, 4.666666, 3),
+                stats(22L, 4.0, 5)));
+
+        List<ActivitySearchResult> result = service.searchActivities("rocha");
+
+        assertThat(result).extracting(ActivitySearchResult::name)
+                .containsExactly("Paddle", "Surf", "Atardecer en kayak", "Buceo");
+        assertThat(result.get(0).averageRating()).isEqualTo(4.67);
+        assertThat(result.get(3).averageRating()).isNull();
+        assertThat(result.get(3).reviewCount()).isZero();
+    }
+
+    @Test
+    void searchActivities_noMatches_returnsEmptyList() {
+        when(activityRepository.findAllPublished()).thenReturn(List.of(described(20L, "Atardecer en kayak", null)));
+        when(reviewRepository.ratingStats()).thenReturn(List.of());
+
+        assertThat(service.searchActivities("paracaidismo")).isEmpty();
+    }
+
+    @Test
+    void searchActivities_emptyKeyword_throwsIndicatingParameter() {
+        assertThatThrownBy(() -> service.searchActivities("   "))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "keyword");
+        assertThatThrownBy(() -> service.searchActivities(null))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "keyword");
+        verifyNoInteractions(activityRepository);
     }
 }
