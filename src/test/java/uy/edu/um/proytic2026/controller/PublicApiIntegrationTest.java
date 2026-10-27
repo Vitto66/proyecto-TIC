@@ -19,6 +19,7 @@ import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.entity.Reservation;
 import uy.edu.um.proytic2026.entity.ReservationStatus;
+import uy.edu.um.proytic2026.entity.Review;
 import uy.edu.um.proytic2026.entity.Tourist;
 import uy.edu.um.proytic2026.entity.User;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
@@ -29,6 +30,7 @@ import uy.edu.um.proytic2026.repository.DepartmentRepository;
 import uy.edu.um.proytic2026.repository.LocalityRepository;
 import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
+import uy.edu.um.proytic2026.repository.ReviewRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
 import uy.edu.um.proytic2026.repository.UserRepository;
 
@@ -82,6 +84,9 @@ class PublicApiIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     private MockMvc mockMvc;
 
@@ -241,6 +246,88 @@ class PublicApiIntegrationTest {
     @Test
     void activitiesOfDay_withoutLocation_returns400() throws Exception {
         mockMvc.perform(get("/api/activities").param("date", "2030-03-15"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parameter").value("departmentId"));
+    }
+
+    // ---------- CU-21 Top 3 de actividades del mes por departamento ----------
+
+    private int touristCount = 0;
+
+    /** Una reserva finalizada de esa actividad, valorada con ese puntaje en esa fecha. */
+    private void review(Activity activity, int rating, LocalDateTime createdAt) {
+        touristCount++;
+        ActivityInstance date = date(activity, createdAt.minusDays(1).withHour(9).plusMinutes(touristCount), 50);
+        User user = userRepository.save(User.builder().email("valora" + touristCount + "@mail.com")
+                .passwordHash("x").build());
+        Tourist tourist = touristRepository.save(Tourist.builder().user(user)
+                .firstName("Ana").lastName("Pérez").nationalId("5000000" + touristCount).build());
+        Reservation reservation = reservationRepository.save(Reservation.builder().tourist(tourist).instance(date)
+                .participants(1).totalPrice(new BigDecimal("1500")).status(ReservationStatus.FINISHED)
+                .createdAt(createdAt.minusDays(3)).build());
+        reviewRepository.save(Review.builder().reservation(reservation).rating(rating)
+                .comment("Muy lindo").createdAt(createdAt).build());
+    }
+
+    @Test
+    void topActivitiesOfMonth_returnsBestThreeOfTheMonthInDepartment() throws Exception {
+        Business laguna = business("Kayak Laguna de Rocha", "kayak@mail.com", "45678901", ProviderStatus.APPROVED);
+        Activity kayak = activity(laguna, laPaloma, "Atardecer en kayak", true);
+        Activity paddle = activity(laguna, laPaloma, "Paddle en la laguna", true);
+        Activity surf = activity(laguna, laPaloma, "Clase de surf", true);
+        Activity trekking = activity(laguna, laPaloma, "Trekking al faro", true);
+        Activity cancelled = activity(laguna, laPaloma, "Actividad dada de baja", false);
+        Activity otherDepartment = activity(laguna, puntaDelEste, "Paseo por la península", true);
+        LocalDateTime october = LocalDateTime.of(2030, 10, 10, 12, 0);
+
+        review(paddle, 5, october);                   // paddle: 4.5 con 2 valoraciones
+        review(paddle, 4, october);
+        review(kayak, 5, october);                    // kayak: 4.5 con 4 → le gana el empate a paddle (3b)
+        review(kayak, 4, october);
+        review(kayak, 5, october.plusDays(1));
+        review(kayak, 4, october.plusDays(2));
+        review(surf, 5, october);                     // surf: 5.0 con 1
+        review(trekking, 2, october);                 // trekking: 2.0, queda cuarto
+        review(trekking, 1, october.minusMonths(1));  // de septiembre: no cuenta
+        review(cancelled, 5, october);                // dada de baja: no participa
+        review(otherDepartment, 5, october);          // otro departamento: no participa
+
+        mockMvc.perform(get("/api/activities/top")
+                        .param("departmentId", rocha.getId().toString()).param("month", "2030-10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].name").value("Clase de surf"))
+                .andExpect(jsonPath("$[0].position").value(1))
+                .andExpect(jsonPath("$[0].averageRating").value(5.0))
+                .andExpect(jsonPath("$[1].name").value("Atardecer en kayak"))
+                .andExpect(jsonPath("$[1].reviewsInMonth").value(4))
+                .andExpect(jsonPath("$[2].name").value("Paddle en la laguna"))
+                .andExpect(jsonPath("$[2].averageRating").value(4.5));
+    }
+
+    @Test
+    void topActivitiesOfMonth_lessThanThreeRated_returnsThoseThatExist() throws Exception {
+        Business laguna = business("Kayak Laguna de Rocha", "kayak@mail.com", "45678901", ProviderStatus.APPROVED);
+        review(activity(laguna, laPaloma, "Atardecer en kayak", true), 4, LocalDateTime.of(2030, 10, 10, 12, 0));
+
+        mockMvc.perform(get("/api/activities/top")
+                        .param("departmentId", rocha.getId().toString()).param("month", "2030-10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value("Atardecer en kayak"));
+    }
+
+    @Test
+    void topActivitiesOfMonth_invalidMonth_returns400WithParameter() throws Exception {
+        mockMvc.perform(get("/api/activities/top")
+                        .param("departmentId", rocha.getId().toString()).param("month", "octubre"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parameter").value("month"));
+    }
+
+    @Test
+    void topActivitiesOfMonth_unknownDepartment_returns400WithParameter() throws Exception {
+        mockMvc.perform(get("/api/activities/top").param("departmentId", "9999").param("month", "2030-10"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parameter").value("departmentId"));
     }
