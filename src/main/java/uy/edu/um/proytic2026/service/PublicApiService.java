@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.ActivitySearchResult;
 import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
@@ -28,9 +29,12 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -220,5 +224,46 @@ public class PublicApiService {
             throw new InvalidApiParameterException(parameter, "El parámetro " + parameter + " tiene que tener dígitos");
         }
         return digits;
+    }
+
+    /**
+     * CU-23: las actividades publicadas que tienen la palabra clave en su nombre, su descripción
+     * o el nombre del emprendimiento. Igual que la búsqueda del portal (CU-05): sin importar
+     * mayúsculas ni tildes, y si son varias palabras tienen que aparecer todas. Ordenadas de la
+     * mejor a la peor puntuada; las que no tienen valoraciones, al final. Sin coincidencias →
+     * lista vacía (3a).
+     *
+     * @throws InvalidApiParameterException si la palabra clave está vacía (1a)
+     */
+    public List<ActivitySearchResult> searchActivities(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new InvalidApiParameterException("keyword", "La palabra clave no puede estar vacía");
+        }
+        List<String> words = Arrays.stream(CatalogService.normalize(keyword.trim()).split("\\s+")).toList();
+
+        Map<Long, ReviewRepository.RatingStats> ratings = reviewRepository.ratingStats().stream()
+                .collect(Collectors.toMap(ReviewRepository.RatingStats::getActivityId, Function.identity()));
+
+        return activityRepository.findAllPublished().stream()
+                .filter(a -> {
+                    String text = CatalogService.normalize(a.getName() + " "
+                            + Objects.toString(a.getDescription(), "") + " " + a.getBusiness().getName());
+                    return words.stream().allMatch(text::contains);
+                })
+                .map(a -> toSearchResult(a, ratings.get(a.getId())))
+                .sorted(Comparator.comparing(ActivitySearchResult::averageRating,
+                                Comparator.nullsLast(Comparator.<Double>reverseOrder()))
+                        .thenComparing(ActivitySearchResult::reviewCount, Comparator.<Long>reverseOrder())
+                        .thenComparing(ActivitySearchResult::name))
+                .toList();
+    }
+
+    private static ActivitySearchResult toSearchResult(Activity a, ReviewRepository.RatingStats rating) {
+        return new ActivitySearchResult(a.getId(), a.getName(), a.getDescription(), a.getBusiness().getName(),
+                a.getLocality().getName(), a.getLocality().getDepartment().getName(),
+                a.getTypes().stream().map(ActivityType::getName).sorted().toList(),
+                a.getPrice(), a.getDurationMinutes(), a.getMinAge(),
+                rating == null ? null : round2(rating.getAverage()),
+                rating == null ? 0 : rating.getCount());
     }
 }

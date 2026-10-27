@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.ActivitySearchResult;
 import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
@@ -62,5 +63,14 @@ public class PublicApiController {
     public BusinessVerification verifyBusiness(@RequestParam(required = false) String rut,
                                                @RequestParam(required = false) String document) {
         return publicApiService.verifyBusiness(rut, document);
+    }
+
+    /**
+     * CU-23: GET /api/activities/search?keyword=kayak → las actividades que coinciden, de la
+     * mejor a la peor puntuada. Palabra clave vacía o faltante → 400.
+     */
+    @GetMapping("/activities/search")
+    public List<ActivitySearchResult> searchActivities(@RequestParam(required = false) String keyword) {
+        return publicApiService.searchActivities(keyword);
     }
 }
