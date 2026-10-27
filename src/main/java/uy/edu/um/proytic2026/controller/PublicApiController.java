@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
 import uy.edu.um.proytic2026.service.PublicApiService;
@@ -51,5 +52,15 @@ public class PublicApiController {
     public List<TopActivity> topActivitiesOfMonth(@RequestParam Integer departmentId,
                                                   @RequestParam String month) {
         return publicApiService.topActivitiesOfMonth(departmentId, month);
+    }
+
+    /**
+     * CU-22: GET /api/businesses/verify?rut=211234560018 (o document=45678901) → si está
+     * registrado y aprobado. Si no existe, 200 con registered = false.
+     */
+    @GetMapping("/businesses/verify")
+    public BusinessVerification verifyBusiness(@RequestParam(required = false) String rut,
+                                               @RequestParam(required = false) String document) {
+        return publicApiService.verifyBusiness(rut, document);
     }
 }

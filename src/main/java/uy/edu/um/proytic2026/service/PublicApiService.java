@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
 import uy.edu.um.proytic2026.entity.Activity;
 import uy.edu.um.proytic2026.entity.ActivityInstance;
 import uy.edu.um.proytic2026.entity.ActivityType;
+import uy.edu.um.proytic2026.entity.Business;
+import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.exception.InvalidApiParameterException;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
@@ -16,6 +19,7 @@ import uy.edu.um.proytic2026.repository.ActivityRepository;
 import uy.edu.um.proytic2026.repository.BusinessRepository;
 import uy.edu.um.proytic2026.repository.DepartmentRepository;
 import uy.edu.um.proytic2026.repository.LocalityRepository;
+import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
 import uy.edu.um.proytic2026.repository.ReviewRepository;
 
@@ -27,6 +31,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,6 +51,7 @@ public class PublicApiService {
     private final LocalityRepository localityRepository;
     private final ReviewRepository reviewRepository;
     private final ActivityRepository activityRepository;
+    private final ProviderRepository providerRepository;
 
     /** Cuántas actividades devuelve el top del mes (CU-21). */
     static final int TOP_SIZE = 3;
@@ -174,5 +180,45 @@ public class PublicApiService {
 
     private static double round2(double value) {
         return Math.round(value * 100) / 100.0;
+    }
+
+    /**
+     * CU-22: si el prestador con ese RUT o documento está registrado y aprobado, con el nombre
+     * de su emprendimiento si ya lo registró. Hay que indicar uno de los dos. Se aceptan con
+     * puntos o guiones (4.567.890-1): se comparan solo los dígitos, como se guardan.
+     *
+     * @throws InvalidApiParameterException si no se indica ninguno, se indican los dos o el
+     *                                      valor no tiene dígitos
+     */
+    public BusinessVerification verifyBusiness(String rut, String document) {
+        boolean hasRut = rut != null && !rut.isBlank();
+        boolean hasDocument = document != null && !document.isBlank();
+        if (hasRut == hasDocument) {
+            throw new InvalidApiParameterException(hasRut ? "document" : "rut",
+                    "Hay que indicar el RUT (rut) o el documento (document) del prestador, uno solo");
+        }
+
+        Optional<Provider> provider;
+        if (hasRut) {
+            provider = providerRepository.findByRut(digitsOf("rut", rut));
+        } else {
+            provider = providerRepository.findByDocument(digitsOf("document", document));
+        }
+        if (provider.isEmpty()) {
+            return BusinessVerification.notRegistered(); // 2a
+        }
+
+        Provider p = provider.get();
+        String businessName = businessRepository.findByProviderId(p.getId()).map(Business::getName).orElse(null);
+        return new BusinessVerification(true, p.getStatus() == ProviderStatus.APPROVED, p.getStatus(), businessName);
+    }
+
+    /** Solo los dígitos: "4.567.890-1" → "45678901". Sin dígitos → error indicando el parámetro. */
+    private static String digitsOf(String parameter, String value) {
+        String digits = value.replaceAll("\\D", "");
+        if (digits.isEmpty()) {
+            throw new InvalidApiParameterException(parameter, "El parámetro " + parameter + " tiene que tener dígitos");
+        }
+        return digits;
     }
 }

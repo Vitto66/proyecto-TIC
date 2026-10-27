@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
+import uy.edu.um.proytic2026.dto.BusinessVerification;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
 import uy.edu.um.proytic2026.dto.TopActivity;
 import uy.edu.um.proytic2026.entity.Activity;
@@ -14,6 +15,8 @@ import uy.edu.um.proytic2026.entity.ActivityType;
 import uy.edu.um.proytic2026.entity.Business;
 import uy.edu.um.proytic2026.entity.Department;
 import uy.edu.um.proytic2026.entity.Locality;
+import uy.edu.um.proytic2026.entity.PersonType;
+import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.exception.InvalidApiParameterException;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
@@ -21,6 +24,7 @@ import uy.edu.um.proytic2026.repository.ActivityRepository;
 import uy.edu.um.proytic2026.repository.BusinessRepository;
 import uy.edu.um.proytic2026.repository.DepartmentRepository;
 import uy.edu.um.proytic2026.repository.LocalityRepository;
+import uy.edu.um.proytic2026.repository.ProviderRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
 import uy.edu.um.proytic2026.repository.ReviewRepository;
 
@@ -28,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,6 +68,9 @@ class PublicApiServiceTest {
     @Mock
     private ActivityRepository activityRepository;
 
+    @Mock
+    private ProviderRepository providerRepository;
+
     private PublicApiService service;
 
     private final Department rocha = Department.builder().id(1).name("Rocha").build();
@@ -74,7 +82,7 @@ class PublicApiServiceTest {
     @BeforeEach
     void setUp() {
         service = new PublicApiService(businessRepository, instanceRepository, reservationRepository,
-                departmentRepository, localityRepository, reviewRepository, activityRepository);
+                departmentRepository, localityRepository, reviewRepository, activityRepository, providerRepository);
     }
 
     // ---------- CU-19 Listar emprendimientos ----------
@@ -276,5 +284,70 @@ class PublicApiServiceTest {
         assertThatThrownBy(() -> service.topActivitiesOfMonth(99, "2026-10"))
                 .isInstanceOf(InvalidApiParameterException.class)
                 .hasFieldOrPropertyWithValue("parameter", "departmentId");
+    }
+
+    // ---------- CU-22 Verificar un emprendimiento ----------
+
+    private Provider provider(ProviderStatus status) {
+        return Provider.builder().id(7L).personType(PersonType.LEGAL).status(status)
+                .rut("211234560018").legalName("Laguna Aventuras S.A.").build();
+    }
+
+    @Test
+    void verifyBusiness_approvedWithBusiness_returnsRegisteredAndApproved() {
+        when(providerRepository.findByRut("211234560018")).thenReturn(Optional.of(provider(ProviderStatus.APPROVED)));
+        when(businessRepository.findByProviderId(7L)).thenReturn(Optional.of(laguna));
+
+        BusinessVerification result = service.verifyBusiness("211234560018", null);
+
+        assertThat(result).isEqualTo(new BusinessVerification(true, true, ProviderStatus.APPROVED,
+                "Kayak Laguna de Rocha"));
+    }
+
+    @Test
+    void verifyBusiness_byDocumentWithDotsAndDash_comparesOnlyDigits() {
+        when(providerRepository.findByDocument("45678901")).thenReturn(Optional.of(provider(ProviderStatus.APPROVED)));
+        when(businessRepository.findByProviderId(7L)).thenReturn(Optional.empty());
+
+        BusinessVerification result = service.verifyBusiness(null, " 4.567.890-1 ");
+
+        // Aprobado, pero todavía no registró su emprendimiento
+        assertThat(result).isEqualTo(new BusinessVerification(true, true, ProviderStatus.APPROVED, null));
+    }
+
+    @Test
+    void verifyBusiness_pendingOrRejected_returnsItsStatus() {
+        when(providerRepository.findByRut("211234560018")).thenReturn(Optional.of(provider(ProviderStatus.PENDING)));
+        when(businessRepository.findByProviderId(7L)).thenReturn(Optional.empty());
+
+        BusinessVerification result = service.verifyBusiness("211234560018", null);
+
+        assertThat(result.registered()).isTrue();
+        assertThat(result.approved()).isFalse();
+        assertThat(result.status()).isEqualTo(ProviderStatus.PENDING);
+    }
+
+    @Test
+    void verifyBusiness_notRegistered_returnsNotRegistered() {
+        when(providerRepository.findByRut("219999990018")).thenReturn(Optional.empty());
+
+        assertThat(service.verifyBusiness("219999990018", null)).isEqualTo(BusinessVerification.notRegistered());
+    }
+
+    @Test
+    void verifyBusiness_neitherOrBoth_throwsIndicatingParameter() {
+        assertThatThrownBy(() -> service.verifyBusiness(null, "  "))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "rut");
+        assertThatThrownBy(() -> service.verifyBusiness("211234560018", "45678901"))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "document");
+    }
+
+    @Test
+    void verifyBusiness_withoutDigits_throwsIndicatingParameter() {
+        assertThatThrownBy(() -> service.verifyBusiness(null, "abc"))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "document");
     }
 }
