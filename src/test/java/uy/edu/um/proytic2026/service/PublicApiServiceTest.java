@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
+import uy.edu.um.proytic2026.dto.TopActivity;
 import uy.edu.um.proytic2026.entity.Activity;
 import uy.edu.um.proytic2026.entity.ActivityInstance;
 import uy.edu.um.proytic2026.entity.ActivityType;
@@ -16,18 +17,22 @@ import uy.edu.um.proytic2026.entity.Locality;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.exception.InvalidApiParameterException;
 import uy.edu.um.proytic2026.repository.ActivityInstanceRepository;
+import uy.edu.um.proytic2026.repository.ActivityRepository;
 import uy.edu.um.proytic2026.repository.BusinessRepository;
 import uy.edu.um.proytic2026.repository.DepartmentRepository;
 import uy.edu.um.proytic2026.repository.LocalityRepository;
 import uy.edu.um.proytic2026.repository.ReservationRepository;
+import uy.edu.um.proytic2026.repository.ReviewRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +57,12 @@ class PublicApiServiceTest {
     @Mock
     private LocalityRepository localityRepository;
 
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private ActivityRepository activityRepository;
+
     private PublicApiService service;
 
     private final Department rocha = Department.builder().id(1).name("Rocha").build();
@@ -63,7 +74,7 @@ class PublicApiServiceTest {
     @BeforeEach
     void setUp() {
         service = new PublicApiService(businessRepository, instanceRepository, reservationRepository,
-                departmentRepository, localityRepository);
+                departmentRepository, localityRepository, reviewRepository, activityRepository);
     }
 
     // ---------- CU-19 Listar emprendimientos ----------
@@ -189,5 +200,81 @@ class PublicApiServiceTest {
         assertThatThrownBy(() -> service.activitiesOfDay(DAY, null, 99))
                 .isInstanceOf(InvalidApiParameterException.class)
                 .hasFieldOrPropertyWithValue("parameter", "localityId");
+    }
+
+    // ---------- CU-21 Top 3 de actividades del mes por departamento ----------
+
+    private ReviewRepository.RatingStats stats(long activityId, double average, long count) {
+        return new ReviewRepository.RatingStats() {
+            public Long getActivityId() {
+                return activityId;
+            }
+
+            public Double getAverage() {
+                return average;
+            }
+
+            public Long getCount() {
+                return count;
+            }
+        };
+    }
+
+    @Test
+    void topActivitiesOfMonth_returnsTopThreeInRepositoryOrder() {
+        when(departmentRepository.existsById(1)).thenReturn(true);
+        when(reviewRepository.ratingStatsInDepartment(1, LocalDateTime.of(2026, 10, 1, 0, 0),
+                LocalDateTime.of(2026, 11, 1, 0, 0)))
+                .thenReturn(List.of(stats(21L, 5.0, 2), stats(20L, 4.666666, 3), stats(22L, 4.5, 2),
+                        stats(23L, 3.0, 1)));
+        when(activityRepository.findAllById(List.of(21L, 20L, 22L)))
+                .thenReturn(List.of(activity(20L, "Atardecer en kayak"), activity(21L, "Paddle"),
+                        activity(22L, "Cabalgata")));
+
+        List<TopActivity> result = service.topActivitiesOfMonth(1, "2026-10");
+
+        assertThat(result).containsExactly(
+                new TopActivity(1, 21L, "Paddle", "Kayak Laguna de Rocha", "La Paloma", "Rocha", 5.0, 2),
+                new TopActivity(2, 20L, "Atardecer en kayak", "Kayak Laguna de Rocha", "La Paloma", "Rocha", 4.67, 3),
+                new TopActivity(3, 22L, "Cabalgata", "Kayak Laguna de Rocha", "La Paloma", "Rocha", 4.5, 2));
+    }
+
+    @Test
+    void topActivitiesOfMonth_noReviewsInMonth_returnsEmptyList() {
+        when(departmentRepository.existsById(1)).thenReturn(true);
+        when(reviewRepository.ratingStatsInDepartment(any(), any(), any())).thenReturn(List.of());
+
+        assertThat(service.topActivitiesOfMonth(1, "2026-10")).isEmpty();
+        verifyNoInteractions(activityRepository);
+    }
+
+    @Test
+    void topActivitiesOfMonth_december_endsOnFirstOfJanuary() {
+        when(departmentRepository.existsById(1)).thenReturn(true);
+        when(reviewRepository.ratingStatsInDepartment(any(), any(), any())).thenReturn(List.of());
+
+        service.topActivitiesOfMonth(1, "2026-12");
+
+        verify(reviewRepository).ratingStatsInDepartment(1, LocalDateTime.of(2026, 12, 1, 0, 0),
+                LocalDateTime.of(2027, 1, 1, 0, 0));
+    }
+
+    @Test
+    void topActivitiesOfMonth_invalidMonth_throwsIndicatingParameter() {
+        assertThatThrownBy(() -> service.topActivitiesOfMonth(1, "10-2026"))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "month");
+        assertThatThrownBy(() -> service.topActivitiesOfMonth(1, "2026-13"))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "month");
+    }
+
+    @Test
+    void topActivitiesOfMonth_unknownDepartment_throwsIndicatingParameter() {
+        when(departmentRepository.existsById(99)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.topActivitiesOfMonth(99, "2026-10"))
+                .isInstanceOf(InvalidApiParameterException.class)
+                .hasFieldOrPropertyWithValue("parameter", "departmentId");
     }
 }

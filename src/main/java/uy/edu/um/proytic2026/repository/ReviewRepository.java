@@ -57,4 +57,21 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             order by r.createdAt desc, r.id desc
             """)
     List<Review> findAllOfTourist(@Param("touristId") Long touristId);
+
+    /**
+     * CU-21: promedio y cantidad de las valoraciones recibidas entre from (incluido) y to
+     * (excluido) por las actividades publicadas de un departamento. De la mejor puntuada a la
+     * peor; si empatan, primero la que recibió más valoraciones (3b) y después por nombre.
+     */
+    @Query("""
+            select a.id as activityId, avg(r.rating) as average, count(r) as count
+            from Review r join r.reservation res join res.instance i join i.activity a
+            where a.active = true and a.locality.department.id = :departmentId
+              and r.createdAt >= :from and r.createdAt < :to
+            group by a.id, a.name
+            order by avg(r.rating) desc, count(r) desc, a.name
+            """)
+    List<RatingStats> ratingStatsInDepartment(@Param("departmentId") Integer departmentId,
+                                              @Param("from") java.time.LocalDateTime from,
+                                              @Param("to") java.time.LocalDateTime to);
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uy.edu.um.proytic2026.dto.ActivityOfDay;
 import uy.edu.um.proytic2026.dto.PublicBusiness;
+import uy.edu.um.proytic2026.dto.TopActivity;
 import uy.edu.um.proytic2026.service.PublicApiService;
 
 import java.time.LocalDate;
@@ -40,5 +41,15 @@ public class PublicApiController {
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer localityId) {
         return publicApiService.activitiesOfDay(date, departmentId, localityId);
+    }
+
+    /**
+     * CU-21: GET /api/activities/top?departmentId=3&month=2026-10 → hasta 3 actividades, de la
+     * mejor puntuada en el mes a la peor. Departamento inexistente o mes inválido → 400.
+     */
+    @GetMapping("/activities/top")
+    public List<TopActivity> topActivitiesOfMonth(@RequestParam Integer departmentId,
+                                                  @RequestParam String month) {
+        return publicApiService.topActivitiesOfMonth(departmentId, month);
     }
 }
