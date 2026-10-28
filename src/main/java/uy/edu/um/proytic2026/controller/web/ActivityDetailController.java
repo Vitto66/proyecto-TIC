@@ -12,6 +12,7 @@ import uy.edu.um.proytic2026.dto.ActivityDetail;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
 import uy.edu.um.proytic2026.entity.Role;
 import uy.edu.um.proytic2026.service.ActivityDetailService;
+import uy.edu.um.proytic2026.service.ActivityPhotoService;
 
 /**
  * CU-06 Consultar el detalle de una actividad. Es público, como la vidriera (RF-03).
@@ -33,12 +34,14 @@ public class ActivityDetailController {
     }
 
     private final ActivityDetailService detailService;
+    private final ActivityPhotoService photoService;
 
     @GetMapping("/activities/{id}")
     public String detail(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser current, Model model) {
         ActivityDetail detail = detailService.load(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("activity", detailService.withForecast(detail));
+        model.addAttribute("photoUrl", photoService.url(id));
 
         model.addAttribute("currentUser", current);
         if (current != null) {

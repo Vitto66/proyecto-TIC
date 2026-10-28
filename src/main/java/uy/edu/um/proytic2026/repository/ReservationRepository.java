@@ -121,4 +121,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             order by i.startAt desc, r.id desc
             """)
     List<Reservation> findFinishedWithoutReview(@Param("touristId") Long touristId);
+
+    /** Cuántas reservas en esos estados recibió cada actividad desde un momento (el inicio). Filas [idActividad, cantidad]. */
+    @Query("""
+            select r.instance.activity.id, count(r) from Reservation r
+            where r.createdAt >= :since and r.status in :statuses
+            group by r.instance.activity.id
+            """)
+    List<Object[]> countBookingsSince(@Param("since") java.time.LocalDateTime since,
+                                      @Param("statuses") Collection<ReservationStatus> statuses);
 }

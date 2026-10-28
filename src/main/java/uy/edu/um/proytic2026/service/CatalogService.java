@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uy.edu.um.proytic2026.dto.ActivityFormOptions.Option;
 import uy.edu.um.proytic2026.dto.ActivitySearch;
+import uy.edu.um.proytic2026.dto.CatalogCalendar;
+import uy.edu.um.proytic2026.dto.DateLabels;
+import uy.edu.um.proytic2026.dto.HomeOverview;
 import uy.edu.um.proytic2026.dto.CatalogCard;
 import uy.edu.um.proytic2026.dto.CatalogFilters;
 import uy.edu.um.proytic2026.dto.CatalogResult;
@@ -21,9 +24,15 @@ import java.math.BigDecimal;
 import java.text.Collator;
 import java.text.Normalizer;
 import java.time.Clock;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -83,6 +92,67 @@ public class CatalogService {
                 .sorted(bestRatedFirst())
                 .toList();
         return new CatalogResult(cards, true);
+    }
+
+    /**
+     * Vista de calendario: las fechas disponibles (futuras y con lugar) de las actividades que
+     * cumplen los filtros, en el mes pedido. Un mes que ya pasó se cambia por el actual.
+     */
+    @Transactional(readOnly = true)
+    public CatalogCalendar calendar(ActivitySearch search, YearMonth requested) {
+        LocalDate today = LocalDate.now(clock);
+        YearMonth current = YearMonth.from(today);
+        YearMonth month = requested == null || requested.isBefore(current) ? current : requested;
+
+        List<Activity> published = activityRepository.findAllPublished();
+        Map<Long, ReviewRepository.RatingStats> ratings = reviewRepository.ratingStats().stream()
+                .collect(Collectors.toMap(ReviewRepository.RatingStats::getActivityId, r -> r));
+        Map<Long, List<ActivityInstance>> availableDates = availableDates(published);
+        Map<Long, Long> occupied = occupiedSeats(availableDates);
+        Predicate<Activity> matches = filter(search, ratings, availableDates);
+
+        // Las fechas del mes, agrupadas por día y ordenadas por hora
+        Map<LocalDate, List<CatalogCalendar.Slot>> byDay = new HashMap<>();
+        int total = 0;
+        for (Activity a : published) {
+            if (!matches.test(a)) continue;
+            String scene = HomeOverview.sceneFor(a.getTypes().stream().map(ActivityType::getName).sorted()
+                    .findFirst().orElse(""));
+            for (ActivityInstance i : availableDates.getOrDefault(a.getId(), List.of())) {
+                LocalDate day = i.getStartAt().toLocalDate();
+                if (!YearMonth.from(day).equals(month)) continue;
+                if (search.getDate() != null && !day.equals(search.getDate())) continue;
+                Long free = i.getMaxCapacity() == null ? null : i.getMaxCapacity() - occupied.getOrDefault(i.getId(), 0L);
+                byDay.computeIfAbsent(day, d -> new ArrayList<>()).add(new CatalogCalendar.Slot(a.getId(), i.getId(),
+                        a.getName(), DateLabels.time(i.getStartAt()), free, scene));
+                total++;
+            }
+        }
+        byDay.values().forEach(list -> list.sort(Comparator.comparing(CatalogCalendar.Slot::time)
+                .thenComparing(CatalogCalendar.Slot::activityName)));
+
+        LocalDate first = month.atDay(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate last = month.atEndOfMonth().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<List<CatalogCalendar.Day>> weeks = new ArrayList<>();
+        List<CatalogCalendar.Day> week = new ArrayList<>();
+        for (LocalDate d = first; !d.isAfter(last); d = d.plusDays(1)) {
+            week.add(new CatalogCalendar.Day(d, YearMonth.from(d).equals(month), d.equals(today),
+                    byDay.getOrDefault(d, List.of())));
+            if (week.size() == 7) {
+                weeks.add(week);
+                week = new ArrayList<>();
+            }
+        }
+        return CatalogCalendar.of(month, current, weeks, total);
+    }
+
+    /** Lugares ocupados de cada fecha (las reservas pagas). */
+    private Map<Long, Long> occupiedSeats(Map<Long, List<ActivityInstance>> availableDates) {
+        List<Long> ids = availableDates.values().stream().flatMap(List::stream).map(ActivityInstance::getId).toList();
+        if (ids.isEmpty()) return Map.of();
+        return reservationRepository.occupiedSeats(ids, ActivityDateService.SEAT_TAKING).stream()
+                .collect(Collectors.toMap(ReservationRepository.OccupiedSeats::getInstanceId,
+                        ReservationRepository.OccupiedSeats::getSeats));
     }
 
     /** Las fechas futuras de cada actividad que todavía tienen lugar, de la más cercana a la más lejana. */

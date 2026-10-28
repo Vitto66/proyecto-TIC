@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uy.edu.um.proytic2026.dto.ActivitySummary;
@@ -23,9 +25,12 @@ import uy.edu.um.proytic2026.exception.ActivityNotFoundException;
 import uy.edu.um.proytic2026.exception.ActivityNotPublishedException;
 import uy.edu.um.proytic2026.exception.BusinessRequiredException;
 import uy.edu.um.proytic2026.exception.InvalidLocationException;
+import uy.edu.um.proytic2026.exception.InvalidPhotoException;
 import uy.edu.um.proytic2026.exception.InvalidSelectionException;
 import uy.edu.um.proytic2026.exception.ProviderNotApprovedException;
 import uy.edu.um.proytic2026.service.ActivityCancellationService;
+import uy.edu.um.proytic2026.service.ActivityPhotoService;
+import uy.edu.um.proytic2026.service.ActivityPhotoService.PhotoUpload;
 import uy.edu.um.proytic2026.service.ActivityService;
 import uy.edu.um.proytic2026.service.ActivityService.Access;
 
@@ -46,6 +51,7 @@ public class ActivityPageController {
 
     private final ActivityService activityService;
     private final ActivityCancellationService cancellationService;
+    private final ActivityPhotoService photoService;
 
     @ModelAttribute("currentUser")
     AuthenticatedUser currentUser(@AuthenticationPrincipal AuthenticatedUser user) {
@@ -61,6 +67,7 @@ public class ActivityPageController {
             model.addAttribute("activities", activityService.myActivities(user.userId()));
             // CU-10: devoluciones que quedaron pendientes al dar de baja una actividad
             model.addAttribute("pendingRefunds", cancellationService.pendingRefunds(user.userId()));
+            model.addAttribute("photos", photoService.urls());
         }
         return LIST_VIEW;
     }
@@ -75,13 +82,16 @@ public class ActivityPageController {
         return formView(model);
     }
 
-    /** Pasos 2 a 7. */
+    /** Pasos 2 a 7, con la foto de portada (opcional). */
     @PostMapping
     public String publish(@AuthenticationPrincipal AuthenticatedUser user,
                           @Valid @ModelAttribute("form") PublishActivityRequest form, BindingResult result,
+                          @RequestParam(name = "photo", required = false) MultipartFile photoFile,
                           Model model, RedirectAttributes redirect) {
-        // 6a. Faltan datos obligatorios → se marcan los campos
-        if (result.hasErrors()) {
+        PhotoUpload photo = readPhoto(photoFile, model);
+        // 6a. Faltan datos obligatorios (o la foto no sirve) → se marcan los campos
+        if (result.hasErrors() || model.containsAttribute("photoError")) {
+            photoLost(photoFile, model);
             return formView(model);
         }
         ActivitySummary published;
@@ -91,6 +101,7 @@ public class ActivityPageController {
             return "redirect:/provider/activities";
         } catch (InvalidLocationException ex) {
             result.rejectValue("localityId", "invalid", "elegí una localidad del departamento seleccionado");
+            photoLost(photoFile, model);
             return formView(model);
         } catch (InvalidSelectionException ex) {
             if ("equipment".equals(ex.getField())) {
@@ -98,7 +109,11 @@ public class ActivityPageController {
             } else {
                 result.rejectValue(ex.getField(), "invalid", ex.getMessage());
             }
+            photoLost(photoFile, model);
             return formView(model);
+        }
+        if (photo != null) {
+            photoService.save(published.id(), photo);
         }
         // Post/Redirect/Get: si recarga la lista no se vuelve a publicar
         redirect.addFlashAttribute("published", published.name());
@@ -125,12 +140,22 @@ public class ActivityPageController {
     @PostMapping("/{activityId}")
     public String update(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long activityId,
                          @Valid @ModelAttribute("form") PublishActivityRequest form, BindingResult result,
+                         @RequestParam(name = "photo", required = false) MultipartFile photoFile,
+                         @RequestParam(name = "removePhoto", defaultValue = "false") boolean removePhoto,
                          Model model, RedirectAttributes redirect) {
         try {
-            if (result.hasErrors()) {
+            PhotoUpload photo = readPhoto(photoFile, model);
+            if (result.hasErrors() || model.containsAttribute("photoError")) {
+                photoLost(photoFile, model);
                 return editView(user, activityId, model);
             }
             ActivitySummary updated = activityService.update(user.userId(), activityId, form);
+            // Una foto nueva reemplaza a la anterior; si no eligió otra, puede sacarla
+            if (photo != null) {
+                photoService.save(updated.id(), photo);
+            } else if (removePhoto) {
+                photoService.remove(updated.id());
+            }
             redirect.addFlashAttribute("activityMessage", "Se guardaron los cambios de \"" + updated.name() + "\".");
             return "redirect:/provider/activities";
         } catch (ActivityNotFoundException ex) {
@@ -139,6 +164,7 @@ public class ActivityPageController {
             return notPublished(redirect);
         } catch (InvalidLocationException ex) {
             result.rejectValue("localityId", "invalid", "elegí una localidad del departamento seleccionado");
+            photoLost(photoFile, model);
             return editView(user, activityId, model);
         } catch (InvalidSelectionException ex) {
             if ("equipment".equals(ex.getField())) {
@@ -146,6 +172,7 @@ public class ActivityPageController {
             } else {
                 result.rejectValue(ex.getField(), "invalid", ex.getMessage());
             }
+            photoLost(photoFile, model);
             return editView(user, activityId, model);
         }
     }
@@ -206,10 +233,28 @@ public class ActivityPageController {
             model.addAttribute("editingId", activityId);
             model.addAttribute("editingName", activityService.activityName(user.userId(), activityId));
             model.addAttribute("options", activityService.formOptions(user.userId(), activityId));
+            model.addAttribute("currentPhotoUrl", photoService.url(activityId));
         } catch (ActivityNotFoundException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return FORM_VIEW;
+    }
+
+    /** Revisa la foto elegida; si no sirve, deja el motivo en el modelo para mostrarlo junto al campo. */
+    private PhotoUpload readPhoto(MultipartFile file, Model model) {
+        try {
+            return photoService.read(file).orElse(null);
+        } catch (InvalidPhotoException ex) {
+            model.addAttribute("photoError", ex.getMessage());
+            return null;
+        }
+    }
+
+    /** El navegador no vuelve a llenar el campo de archivo: si eligió una foto, se le pide que la elija de nuevo. */
+    private static void photoLost(MultipartFile file, Model model) {
+        if (file != null && !file.isEmpty() && !model.containsAttribute("photoError")) {
+            model.addAttribute("photoLost", true);
+        }
     }
 
     private static String notPublished(RedirectAttributes redirect) {

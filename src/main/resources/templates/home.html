@@ -7,179 +7,214 @@
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
-    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
-    <link th:href="@{/css/landing.css}" href="../static/css/landing.css" rel="stylesheet">
+    <link th:href="@{/css/inicio.css}" href="../static/css/inicio.css" rel="stylesheet">
 </head>
-<body class="home">
+<body class="inicio">
 
-<!-- ===== Portada: fotos reales de Uruguay + menú ===== -->
-<section class="hero">
-    <div class="hero-bg" aria-hidden="true">
-        <div class="hero-slide is-active" data-scene="polonio" data-caption="Faro de Cabo Polonio, Rocha"></div>
-        <div class="hero-slide" data-scene="cuervos" data-caption="Quebrada de los Cuervos, Treinta y Tres"></div>
-        <div class="hero-slide" data-scene="colonia" data-caption="Calle de los Suspiros, Colonia del Sacramento"></div>
-        <div class="hero-slide" data-scene="valizas" data-caption="Dunas de Valizas, Rocha"></div>
-    </div>
+<!-- ===== Portada: fotos reales de Uruguay a todo lo ancho, con el menú encima ===== -->
+    <section class="hero-a">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="hero-slide is-active" data-scene-photo="polonio" data-caption="Faro de Cabo Polonio, Rocha"></div>
+            <div class="hero-slide" data-scene-photo="cuervos" data-caption="Quebrada de los Cuervos, Treinta y Tres"></div>
+            <div class="hero-slide" data-scene-photo="colonia" data-caption="Calle de los Suspiros, Colonia del Sacramento"></div>
+            <div class="hero-slide" data-scene-photo="valizas" data-caption="Dunas de Valizas, Rocha"></div>
+        </div>
 
-    <header class="home-header">
-        <div class="container-xl d-flex align-items-center justify-content-between gap-3">
-            <a class="brand" th:href="@{/}" href="home.html">
-                <img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="36" height="36">
-                Uruguay <span>Mnatural</span>
+        <header th:replace="~{fragments/topbar :: topbar(${overview.searchDepartments()}, ${overview.searchTypes()})}"></header>
+
+        <div class="container-xl hero-body">
+            <div class="hero-text">
+                <p class="hero-notice" role="status" th:if="${param.logout != null}">Cerraste sesión. ¡Hasta pronto!</p>
+                <h1>Uruguay al aire libre, con gente del lugar</h1>
+                <p>Excursiones, cabalgatas, kayak y bodegas en los 19 departamentos. Reservás y pagás acá.</p>
+            </div>
+            <div class="hero-foot">
+                <span class="hero-caption" id="hero-caption">Faro de Cabo Polonio, Rocha</span>
+                <div class="hero-dots" role="group" aria-label="Elegir foto">
+                    <button type="button" aria-label="Faro de Cabo Polonio" aria-current="true"></button>
+                    <button type="button" aria-label="Quebrada de los Cuervos" aria-current="false"></button>
+                    <button type="button" aria-label="Calle de los Suspiros" aria-current="false"></button>
+                    <button type="button" aria-label="Dunas de Valizas" aria-current="false"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<main>
+    <section class="container-xl finder-zone">
+        <!-- Buscador: lleva a la vidriera (CU-05) con los filtros elegidos -->
+        <form class="finder" th:action="@{/activities}" action="catalog.html" method="get" role="search" id="finder">
+            <label class="finder-field">
+                <span>Dónde</span>
+                <select name="departmentId">
+                    <option value="">Todo Uruguay</option>
+                    <option th:each="d : ${overview.searchDepartments()}" th:value="${d.departmentId()}"
+                            th:text="${d.name()}">Rocha</option>
+                </select>
+            </label>
+            <label class="finder-field">
+                <span>Cuándo</span>
+                <input type="date" name="date">
+            </label>
+            <label class="finder-field">
+                <span>Qué tipo</span>
+                <select name="typeId">
+                    <option value="">Cualquiera</option>
+                    <option th:each="t : ${overview.searchTypes()}" th:value="${t.id()}" th:text="${t.name()}">Senderismo</option>
+                </select>
+            </label>
+            <button type="submit" class="finder-go">Buscar</button>
+        </form>
+
+        <!-- Tipos de actividad -->
+        <nav class="kinds" aria-label="Elegí tu forma de recorrer Uruguay" th:unless="${overview.types().isEmpty()}">
+            <a class="kind is-all" th:href="@{/activities}" href="catalog.html"><i data-scene="costa"></i>Todo</a>
+            <a class="kind" th:each="t : ${overview.types()}" th:href="@{/activities(typeId=${t.id()})}" href="catalog.html">
+                <i th:attr="data-scene=${t.scene()}"></i><span th:text="${t.name()}">Senderismo</span>
             </a>
-            <nav class="home-nav" aria-label="Principal">
-                <a th:href="@{/activities}" href="catalog.html">Explorar</a>
-                <th:block th:if="${currentUser == null}">
-                    <a th:href="@{/login}" href="login.html">Iniciar sesión</a>
-                    <a class="btn-hero" th:href="@{/register/tourist}" href="register-tourist.html">Crear cuenta</a>
-                </th:block>
-                <th:block th:if="${currentUser != null}">
-                    <a th:href="@{${spacePath}}" href="space.html">Mi espacio</a>
-                    <form th:action="@{/logout}" method="post" class="m-0">
-                        <button type="submit" class="link-button">Salir</button>
-                    </form>
-                </th:block>
-            </nav>
-        </div>
-    </header>
+        </nav>
+    </section>
 
-    <main class="hero-content">
-        <div class="container-xl">
-            <div class="hero-notice" role="status" th:if="${param.logout != null}">
-                Cerraste sesión. ¡Hasta pronto!
-            </div>
-            <h1>Descubrí Uruguay al natural</h1>
-            <p class="hero-lead">
-                Excursiones, cabalgatas, senderismo, kayak y enoturismo de prestadores de los 19
-                departamentos, reunidos en un solo lugar.
-            </p>
-            <div class="hero-actions">
-                <a class="btn-hero" th:href="@{/activities}" href="catalog.html">Explorar actividades</a>
-                <a class="btn-hero btn-hero-outline" th:if="${currentUser == null}"
-                   th:href="@{/register/tourist}" href="register-tourist.html">Crear mi cuenta</a>
-                <a class="btn-hero btn-hero-outline" th:if="${currentUser != null}"
-                   th:href="@{${spacePath}}" href="space.html">Ir a mi espacio</a>
-            </div>
-        </div>
-    </main>
-
-    <div class="hero-footer">
-        <div class="container-xl d-flex align-items-center justify-content-between gap-3">
-            <span class="hero-caption" id="hero-caption">Faro de Cabo Polonio, Rocha</span>
-            <div class="hero-dots" role="group" aria-label="Elegir foto">
-                <button type="button" aria-label="Faro de Cabo Polonio" aria-current="true"></button>
-                <button type="button" aria-label="Quebrada de los Cuervos" aria-current="false"></button>
-                <button type="button" aria-label="Calle de los Suspiros" aria-current="false"></button>
-                <button type="button" aria-label="Dunas de Valizas" aria-current="false"></button>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== Mapa: dónde hay actividades ===== -->
-<section class="map-section" aria-labelledby="map-title">
-    <div class="container-xl">
-        <div class="map-layout">
-            <div class="map-copy">
-                <h2 id="map-title"><strong>Uruguay:</strong> un país, diecinueve paisajes</h2>
-                <p>
-                    En pocas horas pasás de las dunas y los faros de la costa atlántica a las sierras y
-                    quebradas del este, de los palmares de butiá a las termas y los ríos del litoral.
+    <!-- ===== Mapa: qué hay en cada departamento ===== -->
+    <section class="where" aria-labelledby="map-title">
+        <div class="container-xl where-grid">
+            <div class="where-map">
+                <h2 id="map-title">¿A qué parte del país vas?</h2>
+                <p class="where-lead" th:if="${overview.hasActivities()}">
+                    Tocá un departamento y te mostramos lo que hay para hacer ahí.
+                    <span class="map-summary" th:text="${overview.summaryLabel()}">12 actividades en 5 departamentos</span>
                 </p>
-                <p>
-                    En el mapa están marcados los departamentos donde ya hay actividades publicadas.
-                    Tocá uno para ver qué podés hacer ahí.
-                </p>
-                <p class="map-summary" th:if="${overview.hasActivities()}" th:text="${overview.summaryLabel()}">
-                    12 actividades en 5 departamentos
-                </p>
-                <p class="map-summary is-empty" th:unless="${overview.hasActivities()}">
+                <p class="where-lead map-summary is-empty" th:unless="${overview.hasActivities()}">
                     Todavía no hay actividades publicadas. Cuando los prestadores publiquen, las vas a ver acá.
                 </p>
-                <a class="btn-navy" th:href="@{/activities}" href="catalog.html">Ver todas las actividades</a>
-            </div>
 
-            <div class="map-figure">
-                <svg class="uy-map" th:attr="viewBox=${overview.viewBox()}" viewBox="0 0 1000 1084"
-                     role="img" aria-labelledby="map-svg-title">
-                    <title id="map-svg-title">Mapa de los departamentos de Uruguay</title>
-                    <th:block th:each="d : ${overview.departments()}">
-                        <a th:if="${d.linkable()}" th:href="@{/activities(departmentId=${d.departmentId()})}"
-                           th:attr="aria-label=${d.name()} + ': ' + ${d.countLabel()}">
-                            <path class="dep has-activities" th:attr="d=${d.path()},data-iso=${d.iso()}"/>
+                <div class="map-figure">
+                    <svg class="uy-map" th:attr="viewBox=${overview.viewBox()}" viewBox="0 0 1000 1084"
+                         role="img" aria-labelledby="map-svg-title">
+                        <title id="map-svg-title">Mapa de los departamentos de Uruguay</title>
+                        <th:block th:each="d : ${overview.departments()}">
+                            <a th:if="${d.linkable()}" th:href="@{/activities(departmentId=${d.departmentId()})}"
+                               th:attr="aria-label=${d.name()} + ': ' + ${d.countLabel()},data-iso=${d.iso()}">
+                                <path class="dep has-activities"
+                                      th:classappend="${d.iso() == overview.selectedIso()} ? 'is-selected'"
+                                      th:attr="d=${d.path()},data-iso=${d.iso()}"/>
+                            </a>
+                            <path th:unless="${d.linkable()}" class="dep"
+                                  th:classappend="${d.hasActivities()} ? 'has-activities'"
+                                  th:attr="d=${d.path()},data-iso=${d.iso()}"/>
+                        </th:block>
+                    </svg>
+
+                    <th:block th:each="d : ${overview.pins()}">
+                        <a class="map-pin" th:if="${d.linkable()}" th:style="${d.labelStyle()}"
+                           th:classappend="${d.iso() == overview.selectedIso()} ? 'is-selected'"
+                           th:href="@{/activities(departmentId=${d.departmentId()})}" th:attr="data-iso=${d.iso()}">
+                            <span class="map-pin-name" th:text="${d.name()}">Rocha</span>
+                            <span class="map-pin-count" th:text="${d.activityCount()}">3</span>
                         </a>
-                        <path th:unless="${d.linkable()}" class="dep"
-                              th:classappend="${d.hasActivities()} ? 'has-activities'"
-                              th:attr="d=${d.path()},data-iso=${d.iso()}"/>
+                        <span class="map-pin" th:unless="${d.linkable()}" th:style="${d.labelStyle()}" th:attr="data-iso=${d.iso()}">
+                            <span class="map-pin-name" th:text="${d.name()}">Rocha</span>
+                            <span class="map-pin-count" th:text="${d.activityCount()}">3</span>
+                        </span>
                     </th:block>
-                </svg>
+                </div>
+            </div>
 
-                <!-- Etiquetas de los departamentos con actividades, sobre el mapa -->
-                <th:block th:each="d : ${overview.pins()}">
-                    <a class="map-pin" th:if="${d.linkable()}" th:style="${d.labelStyle()}"
-                       th:href="@{/activities(departmentId=${d.departmentId()})}" th:attr="data-iso=${d.iso()}">
-                        <span class="map-pin-name" th:text="${d.name()}">Rocha</span>
-                        <span class="map-pin-count" th:text="${d.activityCount()}">3</span>
+            <!-- Panel del departamento elegido: uno por departamento, se muestra el elegido -->
+            <div class="dept-panels" th:if="${overview.hasActivities()}" aria-live="polite">
+                <article class="dept-panel" th:each="d : ${overview.pins()}" th:attr="data-iso=${d.iso()}"
+                         th:hidden="${d.iso() != overview.selectedIso()}">
+                    <h3 th:text="${d.name()}">Rocha</h3>
+                    <p class="dept-sub" th:text="${d.countLabel()} + ' publicadas'">12 actividades publicadas</p>
+                    <a class="dept-row" th:each="a : ${overview.panel(d.iso())}"
+                       th:href="@{/activities/{id}(id=${a.id()})}" href="activity-detail.html">
+                        <span class="dept-thumb" th:attr="data-scene=${a.scene()}"><img
+                              th:if="${photos.containsKey(a.id())}" th:src="@{${photos.get(a.id())}}" src="" alt="" loading="lazy" onerror="this.remove()"></span>
+                        <span class="dept-info">
+                            <strong th:text="${a.name()}">Kayak al atardecer en la Laguna de Rocha</strong>
+                            <small class="rating">
+                                <th:block th:if="${a.rated()}">★ <b th:text="${a.ratingLabel()}">4,8</b></th:block>
+                                <span th:text="${a.reviewsLabel()}">(32 opiniones)</span>
+                            </small>
+                        </span>
+                        <span class="dept-price"><b th:text="${a.priceLabel()}">$ 1.500</b><small>por persona</small></span>
                     </a>
-                    <span class="map-pin" th:unless="${d.linkable()}" th:style="${d.labelStyle()}" th:attr="data-iso=${d.iso()}">
-                        <span class="map-pin-name" th:text="${d.name()}">Rocha</span>
-                        <span class="map-pin-count" th:text="${d.activityCount()}">3</span>
-                    </span>
-                </th:block>
+                    <a class="dept-all" th:if="${d.linkable()}" th:href="@{/activities(departmentId=${d.departmentId()})}"
+                       href="catalog.html"
+                       th:text="${d.activityCount() == 1} ? 'Ver la actividad de ' + ${d.name()} : 'Ver las ' + ${d.activityCount()} + ' actividades de ' + ${d.name()}">Ver las 12 actividades de Rocha</a>
+                </article>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ===== Tipos de actividad ===== -->
-<section class="types-section" aria-labelledby="types-title" th:unless="${overview.types().isEmpty()}">
-    <div class="container-xl">
-        <p class="types-eyebrow">Cómo explorar</p>
-        <h2 id="types-title">Elegí tu forma de recorrer Uruguay</h2>
-        <div class="type-cards">
-            <a class="type-card" th:each="card : ${overview.types()}" th:classappend="'tone-' + ${card.tone()}"
-               th:href="@{/activities(typeId=${card.id()})}" href="catalog.html">
-                <span class="type-card-icon">
-                    <svg th:replace="~{fragments/icons :: icon(${card.icon()})}"></svg>
-                </span>
-                <span class="type-card-title" th:text="${card.name()}">Trekking</span>
-                <span class="type-card-text" th:text="${card.countLabel()}">4 actividades</span>
-                <span class="type-card-more">Ver actividades →</span>
-            </a>
+    <!-- ===== Lo más reservado del mes ===== -->
+    <section class="popular" aria-labelledby="popular-title" th:unless="${overview.featured().isEmpty()}">
+        <div class="container-xl">
+            <div class="popular-head">
+                <h2 id="popular-title" th:text="${overview.featuredByBookings()} ? 'Lo más reservado este mes' : 'Actividades destacadas'">Lo más reservado este mes</h2>
+                <a th:href="@{/activities}" href="catalog.html">Ver todas</a>
+            </div>
+            <div class="popular-grid">
+                <a class="act-card" th:each="a : ${overview.featured()}" th:href="@{/activities/{id}(id=${a.id()})}"
+                   href="activity-detail.html">
+                    <span class="act-img" th:attr="data-scene=${a.scene()}">
+                        <img class="act-photo" th:if="${photos.containsKey(a.id())}" th:src="@{${photos.get(a.id())}}"
+                             src="" alt="" loading="lazy" onerror="this.remove()">
+                        <span class="act-tag" th:text="${a.typeName()}">Senderismo</span>
+                    </span>
+                    <span class="act-place" th:text="${a.location()}">Treinta y Tres</span>
+                    <span class="act-name" th:text="${a.name()}">Caminata por la Quebrada de los Cuervos</span>
+                    <span class="act-meta rating">
+                        <th:block th:if="${a.rated()}">★ <b th:text="${a.ratingLabel()}">4,9</b></th:block>
+                        <span th:text="${a.reviewsLabel()} + ', ' + ${a.durationLabel()}">(51 opiniones), 4 h</span>
+                    </span>
+                    <span class="act-price">Desde <b th:text="${a.priceLabel()}">$ 1.200</b> por persona</span>
+                </a>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ===== Para quién es la plataforma ===== -->
-<section class="audience-section">
-    <div class="container-xl">
-        <h2>Un punto de encuentro entre turistas y prestadores</h2>
-        <div class="audience-grid">
-            <article class="audience-card audience-tourist">
-                <h3>Soy turista</h3>
-                <p>
-                    Creá tu cuenta para reservar actividades en todo el país, pagar online y, después
-                    de ir, contar cómo te fue con una valoración.
-                </p>
-                <a class="btn-navy" th:href="@{/register/tourist}" href="register-tourist.html">Crear cuenta de turista</a>
-            </article>
-            <article class="audience-card audience-provider">
-                <h3>Ofrezco actividades</h3>
-                <p>
-                    Sumá tu emprendimiento, publicá tus actividades con sus fechas y cupos, y recibí
-                    reservas. Un administrador revisa tu cuenta antes de habilitarla.
-                </p>
-                <a class="btn-sun" th:href="@{/register/provider}" href="register-provider.html">Registrarme como prestador</a>
-            </article>
+    <!-- ===== Lo más próximo: las fechas más cercanas que todavía se pueden reservar ===== -->
+    <section class="soon" aria-labelledby="soon-title" th:unless="${overview.upcoming().isEmpty()}">
+        <div class="container-xl">
+            <div class="popular-head">
+                <div>
+                    <h2 id="soon-title">Lo más próximo</h2>
+                    <p class="soon-lead">Salidas de los próximos días con lugares libres. Reservá antes de que se llenen.</p>
+                </div>
+                <a th:href="@{/activities(view='calendar')}" href="catalog.html">Ver el calendario</a>
+            </div>
+            <div class="popular-grid">
+                <a class="act-card soon-card" th:each="u : ${overview.upcoming()}" th:with="a=${u.activity()}"
+                   th:href="@{/activities/{id}(id=${a.id()})}" href="activity-detail.html">
+                    <span class="act-img" th:attr="data-scene=${a.scene()}">
+                        <img class="act-photo" th:if="${photos.containsKey(a.id())}" th:src="@{${photos.get(a.id())}}"
+                             src="" alt="" loading="lazy" onerror="this.remove()">
+                        <span class="soon-date" aria-hidden="true">
+                            <b th:text="${u.dayNumber()}">31</b>
+                            <small th:text="${u.monthShort()}">oct</small>
+                        </span>
+                        <span class="soon-seats" th:classappend="${u.fewSeats()} ? 'is-few'"
+                              th:text="${u.seatsLabel()}">Quedan 3 lugares</span>
+                    </span>
+                    <span class="soon-when">
+                        <b th:text="${u.dayLabel()}">Mañana</b> · <span th:text="${u.timeLabel()}">10:00</span>
+                    </span>
+                    <span class="act-name" th:text="${a.name()}">Kayak al atardecer en la Laguna de Rocha</span>
+                    <span class="act-place soon-place" th:text="${a.location()}">La Paloma, Rocha</span>
+                    <span class="act-price">Desde <b th:text="${a.priceLabel()}">$ 1.500</b> por persona</span>
+                </a>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+</main>
 
 <footer th:replace="~{fragments/site :: footer}"></footer>
 
-<script th:src="@{/js/home.js}" src="../static/js/home.js"></script>
+<script th:src="@{/js/scenes.js}" src="../static/js/scenes.js"></script>
+<script th:src="@{/js/inicio.js}" src="../static/js/inicio.js"></script>
 </body>
 </html>

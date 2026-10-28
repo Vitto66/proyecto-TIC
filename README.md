@@ -89,6 +89,13 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - La actividad queda publicada (`active = true`) y sin fechas: las fechas y cupos son el CU-09.
 - **No necesita scripts SQL:** usa `activity`, `activity_activity_type`, `activity_equipment`,
   `activity_type` y `equipment_type`, que ya existen en Supabase.
+- **Foto de portada (opcional):** al publicar o al modificar se puede subir una foto JPG, PNG o WebP. El
+  navegador la achica (máx. 1600 px, JPG) antes de subirla y el servidor acepta hasta 3 MB y revisa por el
+  contenido que sea una imagen (`ActivityPhotoService`). Se guarda en la tabla `activity_photo` (script
+  `2026-10-28_activity_photo.sql`) y se sirve en `/activities/{id}/photo`. Se ve en el inicio, en Explorar, en
+  el detalle y en "Mis actividades"; las actividades sin foto muestran una ilustración según su tipo.
+  También puede ser una foto externa (`external_url`, solo `https`): la usan las actividades de ejemplo, así no
+  pesan en la base. Si una foto no carga, se ve la ilustración.
 
 ## Modificar o dar de baja una actividad (CU-10)
 
@@ -127,6 +134,9 @@ y los estilos, scripts e imágenes en `src/main/resources/static`.
 - Filtros: departamento, localidad, tipo, fecha (actividades con una fecha ese día que todavía tenga lugar),
   rango de precio, calificación mínima y palabra clave (nombre, descripción y emprendimiento, sin importar
   mayúsculas ni tildes). Van en la URL, así una búsqueda se puede compartir.
+- **Vista de calendario** (`/activities?view=calendar`, y `&month=2026-11` para elegir el mes): muestra un mes con
+  todas las fechas disponibles (futuras y con lugar) de las actividades que cumplen los filtros. Cada fecha lleva al
+  detalle de su actividad. En el celular se ve como una lista de los días que tienen fechas.
 - Los filtros se aplican en memoria (`CatalogService`). Alcanza para este proyecto; con miles de actividades
   convendría pasarlos a la consulta y paginar.
 - **No necesita scripts SQL:** usa `review`, que ya existe en Supabase.
@@ -299,9 +309,11 @@ Se usa **Spring Security** (`config/SecurityConfig`). Las reglas del login está
 
 ### Inicio: fotos, mapa y logo
 
-- **Fotos de la portada:** son de Wikimedia Commons y se cargan desde su servidor (`static/css/landing.css`).
+- **Fotos de la portada:** son de Wikimedia Commons y se cargan desde su servidor (`static/css/inicio.css`).
   Los créditos están en el pie de página (`templates/fragments/site.html`). Para cambiar una foto, reemplazar
-  la URL en `landing.css` y su enlace en el pie.
+  la URL en `inicio.css` y su enlace en el pie.
+- **Lo más próximo:** debajo de "Lo más reservado", las 4 actividades con la fecha más cercana que todavía tiene
+  lugar y se puede reservar (una tarjeta por actividad, con el día, la hora y los lugares libres).
 - **Mapa:** los trazos de los 19 departamentos salen de Natural Earth (dominio público) y están en
   `src/main/resources/map/uruguay-departments.txt`. `HomeService` cuenta las actividades publicadas por
   departamento y cada etiqueta lleva a `/activities?departmentId=...`.
@@ -323,6 +335,9 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-26_cu14_cu15_participants_payments.sql` | Tablas `reservation_participant` (acompañantes de una reserva) y `reservation_payment` (intentos de pago). **Sin este script la app no arranca con Supabase** |
 | `2026-10-26_cu10_cancel_activity.sql` | Agrega el estado `CANCELLED` a `reservation.status` (CU-10). Sin él, dar de baja una actividad con reservas da error |
 | `2026-10-26_cu16_tourist_notifications.sql` | Tabla `tourist_notification`: avisos al turista, como las reservas vencidas (CU-16). **Sin este script la app no arranca con Supabase** |
+| `2026-10-28_activity_photo.sql` | Tabla `activity_photo`: la foto de portada de cada actividad (subida o con dirección externa). **Sin este script la app no arranca con Supabase** |
+| `2026-10-28_demo_activities.sql` | **Opcional.** Datos de ejemplo: 7 prestadores (correos `@demo.uy`, contraseña `Demo2026`) y 15 actividades en 10 departamentos, con fotos de Wikimedia Commons (solo la dirección) y fechas desde hoy |
+| `2026-10-28_demo_reviews.sql` | **Opcional, después del anterior.** 12 turistas de ejemplo (`@demo.uy`, contraseña `Demo2026`) con 44 reservas finalizadas y sus valoraciones en las actividades de ejemplo |
 
 ## Medios de pago
 

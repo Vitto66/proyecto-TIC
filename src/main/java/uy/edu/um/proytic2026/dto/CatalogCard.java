@@ -23,6 +23,16 @@ public record CatalogCard(Long id, String name, String businessName, String loca
         return localityName.equalsIgnoreCase(departmentName) ? departmentName : localityName + ", " + departmentName;
     }
 
+    /** El paisaje que ilustra la tarjeta, según su primer tipo (scenes.js). */
+    public String scene() {
+        return HomeOverview.sceneFor(typeNames.isEmpty() ? "" : typeNames.get(0));
+    }
+
+    /** El tipo que va en la etiqueta de la foto. */
+    public String mainType() {
+        return typeNames.isEmpty() ? "Actividad" : typeNames.get(0);
+    }
+
     public String typesLabel() {
         return String.join(" · ", typeNames);
     }

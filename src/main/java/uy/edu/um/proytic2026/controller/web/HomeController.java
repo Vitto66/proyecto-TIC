@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
+import uy.edu.um.proytic2026.service.ActivityPhotoService;
 import uy.edu.um.proytic2026.service.HomeService;
 
 /**
@@ -19,6 +20,7 @@ public class HomeController {
     static final String HOME_VIEW = "home";
 
     private final HomeService homeService;
+    private final ActivityPhotoService photoService;
 
     @GetMapping("/")
     public String home(@AuthenticationPrincipal AuthenticatedUser current, Model model) {
@@ -28,6 +30,8 @@ public class HomeController {
             model.addAttribute("spacePath", RoleHome.pathFor(current.role()));
         }
         model.addAttribute("overview", homeService.overview());
+        // Las fotos que subieron los prestadores; las actividades sin foto muestran una ilustración
+        model.addAttribute("photos", photoService.urls());
         return HOME_VIEW;
     }
 }
