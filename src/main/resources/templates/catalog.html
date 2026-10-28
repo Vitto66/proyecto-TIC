@@ -7,168 +7,202 @@
     <title>Explorar actividades · Uruguay Mnatural</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
-    <link th:href="@{/css/home.css}" href="../static/css/home.css" rel="stylesheet">
-    <link th:href="@{/css/business.css}" href="../static/css/business.css" rel="stylesheet">
-    <link th:href="@{/css/activities.css}" href="../static/css/activities.css" rel="stylesheet">
-    <link th:href="@{/css/catalog.css}" href="../static/css/catalog.css" rel="stylesheet">
+    <link th:href="@{/css/inicio.css}" href="../static/css/inicio.css" rel="stylesheet">
+    <link th:href="@{/css/explorar.css}" href="../static/css/explorar.css" rel="stylesheet">
 </head>
-<body>
+<body class="inicio explorar">
 
-<header class="site-header">
-    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
-        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
-        <nav class="site-nav" aria-label="Principal">
-            <th:block th:if="${currentUser == null}">
-                <a th:href="@{/login}" href="login.html">Iniciar sesión</a>
-                <a class="btn btn-submit btn-sm-nav nav-optional" th:href="@{/register/tourist}" href="register-tourist.html">Crear cuenta</a>
-            </th:block>
-            <a th:if="${currentUser != null}" class="btn btn-submit btn-sm-nav"
-               th:href="@{${spacePath}}" href="space.html">Mi espacio</a>
-        </nav>
+<!-- ===== Banda con foto y el menú encima ===== -->
+<section class="explore-hero">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-slide is-active" data-scene-photo="cuervos"></div>
     </div>
-</header>
-
-<main class="container-xl catalog">
-    <div class="catalog-head">
+    <header th:replace="~{fragments/topbar :: topbar(${filters.locations().departments()}, ${filters.activityTypes()})}"></header>
+    <div class="container-xl explore-head">
         <h1>Explorá actividades</h1>
-        <p>Experiencias en la naturaleza de prestadores de todo el país.</p>
+        <p>Experiencias en la naturaleza de prestadores de todo el país, con fecha y lugar para reservar.</p>
     </div>
+</section>
+
+<main class="container-xl explore">
 
     <!-- 2a. No hay actividades publicadas -->
-    <section class="empty-state" role="status" th:unless="${result.anyPublished()}">
+    <section class="explore-empty is-first" role="status" th:unless="${result.anyPublished()}">
         <h2>Todavía no hay actividades publicadas</h2>
         <p>Volvé pronto: los prestadores están cargando sus propuestas.</p>
     </section>
 
-    <div class="catalog-layout" th:if="${result.anyPublished()}">
+    <!-- Paso 3: filtros. Formulario GET: la búsqueda queda en la dirección y se puede compartir -->
+    <form th:if="${result.anyPublished()}" th:action="@{/activities}" th:object="${search}" method="get"
+          id="filters-form" class="explore-form">
+        <input type="hidden" name="view" value="calendar" th:if="${calendarView}">
 
-        <!-- Paso 3: filtros. Es un formulario GET: la búsqueda queda en la URL y se puede compartir -->
-        <aside class="catalog-filters" aria-labelledby="filters-title">
-            <details open id="filters-panel">
-                <summary id="filters-title">Filtros</summary>
+        <div class="explore-search" role="search">
+            <label class="finder-field">
+                <span>Qué</span>
+                <input type="search" th:field="*{keyword}" maxlength="100" placeholder="Kayak, cabalgata, viñedo…">
+            </label>
+            <label class="finder-field">
+                <span>Dónde</span>
+                <select th:field="*{departmentId}">
+                    <option value="">Todo Uruguay</option>
+                    <option th:each="d : ${filters.locations().departments()}" th:value="${d.id()}"
+                            th:text="${d.name()}">Rocha</option>
+                </select>
+            </label>
+            <label class="finder-field">
+                <span>Cuándo</span>
+                <input type="date" th:field="*{date}">
+            </label>
+            <button type="submit" class="finder-go">Buscar</button>
+        </div>
 
-                <form th:action="@{/activities}" th:object="${search}" method="get" id="filters-form">
-                    <div class="mb-3">
-                        <label class="form-label" for="keyword">Buscar</label>
-                        <input class="form-control" type="search" th:field="*{keyword}" maxlength="100"
-                               placeholder="Kayak, cabalgata, viñedo…">
-                    </div>
+        <!-- Tipos de actividad: se elige uno tocando el botón -->
+        <div class="type-pills" role="radiogroup" aria-label="Tipo de actividad">
+            <label class="type-pill">
+                <input type="radio" name="typeId" value="" th:checked="*{typeId == null}">
+                <span><i data-scene="costa"></i>Todos</span>
+            </label>
+            <label class="type-pill" th:each="t : ${filters.activityTypes()}">
+                <input type="radio" th:field="*{typeId}" th:value="${t.id()}">
+                <span><i th:attr="data-scene=${filters.sceneOf(t.name())}"></i><th:block th:text="${t.name()}">Senderismo</th:block></span>
+            </label>
+        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label" for="departmentId">Departamento</label>
-                        <select class="form-select" th:field="*{departmentId}">
-                            <option value="">Todos</option>
-                            <option th:each="d : ${filters.locations().departments()}"
-                                    th:value="${d.id()}" th:text="${d.name()}">Rocha</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="localityId">Localidad</label>
-                        <select class="form-select" th:field="*{localityId}">
-                            <option value="">Todas</option>
-                            <option th:each="l : ${filters.locations().localities()}"
-                                    th:value="${l.id()}" th:text="${l.name()}"
-                                    th:attr="data-department=${l.departmentId()}">La Paloma</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="typeId">Tipo de actividad</label>
-                        <select class="form-select" th:field="*{typeId}">
-                            <option value="">Todos</option>
-                            <option th:each="t : ${filters.activityTypes()}"
-                                    th:value="${t.id()}" th:text="${t.name()}">Trekking</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="date">Fecha</label>
-                        <input class="form-control" type="date" th:field="*{date}">
-                    </div>
-
-                    <fieldset class="mb-3">
-                        <legend class="form-label">Precio por persona</legend>
-                        <div class="price-range">
-                            <input class="form-control" type="number" th:field="*{minPrice}" min="0" step="1"
-                                   inputmode="numeric" placeholder="Desde" aria-label="Precio desde">
-                            <span aria-hidden="true">–</span>
-                            <input class="form-control" type="number" th:field="*{maxPrice}" min="0" step="1"
-                                   inputmode="numeric" placeholder="Hasta" aria-label="Precio hasta">
-                        </div>
-                    </fieldset>
-
-                    <div class="mb-4">
-                        <label class="form-label" for="minRating">Calificación</label>
-                        <select class="form-select" th:field="*{minRating}">
-                            <option value="">Cualquiera</option>
-                            <option value="4">4 o más ★</option>
-                            <option value="3">3 o más ★</option>
-                            <option value="2">2 o más ★</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-actions">
-                        <button type="submit" class="btn btn-submit">Aplicar</button>
-                        <a class="btn-outline-monte" th:href="@{/activities}" href="catalog.html">Limpiar</a>
-                    </div>
-                </form>
-            </details>
-        </aside>
-
-        <!-- Pasos 2 y 4: resultados -->
-        <section class="catalog-results" aria-live="polite">
-            <div class="alert alert-warning" role="status" th:if="${invalidFilters}">
-                Algún filtro tenía un valor que no se entiende y no se aplicó.
-            </div>
-
+        <div class="explore-bar">
             <p class="results-count" th:unless="${result.activities().isEmpty()}"
                th:text="${result.activities().size() == 1} ? '1 actividad' : ${result.activities().size()} + ' actividades'">3 actividades</p>
+            <p class="results-count" th:if="${result.activities().isEmpty()}">Sin resultados</p>
 
-            <!-- 4a. Sin coincidencias -->
-            <section class="empty-state" role="status" th:if="${result.noneMatch()}">
-                <h2>No se encontraron actividades</h2>
-                <p>Probá con otros filtros o <a th:href="@{/activities}" href="catalog.html">mirá todas</a>.</p>
-            </section>
+            <details class="more-filters" id="filters-panel">
+                <summary>Más filtros</summary>
+                <div class="more-panel">
+                    <label class="form-label" for="localityId">Localidad</label>
+                    <select class="form-select mb-3" th:field="*{localityId}">
+                        <option value="">Todas</option>
+                        <option th:each="l : ${filters.locations().localities()}" th:value="${l.id()}"
+                                th:text="${l.name()}" th:attr="data-department=${l.departmentId()}">La Paloma</option>
+                    </select>
 
-            <ul class="catalog-grid">
-                <li th:each="a : ${result.activities()}">
-                    <a class="catalog-card" th:href="@{/activities/{id}(id=${a.id()})}" href="activity-detail.html">
-                        <span class="card-types" th:text="${a.typesLabel()}">Actividades acuáticas</span>
-                        <h2 th:text="${a.name()}">Atardecer en kayak por la laguna</h2>
-                        <span class="card-business" th:text="${a.businessName()}">Kayak Laguna de Rocha</span>
-                        <span class="card-location" th:text="${a.location()}">La Paloma, Rocha</span>
+                    <span class="form-label d-block">Precio por persona</span>
+                    <div class="price-range mb-3">
+                        <input class="form-control" type="number" th:field="*{minPrice}" min="0" step="1"
+                               inputmode="numeric" placeholder="Desde" aria-label="Precio desde">
+                        <span aria-hidden="true">a</span>
+                        <input class="form-control" type="number" th:field="*{maxPrice}" min="0" step="1"
+                               inputmode="numeric" placeholder="Hasta" aria-label="Precio hasta">
+                    </div>
 
-                        <span class="card-rating" th:if="${a.rated()}">
-                            <span class="stars" aria-hidden="true">★</span>
-                            <strong th:text="${a.ratingLabel()}">4,5</strong>
-                            <span th:text="'(' + ${a.reviewsLabel()} + ')'">(12 valoraciones)</span>
-                        </span>
-                        <span class="card-rating is-empty" th:unless="${a.rated()}">Sin valoraciones todavía</span>
+                    <label class="form-label" for="minRating">Calificación</label>
+                    <select class="form-select mb-3" th:field="*{minRating}">
+                        <option value="">Cualquiera</option>
+                        <option value="4">4 o más ★</option>
+                        <option value="3">3 o más ★</option>
+                        <option value="2">2 o más ★</option>
+                    </select>
 
-                        <span class="card-footer">
-                            <span>
-                                <span class="card-price" th:text="${a.priceLabel()}">$ 1.500</span>
-                                <span class="card-unit">por persona</span>
-                            </span>
-                            <span class="card-meta">
-                                <span th:text="${a.durationLabel()}">2 h 30 min</span>
-                                <span th:if="${a.nextDateLabel() != null}"
-                                      th:text="'Próxima: ' + ${a.nextDateLabel()}">Próxima: Dom 25 oct · 10:00</span>
-                                <span th:unless="${a.nextDateLabel() != null}">Sin fechas próximas</span>
-                            </span>
-                        </span>
-                    </a>
-                </li>
-            </ul>
-        </section>
+                    <div class="more-actions">
+                        <button type="submit" class="finder-go">Aplicar</button>
+                        <a th:href="@{/activities}" href="catalog.html">Limpiar todo</a>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Lista o calendario con todas las fechas disponibles -->
+            <nav class="view-switch" aria-label="Cómo ver las actividades">
+                <a th:href="${listUrl}" href="catalog.html" th:classappend="${!calendarView} ? 'is-on'"
+                   th:attr="aria-current=${!calendarView} ? 'page' : 'false'">Lista</a>
+                <a th:href="${calendarUrl}" href="catalog.html" th:classappend="${calendarView} ? 'is-on'"
+                   th:attr="aria-current=${calendarView} ? 'page' : 'false'">Calendario</a>
+            </nav>
+        </div>
+    </form>
+
+    <div class="alert alert-warning" role="status" th:if="${invalidFilters}">
+        Algún filtro tenía un valor que no se entiende y no se aplicó.
     </div>
+
+    <!-- 4a. Sin coincidencias -->
+    <section class="explore-empty" role="status" th:if="${result.noneMatch()}">
+        <h2>No se encontraron actividades</h2>
+        <p>Probá con otros filtros o <a th:href="@{/activities}" href="catalog.html">mirá todas</a>.</p>
+    </section>
+
+    <!-- ===== Vista de lista (pasos 2 y 4) ===== -->
+    <ul class="explore-grid" th:unless="${calendarView}" aria-live="polite">
+        <li th:each="a : ${result.activities()}">
+            <a class="x-card" th:href="@{/activities/{id}(id=${a.id()})}" href="activity-detail.html">
+                <span class="x-img" th:attr="data-scene=${a.scene()}">
+                    <img class="x-photo" th:if="${photos.containsKey(a.id())}" th:src="@{${photos.get(a.id())}}"
+                         src="" alt="" loading="lazy" onerror="this.remove()">
+                    <span class="x-tag" th:text="${a.mainType()}">Actividades acuáticas</span>
+                    <span class="x-next" th:if="${a.nextDateLabel() != null}"
+                          th:text="'Próxima: ' + ${a.nextDateLabel()}">Próxima: Dom 25 oct · 10:00</span>
+                </span>
+                <span class="x-body">
+                    <span class="x-place" th:text="${a.location()}">La Paloma, Rocha</span>
+                    <h2 class="x-name" th:text="${a.name()}">Atardecer en kayak por la laguna</h2>
+                    <span class="x-biz">Organiza <b th:text="${a.businessName()}">Kayak Laguna</b></span>
+                    <span class="x-rating" th:if="${a.rated()}">
+                        <span class="x-star" aria-hidden="true">★</span>
+                        <b th:text="${a.ratingLabel()}">4,5</b>
+                        <span th:text="'(' + ${a.reviewsLabel()} + ')'">(12 valoraciones)</span>
+                    </span>
+                    <span class="x-rating is-new" th:unless="${a.rated()}">Sin valoraciones todavía</span>
+                    <span class="x-foot">
+                        <span class="x-dur" th:text="${a.durationLabel()}">2 h 30 min</span>
+                        <span class="x-price">Desde <b th:text="${a.priceLabel()}">$ 1.500</b> <small>por persona</small></span>
+                    </span>
+                    <span class="x-nodates" th:if="${a.nextDateLabel() == null}">Sin fechas próximas</span>
+                </span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- ===== Vista de calendario: todas las fechas disponibles del mes ===== -->
+    <section class="cal" th:if="${calendarView and result.anyPublished()}" aria-labelledby="cal-title">
+        <div class="cal-head">
+            <a class="cal-nav" th:if="${prevMonthUrl != null}" th:href="${prevMonthUrl}" href="catalog.html" aria-label="Mes anterior">‹</a>
+            <span class="cal-nav is-off" th:unless="${prevMonthUrl != null}" aria-hidden="true">‹</span>
+            <h2 id="cal-title" th:text="${calendar.monthLabel()}">Noviembre de 2026</h2>
+            <a class="cal-nav" th:href="${nextMonthUrl}" href="catalog.html" aria-label="Mes siguiente">›</a>
+            <p class="cal-count" th:text="${calendar.totalDates() == 1} ? '1 fecha disponible' : ${calendar.totalDates()} + ' fechas disponibles'">12 fechas disponibles</p>
+        </div>
+
+        <p class="cal-empty" th:if="${calendar.totalDates() == 0}">
+            No hay fechas disponibles este mes con estos filtros. Probá con el mes siguiente.
+        </p>
+
+        <div class="cal-grid" role="grid" th:attr="aria-label=${calendar.monthLabel()}">
+            <div class="cal-row cal-weekdays" role="row">
+                <span role="columnheader" th:each="w : ${calendar.weekdays()}" th:text="${w}">Lun</span>
+            </div>
+            <div class="cal-row" role="row" th:each="week : ${calendar.weeks()}">
+                <div class="cal-day" role="gridcell" th:each="d : ${week}"
+                     th:classappend="${(d.inMonth() ? '' : ' is-out') + (d.today() ? ' is-today' : '') + (d.hasSlots() ? ' has-slots' : '')}">
+                    <span class="cal-num" th:text="${d.number()}">25</span>
+                    <span class="cal-date" th:text="${d.label()}">Sábado 25 de octubre de 2026</span>
+                    <a class="cal-slot" th:each="s : ${d.shown()}" th:href="@{/activities/{id}(id=${s.activityId()})}"
+                       href="activity-detail.html" th:attr="data-scene-dot=${s.scene()}"
+                       th:title="${s.activityName()} + ', ' + ${s.time()} + ' (' + ${s.freeLabel()} + ')'">
+                        <time th:text="${s.time()}">10:00</time>
+                        <span th:text="${s.activityName()}">Atardecer en kayak</span>
+                    </a>
+                    <a class="cal-more" th:if="${d.hiddenCount() > 0}" th:href="@{/activities(date=${d.date()})}"
+                       href="catalog.html" th:text="'+' + ${d.hiddenCount()} + ' más'">+2 más</a>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer th:replace="~{fragments/site :: footer}"></footer>
 
+<script th:src="@{/js/scenes.js}" src="../static/js/scenes.js"></script>
+<script th:src="@{/js/inicio.js}" src="../static/js/inicio.js"></script>
 <script th:src="@{/js/catalog.js}" src="../static/js/catalog.js"></script>
 </body>
 </html>

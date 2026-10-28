@@ -6,4 +6,9 @@ import java.util.List;
 
 /** Opciones de los filtros de la vidriera (CU-05): ubicaciones y tipos de actividad activos. */
 public record CatalogFilters(LocationOptions locations, List<Option> activityTypes) {
+
+    /** El paisaje que ilustra un tipo en los botones de filtro (scenes.js). */
+    public String sceneOf(String typeName) {
+        return HomeOverview.sceneFor(typeName);
+    }
 }

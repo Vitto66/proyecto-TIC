@@ -70,6 +70,14 @@
 
         <ul class="activity-list" th:unless="${activities.isEmpty()}">
             <li class="activity-item" th:each="a : ${activities}">
+                <!-- Foto de portada; sin foto, invita a agregarla -->
+                <span class="activity-thumb" th:if="${photos.containsKey(a.id())}">
+                    <img th:src="@{${photos.get(a.id())}}" src="" alt="" loading="lazy"
+                         onerror="this.parentElement.classList.add('is-empty'); this.remove()">
+                </span>
+                <a class="activity-thumb is-empty" th:if="${!photos.containsKey(a.id()) and a.active()}"
+                   th:href="@{/provider/activities/{id}/edit(id=${a.id()})}" href="activity-form.html">+ Agregar foto</a>
+                <span class="activity-thumb is-empty" th:if="${!photos.containsKey(a.id()) and !a.active()}">Sin foto</span>
                 <div class="activity-main">
                     <h2 th:text="${a.name()}">Atardecer en kayak por la laguna</h2>
                     <p class="activity-types" th:text="${a.typesLabel()}">Actividades acuáticas · Turismo de naturaleza</p>

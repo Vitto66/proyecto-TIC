@@ -1,0 +1,260 @@
+/* Inicio (opción A): menú con desplegables, portada con fotos y buscador, mapa con el panel del
+   departamento elegido y las actividades más reservadas. Se carga después de main.css.
+   Letras: Gloock para los títulos e Instrument Sans para el texto. */
+.inicio {
+    --a-navy: #0E3A63;
+    --a-navy-2: #0A2B4A;
+    --a-celeste: #4E9DD9;
+    --a-celeste-2: #D9ECFA;
+    --a-sky: #F3F8FC;
+    --a-ink: #13263A;
+    --a-muted: #5C6B7C;
+    --a-line: #DCE5EE;
+    --a-star: #C98A10;
+    --a-sand: #F5EFE4;
+    --a-sand-2: #EADFCB;
+    --a-display: "Gloock", Georgia, serif;
+    --a-body: "Instrument Sans", system-ui, sans-serif;
+    background: var(--a-sand);
+    color: var(--a-ink);
+    font-family: var(--a-body);
+}
+.inicio a { text-decoration: none; }
+.inicio h1, .inicio h2, .inicio h3 { font-family: var(--a-display); font-weight: 400; color: var(--a-navy); }
+.inicio :focus-visible { outline: 3px solid var(--a-celeste); outline-offset: 2px; }
+
+/* ---------- Menú: va encima de la foto de portada, con letras blancas ---------- */
+.top { position: relative; z-index: 20; color: #fff; }
+.top-inner { display: flex; align-items: center; gap: 2.25rem; height: 84px; }
+.top-brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--a-display); font-size: 1.55rem; color: #fff; white-space: nowrap; }
+.top-brand:hover { color: #fff; }
+.top-brand img { width: 36px; height: 36px; background: #fff; border-radius: 50%; padding: 2px; }
+.top-links { display: flex; align-items: center; gap: 1.75rem; font-weight: 600; font-size: 0.97rem; }
+.top-links > a, .drop-toggle { color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25); }
+.top-links > a:hover, .drop-toggle:hover { color: #CFE6F7; }
+.drop { position: relative; }
+.drop-toggle { display: inline-flex; align-items: center; gap: 0.45rem; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; }
+.drop-toggle::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-3px); transition: transform 0.15s; }
+.drop-menu {
+    position: absolute; top: calc(100% + 14px); left: -14px; min-width: 230px; max-height: 60vh; overflow: auto;
+    background: #fff; border-radius: 14px; padding: 0.5rem; box-shadow: 0 18px 40px rgba(10, 43, 74, 0.28); display: none;
+}
+.drop-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -16px; height: 16px; }
+.drop:hover .drop-menu, .drop:focus-within .drop-menu, .drop.is-open .drop-menu { display: block; }
+.drop:hover .drop-toggle::after, .drop.is-open .drop-toggle::after { transform: rotate(225deg) translateY(-1px); }
+.drop-menu a { display: block; padding: 0.55rem 0.75rem; border-radius: 9px; color: var(--a-ink); font-weight: 500; text-shadow: none; }
+.drop-menu a:hover { background: var(--a-sky); color: var(--a-navy); }
+.top-account { margin-left: auto; display: flex; align-items: center; gap: 1.1rem; font-weight: 600; font-size: 0.97rem; white-space: nowrap; }
+.top-login { color: #fff; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25); }
+.top-login:hover { color: #CFE6F7; }
+.top-cta { background: #fff; color: var(--a-navy) !important; border-radius: 999px; padding: 0.65rem 1.35rem; }
+.top-cta:hover { background: var(--a-celeste-2); }
+
+/* ---------- Portada: foto a todo lo ancho ---------- */
+.hero-a { position: relative; isolation: isolate; min-height: 620px; display: flex; flex-direction: column; color: #fff; background: var(--a-navy-2); }
+.hero-bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.hero-slide { position: absolute; inset: 0; background-size: cover; background-position: center 60%; opacity: 0; transition: opacity 1.4s ease; }
+.hero-slide.is-active { opacity: 1; }
+.hero-slide[data-scene-photo="polonio"] { background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Faro_de_Cabo_Polonio,_Uruguay_03.jpg?width=1920"); }
+.hero-slide[data-scene-photo="cuervos"] { background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Quebrada_de_los_Cuervos_Treinta_y_Tres_%286%29.jpg?width=1920"); }
+.hero-slide[data-scene-photo="colonia"] { background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Calle_de_los_Suspiros,_Colonia_del_Sacramento,_Uruguay_-_panoramio.jpg?width=1920"); }
+.hero-slide[data-scene-photo="valizas"] { background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Dunas_y_Playa_de_Valizas_Rocha_Uruguay_-_panoramio.jpg?width=1920"); }
+.hero-a::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, rgba(10, 43, 74, 0.6) 0%, rgba(10, 43, 74, 0.05) 30%),
+                linear-gradient(90deg, rgba(10, 43, 74, 0.8) 0%, rgba(10, 43, 74, 0.3) 55%, rgba(10, 43, 74, 0.05) 100%),
+                linear-gradient(transparent 65%, rgba(10, 43, 74, 0.55));
+}
+.hero-body { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: center; padding-top: 1.5rem; padding-bottom: 6.5rem; position: relative; }
+.hero-text { max-width: 640px; }
+.hero-text h1 { color: #fff; font-size: clamp(2.6rem, 5.8vw, 4.6rem); line-height: 1.02; margin: 0 0 1.1rem; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.2); }
+.hero-text p { font-size: 1.22rem; color: #E8F2FB; margin: 0; max-width: 46ch; }
+.hero-notice { display: inline-block; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 10px; padding: 0.45rem 0.9rem; margin-bottom: 1.1rem !important; font-size: 1rem !important; }
+.hero-foot { position: absolute; left: 12px; right: 12px; bottom: 4.6rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.hero-caption { color: #D6E4F0; font-size: 0.88rem; }
+.hero-dots { display: flex; gap: 0.45rem; }
+.hero-dots button { width: 2rem; height: 0.35rem; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.45); padding: 0; cursor: pointer; }
+.hero-dots button[aria-current="true"] { background: #fff; }
+
+/* Buscador */
+.finder {
+    position: relative; z-index: 5; display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; align-items: center;
+    width: calc(100% - 7rem); margin: -3.4rem auto 0; padding: 0.6rem; background: #fff; border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(14, 58, 99, 0.18);
+}
+.finder-field { display: block; padding: 0.45rem 1.35rem; margin: 0; border-right: 1px solid var(--a-line); cursor: pointer; }
+.finder-field:nth-of-type(3) { border-right: 0; }
+.finder-field span { display: block; font-weight: 700; font-size: 0.8rem; color: var(--a-navy); }
+.finder-field select, .finder-field input { width: 100%; border: 0; padding: 0.15rem 0 0; background: transparent; color: var(--a-muted); font: inherit; font-size: 1rem; outline: none; cursor: pointer; }
+.finder-go { background: var(--a-celeste); color: #fff; font-weight: 700; font-size: 1.05rem; border: 0; border-radius: 16px; padding: 1.05rem 2.1rem; cursor: pointer; }
+.finder-go:hover { background: #3A88C6; }
+
+/* Tipos */
+.kinds { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2.5rem; }
+.kind { display: inline-flex; align-items: center; gap: 0.6rem; border: 1.5px solid var(--a-line); border-radius: 999px; padding: 0.4rem 1.1rem 0.4rem 0.45rem; font-weight: 700; color: var(--a-navy); }
+.kind:hover { border-color: var(--a-navy); }
+.kind i { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: var(--a-celeste-2); display: block; flex-shrink: 0; }
+.kind i svg { width: 100%; height: 100%; display: block; }
+.kind.is-all { background: var(--a-navy); border-color: var(--a-navy); color: #fff; }
+
+/* ---------- Mapa y panel: sobre una foto de Uruguay, con un velo azul noche ---------- */
+.where {
+    position: relative; isolation: isolate; margin-top: 4rem; padding: 5rem 0; color: #fff;
+    background: var(--a-navy-2) url("https://commons.wikimedia.org/wiki/Special:FilePath/Quebrada_de_los_Cuervos_Treinta_y_Tres_%286%29.jpg?width=1920") center / cover no-repeat;
+}
+.where::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 20% 30%, rgba(78, 157, 217, 0.28), transparent 55%),
+                linear-gradient(135deg, rgba(10, 43, 74, 0.94) 0%, rgba(14, 58, 99, 0.86) 55%, rgba(10, 43, 74, 0.92) 100%);
+}
+.where + .popular { border-top: 1px solid rgba(255, 255, 255, 0.12); }
+.where-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 3.5rem; align-items: center; }
+.where h2 { color: #fff; font-size: clamp(2rem, 3.6vw, 2.65rem); line-height: 1.1; margin: 0 0 0.6rem; }
+.where-lead { color: #C9DCEE; margin: 0 0 1.75rem; max-width: 48ch; }
+.map-summary { display: block; width: fit-content; margin-top: 0.7rem; font-weight: 700; color: #fff; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 999px; padding: 0.25rem 0.85rem; }
+.map-summary.is-empty { font-weight: 500; font-style: italic; background: none; border: 0; padding: 0; }
+.map-figure { position: relative; max-width: 520px; }
+.uy-map { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.3)); }
+.uy-map .dep { fill: rgba(255, 255, 255, 0.13); stroke: rgba(255, 255, 255, 0.45); stroke-width: 2; stroke-linejoin: round; transition: fill 0.2s; }
+.uy-map .dep.has-activities { fill: var(--a-celeste); stroke: rgba(255, 255, 255, 0.8); }
+.uy-map a { cursor: pointer; }
+.uy-map a:hover .dep, .uy-map .dep.is-highlighted { fill: #7DB9E8; }
+.uy-map .dep.is-selected { fill: #fff !important; }
+.uy-map a:focus-visible { outline: none; }
+.uy-map a:focus-visible .dep { stroke: #fff; stroke-width: 6; }
+.map-pin {
+    position: absolute; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 0.35rem;
+    background: #fff; color: var(--a-navy); border-radius: 999px; padding: 0.25rem 0.25rem 0.25rem 0.7rem;
+    font-size: 0.82rem; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+}
+.map-pin-count { min-width: 1.5rem; height: 1.5rem; padding: 0 0.35rem; border-radius: 999px; display: inline-grid; place-items: center; background: var(--a-celeste-2); }
+a.map-pin:hover, .map-pin.is-highlighted { transform: translate(-50%, -50%) scale(1.06); }
+.map-pin.is-selected { background: var(--a-celeste); color: #fff; }
+.map-pin.is-selected .map-pin-count { background: var(--a-navy); color: #fff; }
+
+.dept-panel { background: #fff; border-radius: 24px; padding: 1.9rem; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3); }
+.dept-panel h3 { font-size: 2rem; margin: 0; }
+.dept-sub { color: var(--a-muted); margin: 0.15rem 0 1.1rem; }
+.dept-row { display: grid; grid-template-columns: 92px 1fr auto; gap: 1rem; align-items: center; padding: 0.85rem 0; border-top: 1px solid var(--a-line); color: var(--a-ink); }
+.dept-row:hover strong { color: var(--a-celeste); }
+.dept-thumb { position: relative; display: block; width: 92px; height: 70px; border-radius: 12px; overflow: hidden; background: var(--a-celeste-2); }
+.dept-thumb svg, .act-img svg { width: 100%; height: 100%; display: block; }
+/* Fotos que subieron los prestadores */
+.dept-thumb img, .act-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.act-photo { position: absolute; inset: 0; transition: transform 0.4s ease; }
+.act-card:hover .act-photo { transform: scale(1.04); }
+.dept-info strong { display: block; font-size: 1rem; line-height: 1.3; }
+.rating { color: var(--a-muted); font-size: 0.88rem; }
+.rating b { color: var(--a-star); }
+.dept-price { text-align: right; }
+.dept-price b { display: block; color: var(--a-navy); }
+.dept-price small { color: var(--a-muted); }
+.dept-all { display: block; text-align: center; margin-top: 0.9rem; font-weight: 700; color: var(--a-celeste); }
+.dept-all:hover { text-decoration: underline; }
+
+/* ---------- Lo más reservado ---------- */
+.popular { padding: 4.5rem 0 4rem; }
+.popular-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; }
+.popular-head h2 { font-size: clamp(2rem, 3.6vw, 2.65rem); margin: 0; }
+.popular-head a { font-weight: 700; color: var(--a-navy); border-bottom: 2px solid var(--a-celeste); white-space: nowrap; }
+.popular-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
+.act-card { display: flex; flex-direction: column; color: var(--a-ink); }
+.act-img { position: relative; display: block; aspect-ratio: 4 / 3.2; border-radius: 18px; overflow: hidden; background: var(--a-celeste-2); }
+.act-tag { position: absolute; left: 12px; top: 12px; background: #fff; color: var(--a-navy); font-weight: 700; font-size: 0.8rem; border-radius: 8px; padding: 0.2rem 0.6rem; }
+.act-place { color: var(--a-muted); font-size: 0.88rem; margin: 0.85rem 0 0.2rem; }
+.act-name { font-weight: 700; font-size: 1.1rem; line-height: 1.3; margin-bottom: 0.35rem; }
+.act-card:hover .act-name { color: var(--a-celeste); }
+.act-price { margin-top: 0.55rem; color: var(--a-muted); font-size: 0.95rem; }
+.act-price b { color: var(--a-ink); font-size: 1.1rem; }
+
+/* ---------- Lo más próximo: franja celeste con fechas ---------- */
+.soon { padding: 4rem 0 5rem; }
+.soon-lead { color: var(--a-muted); margin: 0.4rem 0 0; }
+.soon-card .act-img { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3); }
+.soon-date {
+    position: absolute; left: 12px; top: 12px; z-index: 1; display: grid; place-items: center; min-width: 54px;
+    background: #fff; border-radius: 12px; padding: 0.3rem 0.5rem 0.35rem; line-height: 1;
+    box-shadow: 0 4px 12px rgba(10, 43, 74, 0.2);
+}
+.soon-date b { font-family: var(--a-display); font-weight: 400; font-size: 1.6rem; color: var(--a-navy); }
+.soon-date small { font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--a-celeste); margin-top: 0.15rem; }
+.soon-seats {
+    position: absolute; left: 12px; bottom: 12px; z-index: 1; background: rgba(10, 43, 74, 0.82); color: #fff;
+    font-size: 0.78rem; font-weight: 700; border-radius: 999px; padding: 0.25rem 0.7rem;
+}
+.soon-seats.is-few { background: #C2410C; }
+.soon-when { margin: 0.85rem 0 0.2rem; color: var(--a-navy); font-size: 0.92rem; }
+.soon-when b { color: var(--a-celeste); }
+.soon-place { margin: 0 0 0.1rem; }
+
+/* ---------- Lo más reservado y Lo más próximo: el mismo azul noche del mapa, sin fotos ----------
+   Para que no se vean como un solo bloque, cada una tiene su brillo celeste en otro lugar y una
+   línea fina las separa. */
+.inicio .popular, .inicio .soon { position: relative; color: #fff; }
+.inicio .popular {
+    background: radial-gradient(ellipse at 85% 0%, rgba(78, 157, 217, 0.22), transparent 55%),
+                linear-gradient(180deg, #0A2B4A 0%, #0E3A63 100%);
+}
+.inicio .soon {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: radial-gradient(ellipse at 10% 100%, rgba(78, 157, 217, 0.25), transparent 55%),
+                linear-gradient(180deg, #0E3A63 0%, #0A2B4A 100%);
+}
+.inicio .popular-head h2 { color: #fff; }
+.inicio .popular-head a { color: #fff; border-bottom-color: var(--a-celeste); }
+.inicio .popular-head a:hover { color: #9CCBF0; }
+.inicio .popular .act-card, .inicio .soon .act-card { color: #fff; }
+.inicio .popular .act-img, .inicio .soon .act-img { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3); }
+.inicio .popular .act-place, .inicio .soon .act-place { color: #B9CEE2; }
+.inicio .popular .act-card:hover .act-name, .inicio .soon .act-card:hover .act-name { color: #9CCBF0; }
+.inicio .popular .rating, .inicio .popular .act-meta { color: #B9CEE2; }
+.inicio .popular .rating b { color: #F2B544; }
+.inicio .popular .act-price, .inicio .soon .act-price { color: #B9CEE2; }
+.inicio .popular .act-price b, .inicio .soon .act-price b { color: #fff; }
+.inicio .soon-lead { color: #C9DCEE; }
+.inicio .soon-when { color: #E3EEF8; }
+.inicio .soon-when b { color: #9CCBF0; }
+
+/* ---------- Celular y tablet ---------- */
+@media (max-width: 1199.98px) {
+    .top-inner { gap: 1.4rem; }
+    .top-links { gap: 1.1rem; }
+    .popular-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 991.98px) {
+    .top-links { display: none; }
+    .where-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .map-figure { margin: 0 auto; }
+    .finder { width: calc(100% - 3rem); }
+}
+@media (max-width: 767.98px) {
+    .top-inner { height: 68px; }
+    .top-brand { font-size: 1.25rem; }
+    .top-login { display: none; }
+    .hero-a { min-height: 520px; }
+    .top-inner { gap: 1rem; }
+    .hero-body { padding-bottom: 4.5rem; }
+    .hero-text p { font-size: 1.02rem; }
+    .hero-foot { bottom: 2.6rem; justify-content: flex-end; }
+    .hero-caption { display: none; }
+    .finder { width: calc(100% - 1.5rem); grid-template-columns: 1fr; margin-top: -1.5rem; padding: 0.5rem; }
+    .finder-field { border-right: 0; border-bottom: 1px solid var(--a-line); padding: 0.55rem 0.9rem; }
+    .finder-field:nth-of-type(3) { border-bottom: 0; }
+    .finder-go { margin-top: 0.4rem; }
+    .kinds { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.4rem; margin-top: 1.75rem; }
+    .kind { flex-shrink: 0; }
+    .where { margin-top: 2.5rem; padding: 3.5rem 0; }
+    .soon { padding: 3rem 0 3.5rem; }
+    .map-pin-name { display: none; }
+    .map-pin { padding: 0.15rem; }
+    .dept-panel { padding: 1.3rem; }
+    .dept-row { grid-template-columns: 72px 1fr; }
+    .dept-thumb { width: 72px; height: 56px; }
+    .dept-price { grid-column: 2; text-align: left; }
+    .dept-price b { display: inline; margin-right: 0.3rem; }
+    .popular-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .hero-slide, .uy-map .dep, .map-pin, .act-photo { transition: none; }
+}

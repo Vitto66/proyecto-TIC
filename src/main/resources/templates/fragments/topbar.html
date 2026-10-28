@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Menú principal sobre la foto de portada (inicio y Explorar).
+     Uso: <header th:replace="~{fragments/topbar :: topbar(${departamentos}, ${tipos})}"></header>
+     Cada elemento de las listas tiene id() y name(). Necesita inicio.css y, en el modelo,
+     currentUser (y spacePath si hay sesión). Los desplegables los maneja inicio.js. -->
+<header th:fragment="topbar(departments, types)" class="top">
+    <div class="container-xl top-inner">
+        <a class="top-brand" th:href="@{/}" href="../home.html">
+            <img th:src="@{/img/oasis-mark.png}" src="../../static/img/oasis-mark.png" alt="" width="34" height="34">
+            Uruguay Mnatural
+        </a>
+
+        <nav class="top-links" aria-label="Principal">
+            <a th:href="@{/activities}" href="../catalog.html">Explorar actividades</a>
+
+            <div class="drop" th:unless="${departments == null or departments.isEmpty()}">
+                <button type="button" class="drop-toggle" aria-expanded="false" aria-controls="drop-departments">Departamentos</button>
+                <div class="drop-menu" id="drop-departments">
+                    <a th:each="d : ${departments}" th:href="@{/activities(departmentId=${d.id()})}"
+                       href="../catalog.html" th:text="${d.name()}">Rocha</a>
+                </div>
+            </div>
+
+            <div class="drop" th:unless="${types == null or types.isEmpty()}">
+                <button type="button" class="drop-toggle" aria-expanded="false" aria-controls="drop-types">Tipos de experiencia</button>
+                <div class="drop-menu" id="drop-types">
+                    <a th:each="t : ${types}" th:href="@{/activities(typeId=${t.id()})}"
+                       href="../catalog.html" th:text="${t.name()}">Senderismo</a>
+                </div>
+            </div>
+
+            <a th:href="@{/register/provider}" href="../register-provider.html">Para prestadores</a>
+        </nav>
+
+        <div class="top-account">
+            <th:block th:if="${currentUser == null}">
+                <a class="top-login" th:href="@{/login}" href="../login.html">Iniciar sesión</a>
+                <a class="top-cta" th:href="@{/register/tourist}" href="../register-tourist.html">Crear cuenta</a>
+            </th:block>
+            <th:block th:if="${currentUser != null}">
+                <a class="top-cta" th:href="@{${spacePath}}" href="../space.html">Mi espacio</a>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="top-login link-button">Salir</button>
+                </form>
+            </th:block>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>

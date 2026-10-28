@@ -39,7 +39,7 @@
             </th:block>
 
             <form th:action="${editingId == null} ? @{/provider/activities} : @{/provider/activities/{id}(id=${editingId})}"
-                  th:object="${form}" method="post"
+                  th:object="${form}" method="post" enctype="multipart/form-data"
                   id="activity-form" class="needs-validation" novalidate>
 
                 <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('*')}">
@@ -95,6 +95,43 @@
                             </div>
                             <div class="invalid-feedback"
                                  th:text="${#fields.hasErrors('localityId')} ? ${#fields.errors('localityId')[0]} : 'elegí la localidad'">elegí la localidad</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Foto de portada: se ve en el inicio, en Explorar y en el detalle -->
+                <fieldset class="form-section" id="photo-fieldset">
+                    <legend>Foto de portada</legend>
+                    <p class="form-text mt-0">
+                        Opcional, pero las actividades con foto llaman mucho más la atención. Usá una foto
+                        horizontal del lugar o de la actividad. JPG, PNG o WebP.
+                    </p>
+                    <div class="photo-picker">
+                        <div class="photo-preview" id="photo-preview"
+                             th:classappend="${currentPhotoUrl != null} ? 'has-photo'">
+                            <img id="photo-preview-img" alt="Vista previa de la foto"
+                                 th:src="${currentPhotoUrl != null} ? @{${currentPhotoUrl}} : null"
+                                 th:hidden="${currentPhotoUrl == null}" hidden>
+                            <span class="photo-empty" th:hidden="${currentPhotoUrl != null}">Sin foto todavía</span>
+                        </div>
+                        <div class="photo-controls">
+                            <input class="visually-hidden" type="file" id="photo" name="photo"
+                                   accept="image/jpeg,image/png,image/webp" aria-describedby="photo-help">
+                            <label class="btn-outline-monte photo-choose" for="photo"
+                                   th:text="${currentPhotoUrl != null} ? 'Cambiar foto' : 'Elegir foto'">Elegir foto</label>
+                            <span class="photo-name" id="photo-name" aria-live="polite"></span>
+                            <label class="form-check photo-remove" th:if="${currentPhotoUrl != null}">
+                                <input class="form-check-input" type="checkbox" name="removePhoto" value="true" id="removePhoto">
+                                <span class="form-check-label">Sacar la foto</span>
+                            </label>
+                            <div class="form-text" id="photo-help">Se achica sola antes de subirla.</div>
+                            <div class="photo-error" role="alert" th:if="${photoError != null}" th:text="${photoError}">
+                                La foto tiene que ser una imagen JPG, PNG o WebP.
+                            </div>
+                            <div class="photo-error" role="alert" id="photo-error-js" hidden></div>
+                            <div class="photo-warning" role="status" th:if="${photoLost != null}">
+                                Volvé a elegir la foto: hay que elegirla de nuevo después de corregir los campos.
+                            </div>
                         </div>
                     </div>
                 </fieldset>

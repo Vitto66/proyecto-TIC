@@ -33,6 +33,12 @@
 <main class="container-xl catalog">
     <a class="back-link" th:href="@{/activities}" href="catalog.html">Volver a explorar</a>
 
+    <!-- Foto de portada que subió el prestador -->
+    <figure class="detail-photo" th:if="${photoUrl != null}">
+        <img th:src="@{${photoUrl}}" src="" th:alt="'Foto de ' + ${activity.name()}" alt="Foto de la actividad"
+             onerror="this.parentElement.remove()">
+    </figure>
+
     <!-- Paso 2: la actividad y quién la organiza -->
     <header class="detail-head">
         <p class="card-types" th:text="${activity.typesLabel()}">Actividades acuáticas · Turismo de naturaleza</p>

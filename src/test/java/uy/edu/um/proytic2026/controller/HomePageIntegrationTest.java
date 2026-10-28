@@ -9,11 +9,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import uy.edu.um.proytic2026.config.ClockConfig;
 import uy.edu.um.proytic2026.dto.HomeOverview;
 import uy.edu.um.proytic2026.entity.*;
 import uy.edu.um.proytic2026.repository.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -38,6 +41,7 @@ class HomePageIntegrationTest {
     @Autowired private LocalityRepository localityRepository;
     @Autowired private ActivityTypeRepository activityTypeRepository;
     @Autowired private ActivityRepository activityRepository;
+    @Autowired private ActivityInstanceRepository instanceRepository;
 
     private MockMvc mockMvc;
     private Department rocha;
@@ -62,12 +66,12 @@ class HomePageIntegrationTest {
                 .name("Kayak Laguna").description("x").address("x").phone("099").email("laguna@mail.com").build());
     }
 
-    private void activity(String name, ActivityType type, boolean active) {
+    private Activity activity(String name, ActivityType type, boolean active) {
         Activity a = Activity.builder().business(laguna).locality(laPaloma).name(name)
                 .description("Una linda salida").durationMinutes(120).price(new BigDecimal("1500"))
                 .minAge(0).bookingCutoffMinutes(0).active(active).build();
         a.getTypes().add(type);
-        activityRepository.save(a);
+        return activityRepository.save(a);
     }
 
     private HomeOverview overview() throws Exception {
@@ -125,5 +129,74 @@ class HomePageIntegrationTest {
                 .andExpect(content().string(containsString("/img/oasis-logo-light.png")))
                 .andExpect(content().string(containsString("Desarrollado por")))
                 .andExpect(content().string(containsString("Wikimedia Commons")));
+    }
+
+    @Test
+    void mapPanel_showsTheActivitiesOfTheDepartment_andLinksToThem() throws Exception {
+        activity("Atardecer en kayak", acuaticas, true);
+        activity("Paseo por la laguna", cabalgatas, true);
+
+        HomeOverview overview = overview();
+        String rochaIso = overview.selectedIso();
+        assertThat(overview.panel(rochaIso)).extracting(uy.edu.um.proytic2026.dto.HomeActivity::name)
+                .containsExactlyInAnyOrder("Atardecer en kayak", "Paseo por la laguna");
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Ver las 2 actividades de Rocha")))
+                .andExpect(content().string(containsString("Atardecer en kayak")))
+                // Buscador: departamentos y tipos para filtrar la vidriera
+                .andExpect(content().string(containsString("name=\"departmentId\"")))
+                .andExpect(content().string(containsString("name=\"typeId\"")));
+    }
+
+    @Test
+    void featured_withoutBookingsThisMonth_showsTheHighlightedOnes() throws Exception {
+        activity("Atardecer en kayak", acuaticas, true);
+
+        HomeOverview overview = overview();
+        assertThat(overview.featuredByBookings()).isFalse();
+        assertThat(overview.featured()).singleElement()
+                .satisfies(a -> assertThat(a.scene()).isEqualTo("rio"));
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Actividades destacadas")))
+                .andExpect(content().string(containsString("Desde")));
+    }
+
+    @Test
+    void upcoming_showsTheNextDateOfEachActivity_soonestFirst() throws Exception {
+        LocalDate today = LocalDate.now(ClockConfig.URUGUAY);
+        Activity kayak = activity("Atardecer en kayak", acuaticas, true);
+        Activity cabalgata = activity("Cabalgata por la sierra", cabalgatas, true);
+        activity("Sin fechas", acuaticas, true);
+        instanceRepository.save(ActivityInstance.builder().activity(kayak)
+                .startAt(today.plusDays(9).atTime(10, 0)).maxCapacity(3).build());
+        instanceRepository.save(ActivityInstance.builder().activity(kayak)
+                .startAt(today.plusDays(20).atTime(10, 0)).maxCapacity(3).build());
+        instanceRepository.save(ActivityInstance.builder().activity(cabalgata)
+                .startAt(today.plusDays(4).atTime(16, 30)).maxCapacity(12).build());
+        // Una fecha que ya pasó no cuenta
+        instanceRepository.save(ActivityInstance.builder().activity(cabalgata)
+                .startAt(LocalDateTime.now(ClockConfig.URUGUAY).minusDays(1).withNano(0)).maxCapacity(12).build());
+
+        HomeOverview overview = overview();
+        assertThat(overview.upcoming()).extracting(u -> u.activity().name())
+                .containsExactly("Cabalgata por la sierra", "Atardecer en kayak");
+        assertThat(overview.upcoming().get(1).seatsLabel()).isEqualTo("Quedan 3 lugares");
+        assertThat(overview.upcoming().get(1).fewSeats()).isTrue();
+
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(containsString("Lo más próximo")))
+                .andExpect(content().string(containsString("16:30")))
+                .andExpect(content().string(containsString("Quedan 12 lugares")));
+    }
+
+    @Test
+    void upcoming_withoutDates_isNotShown() throws Exception {
+        activity("Atardecer en kayak", acuaticas, true);
+
+        assertThat(overview().upcoming()).isEmpty();
+        mockMvc.perform(get("/"))
+                .andExpect(content().string(not(containsString("id=\"soon-title\""))));
     }
 }

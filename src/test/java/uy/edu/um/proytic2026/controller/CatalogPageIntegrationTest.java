@@ -234,4 +234,55 @@ class CatalogPageIntegrationTest {
         mockMvc.perform(get(URL))
                 .andExpect(content().string(containsString("/activities/" + kayak.getId())));
     }
+
+    // ---------- Vista de calendario ----------
+
+    @Test
+    void calendarView_showsTheAvailableDatesOfTheMonth() throws Exception {
+        Activity kayak = activity(laguna, laPaloma, "Atardecer en kayak", "1500", acuaticas, true);
+        Activity cabalgata = activity(estancia, puntaDelEste, "Cabalgata serrana", "3000", cabalgatas, true);
+        instanceRepository.save(ActivityInstance.builder().activity(kayak)
+                .startAt(FUTURE_DAY.atTime(10, 0)).maxCapacity(10).build());
+        String month = java.time.YearMonth.from(FUTURE_DAY).toString();
+
+        org.springframework.test.web.servlet.MvcResult mvc = mockMvc.perform(get(URL)
+                        .param("view", "calendar").param("month", month))
+                .andExpect(status().isOk())
+                .andExpect(view().name("catalog"))
+                .andExpect(content().string(containsString("1 fecha disponible")))
+                .andExpect(content().string(containsString("10:00")))
+                .andExpect(content().string(containsString("/activities/" + kayak.getId())))
+                .andReturn();
+        uy.edu.um.proytic2026.dto.CatalogCalendar calendar =
+                (uy.edu.um.proytic2026.dto.CatalogCalendar) mvc.getModelAndView().getModel().get("calendar");
+        assertThat(calendar.month()).isEqualTo(month);
+        assertThat(calendar.weeks()).allSatisfy(week -> assertThat(week).hasSize(7));
+        // La cabalgata no tiene fechas: no aparece en el calendario
+        assertThat(calendar.weeks().stream().flatMap(List::stream).flatMap(d -> d.slots().stream()))
+                .extracting(uy.edu.um.proytic2026.dto.CatalogCalendar.Slot::activityName)
+                .containsExactly("Atardecer en kayak");
+        assertThat(cabalgata.getId()).isNotNull();
+    }
+
+    @Test
+    void calendarView_appliesTheFilters_andKeepsThemInTheMonthLinks() throws Exception {
+        Activity kayak = activity(laguna, laPaloma, "Atardecer en kayak", "1500", acuaticas, true);
+        instanceRepository.save(ActivityInstance.builder().activity(kayak)
+                .startAt(FUTURE_DAY.atTime(10, 0)).maxCapacity(10).build());
+        String month = java.time.YearMonth.from(FUTURE_DAY).toString();
+
+        mockMvc.perform(get(URL).param("view", "calendar").param("month", month)
+                        .param("departmentId", maldonado.getId().toString()))
+                .andExpect(content().string(containsString("0 fechas disponibles")))
+                .andExpect(content().string(containsString("departmentId=" + maldonado.getId())));
+    }
+
+    @Test
+    void listView_offersTheCalendar() throws Exception {
+        activity(laguna, laPaloma, "Atardecer en kayak", "1500", acuaticas, true);
+
+        mockMvc.perform(get(URL))
+                .andExpect(content().string(containsString("view=calendar")))
+                .andExpect(content().string(containsString("Calendario")));
+    }
 }
