@@ -197,6 +197,6 @@ class HomePageIntegrationTest {
 
         assertThat(overview().upcoming()).isEmpty();
         mockMvc.perform(get("/"))
-                .andExpect(content().string(not(containsString("Lo más próximo"))));
+                .andExpect(content().string(not(containsString("id=\"soon-title\""))));
     }
 }
