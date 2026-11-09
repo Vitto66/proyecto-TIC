@@ -51,6 +51,13 @@ class TouristRegistrationPageIntegrationTest {
 
     private MockHttpServletRequestBuilder touristForm(String email, String nationalId,
                                                       String password, String confirmPassword) {
+        return touristFormWithoutTerms(email, nationalId, password, confirmPassword)
+                .param("acceptTerms", "true");
+    }
+
+    /** El formulario sin marcar la casilla de términos y privacidad. */
+    private MockHttpServletRequestBuilder touristFormWithoutTerms(String email, String nationalId,
+                                                                  String password, String confirmPassword) {
         return post(PAGE_URL)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("firstName", "Ana")
@@ -101,6 +108,25 @@ class TouristRegistrationPageIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register-tourist"))
                 .andExpect(model().attributeHasFieldErrors("form", "email", "nationalId", "confirmPassword"));
+
+        assertThat(touristRepository.count()).isZero();
+    }
+
+    @Test
+    void page_showsTermsCheckboxWithLinks() throws Exception {
+        mockMvc.perform(get(PAGE_URL))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"acceptTerms\"")))
+                .andExpect(content().string(containsString("href=\"/terminos\"")))
+                .andExpect(content().string(containsString("href=\"/privacidad\"")));
+    }
+
+    @Test
+    void page_withoutAcceptingTerms_marksFieldAndDoesNotCreateAccount() throws Exception {
+        mockMvc.perform(touristFormWithoutTerms("ana@mail.com", "12345678", "secreta123", "secreta123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("register-tourist"))
+                .andExpect(model().attributeHasFieldErrors("form", "acceptTerms"));
 
         assertThat(touristRepository.count()).isZero();
     }

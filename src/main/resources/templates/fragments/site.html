@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<!-- Pie de página común: quién desarrolló la plataforma y créditos de las fotos.
+<!-- Pie de página común: quién desarrolló la plataforma, links legales y créditos de las fotos.
      Uso: <footer th:replace="~{fragments/site :: footer}"></footer> -->
 <footer th:fragment="footer" class="site-footer">
     <div class="container-xl site-footer-inner">
@@ -10,6 +10,10 @@
             <span class="site-footer-name">Uruguay <span>Mnatural</span></span>
             <p>Turismo de naturaleza en todo el país. Proyectos TIC 2026 · Universidad de Montevideo.</p>
         </div>
+        <nav class="site-footer-legal" aria-label="Información legal">
+            <a th:href="@{/terminos}" href="../legal-terms.html">Términos y condiciones</a>
+            <a th:href="@{/privacidad}" href="../legal-privacy.html">Política de privacidad</a>
+        </nav>
         <div class="site-footer-dev">
             <span class="site-footer-label">Desarrollado por</span>
             <img th:src="@{/img/oasis-logo-light.png}" src="../../static/img/oasis-logo-light.png"

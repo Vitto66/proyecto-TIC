@@ -67,4 +67,10 @@ public class RegisterProviderRequest {
     /** Solo lo manda el formulario web. Si viene, tiene que coincidir con password. */
     @ToString.Exclude
     private String confirmPassword;
+
+    /**
+     * Aceptación de los términos y condiciones y de la política de privacidad.
+     * La exige solo el formulario web (la API la usan otros sistemas, no personas).
+     */
+    private boolean acceptTerms;
 }

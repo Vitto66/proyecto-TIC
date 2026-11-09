@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Vidriera pública: se navega sin cuenta (RF-03)
                         .requestMatchers("/", "/login", "/login/**", "/register/**", "/error",
+                                // Términos y condiciones y política de privacidad
+                                "/terminos", "/privacidad",
                                 "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                         // Vidriera de actividades y su detalle (CU-05, CU-06)
                         .requestMatchers(HttpMethod.GET, "/activities", "/activities/**").permitAll()
