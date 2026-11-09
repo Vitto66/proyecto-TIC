@@ -107,6 +107,11 @@ class ProviderRegistrationIntegrationTest {
     }
 
     private MockHttpServletRequestBuilder legalForm(String rut, String email, String confirmPassword) {
+        return legalFormWithoutTerms(rut, email, confirmPassword).param("acceptTerms", "true");
+    }
+
+    /** El formulario sin marcar la casilla de términos y privacidad. */
+    private MockHttpServletRequestBuilder legalFormWithoutTerms(String rut, String email, String confirmPassword) {
         return post(PAGE_URL)
                 .param("personType", "LEGAL")
                 .param("rut", rut)
@@ -150,6 +155,24 @@ class ProviderRegistrationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register-provider"))
                 .andExpect(model().attributeHasFieldErrors("form", "rut", "confirmPassword"));
+    }
+
+    @Test
+    void page_withoutAcceptingTerms_marksFieldAndDoesNotCreateProvider() throws Exception {
+        mockMvc.perform(legalFormWithoutTerms("211234560018", "info@laguna.uy", "secreta123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("register-provider"))
+                .andExpect(model().attributeHasFieldErrors("form", "acceptTerms"));
+
+        assertThat(providerRepository.findByStatus(ProviderStatus.PENDING)).isEmpty();
+    }
+
+    @Test
+    void api_doesNotRequireTermsAcceptance() throws Exception {
+        // La API la usan otros sistemas: la aceptación solo se pide en el formulario web
+        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
+                        .content(physicalJson("juan@mail.com", "45678901")))
+                .andExpect(status().isCreated());
     }
 
     @Test

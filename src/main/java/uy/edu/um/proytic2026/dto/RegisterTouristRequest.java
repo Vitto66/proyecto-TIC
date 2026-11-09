@@ -70,6 +70,18 @@ public class RegisterTouristRequest {
     @ToString.Exclude
     private String cardCvv;
 
+    /**
+     * Aceptación de los términos y condiciones y de la política de privacidad.
+     * La exige solo el formulario web (la API la usan otros sistemas, no personas).
+     * Es Boolean y no boolean: en el JSON de la API el campo no viene y queda null.
+     */
+    private Boolean acceptTerms;
+
+    /** true solo si se marcó la casilla. */
+    public boolean acceptedTerms() {
+        return Boolean.TRUE.equals(acceptTerms);
+    }
+
     /** true si el turista quiso registrar un medio de pago (completó al menos un dato). */
     public boolean wantsPaymentMethod() {
         return hasText(cardNumber) || hasText(cardExpiry) || hasText(cardCvv);

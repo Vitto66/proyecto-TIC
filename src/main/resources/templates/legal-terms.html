@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Términos y condiciones · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <a class="small" th:href="@{/privacidad}" href="legal-privacy.html">Política de privacidad</a>
+    </div>
+</header>
+
+<main class="container-xl legal">
+    <header class="legal-head">
+        <h1>Términos y condiciones de uso</h1>
+        <p class="legal-updated">Última actualización: 9 de noviembre de 2026</p>
+    </header>
+
+    <nav class="legal-toc" aria-label="Contenido">
+        <strong>Contenido</strong>
+        <ol>
+            <li><a href="#t-objeto">Qué es Uruguay Mnatural</a></li>
+            <li><a href="#t-cuentas">Cuentas y perfiles</a></li>
+            <li><a href="#t-prestadores">Prestadores</a></li>
+            <li><a href="#t-reservas">Reservas</a></li>
+            <li><a href="#t-pagos">Pagos</a></li>
+            <li><a href="#t-cancelaciones">Cancelaciones y reembolsos</a></li>
+            <li><a href="#t-valoraciones">Valoraciones</a></li>
+            <li><a href="#t-responsabilidad">Responsabilidades</a></li>
+            <li><a href="#t-api">API para otras plataformas</a></li>
+            <li><a href="#t-cambios">Cambios y contacto</a></li>
+        </ol>
+    </nav>
+
+    <section id="t-objeto">
+        <h2>1. Qué es Uruguay Mnatural</h2>
+        <p>
+            Uruguay Mnatural es una plataforma que reúne la oferta de turismo de naturaleza del país. Los
+            prestadores publican sus actividades y los turistas las encuentran, las reservan y las pagan en línea.
+        </p>
+        <p>
+            Uruguay Mnatural actúa como <strong>intermediario</strong>: no organiza ni presta las actividades.
+            Cada actividad la brinda el prestador que la publica, que es el responsable de realizarla en las
+            condiciones anunciadas.
+        </p>
+        <p>
+            Al crear una cuenta aceptás estos términos y la <a th:href="@{/privacidad}" href="legal-privacy.html">política de privacidad</a>.
+            Para recorrer las actividades no hace falta tener cuenta.
+        </p>
+    </section>
+
+    <section id="t-cuentas">
+        <h2>2. Cuentas y perfiles</h2>
+        <ul>
+            <li>Hay tres perfiles: <strong>turista</strong>, <strong>prestador</strong> y <strong>administrador</strong>. Los administradores no se registran desde la plataforma.</li>
+            <li>Un mismo correo puede tener perfil de turista y de prestador. Al iniciar sesión elegís con cuál entrar, y cada perfil solo accede a sus funciones: con el perfil de prestador no se puede reservar.</li>
+            <li>Los datos que ingresás tienen que ser verdaderos y tuyos. No se permite registrar la cédula, el documento o el RUT de otra persona.</li>
+            <li>Sos responsable de cuidar tu contraseña. Si sospechás que alguien entró a tu cuenta, avisanos.</li>
+        </ul>
+    </section>
+
+    <section id="t-prestadores">
+        <h2>3. Prestadores</h2>
+        <ul>
+            <li>La cuenta de prestador queda <strong>pendiente de validación</strong> hasta que un administrador revisa los datos y la aprueba o la rechaza. Solo los prestadores aprobados pueden registrar su emprendimiento y publicar actividades.</li>
+            <li>El prestador se compromete a publicar información veraz y completa: descripción, ubicación, duración, precio, edad mínima, equipamiento necesario y provisto, fechas y cupos.</li>
+            <li>El prestador es responsable de contar con las habilitaciones, seguros y medidas de seguridad que exija cada actividad, y de cumplir las fechas que publica.</li>
+            <li>Los cambios de precio rigen solo para reservas nuevas: las reservas ya confirmadas mantienen el precio con el que se pagaron.</li>
+            <li>Si da de baja una actividad con reservas confirmadas, esas reservas se cancelan y se reembolsa el 100% a cada turista.</li>
+            <li>Los tipos de actividad y de equipamiento los define Uruguay Mnatural. Los prestadores pueden proponer tipos nuevos, que un administrador acepta o rechaza.</li>
+        </ul>
+    </section>
+
+    <section id="t-reservas">
+        <h2>4. Reservas</h2>
+        <ul>
+            <li>Para reservar hace falta iniciar sesión con el perfil de turista.</li>
+            <li>Elegís una fecha y un horario disponibles e indicás la cantidad de participantes. La plataforma verifica que haya cupos suficientes.</li>
+            <li>Cada actividad tiene un límite de anticipación fijado por el prestador: pasado ese límite, ya no se admiten reservas para esa fecha.</li>
+            <li>Una reserva nueva queda <strong>pendiente</strong> y no ocupa lugar hasta que se aprueba el pago.</li>
+            <li>Cada participante tiene que cumplir la edad mínima de la actividad. El turista que reserva es responsable de verificarlo.</li>
+        </ul>
+    </section>
+
+    <section id="t-pagos">
+        <h2>5. Pagos</h2>
+        <ul>
+            <li>Los pagos se procesan a través de <strong>Mercado Pago</strong>. Uruguay Mnatural no procesa pagos directamente ni guarda el número completo de tu tarjeta ni su código de seguridad.</li>
+            <li>Una reserva se confirma <strong>solo cuando el pago es aprobado</strong>. Nunca se confirma una reserva sin pago.</li>
+            <li>Si el pago es rechazado o el servicio de pagos no responde, la reserva sigue pendiente y podés reintentar el pago.</li>
+            <li>Si pasan <strong>24 horas</strong> desde que se creó la reserva sin un pago aprobado, o si se cierra el plazo para reservar esa fecha, la reserva se da de baja automáticamente y queda <strong>vencida</strong>.</li>
+            <li>Si mientras la reserva estaba pendiente otra persona ocupó los últimos lugares, no se realiza el cobro.</li>
+            <li>El precio total se calcula al reservar, según el precio vigente y la cantidad de participantes.</li>
+        </ul>
+    </section>
+
+    <section id="t-cancelaciones">
+        <h2>6. Cancelaciones y reembolsos</h2>
+        <ul>
+            <li>Si el prestador da de baja la actividad, las reservas confirmadas se cancelan, se reembolsa el <strong>100% del pago</strong> y se te avisa dentro de la plataforma.</li>
+            <li>Las reservas pendientes de pago de una actividad dada de baja también se cancelan, sin ningún cobro.</li>
+            <li>
+                Por el momento las reservas confirmadas no se cancelan desde la plataforma. Para pedir la
+                cancelación de una reserva confirmada, escribinos a la dirección de contacto indicando el número de
+                reserva. La solicitud se resuelve según la normativa de defensa del consumidor vigente en Uruguay
+                (Ley 17.250 y sus modificaciones).
+            </li>
+        </ul>
+    </section>
+
+    <section id="t-valoraciones">
+        <h2>7. Valoraciones</h2>
+        <ul>
+            <li>Solo puede valorar quien participó de la actividad: la valoración se habilita cuando la reserva queda finalizada.</li>
+            <li>Se permite una única valoración por reserva, con un puntaje de 1 a 5 y un comentario opcional.</li>
+            <li>Las valoraciones son públicas: se muestran en el detalle de la actividad, actualizan su puntaje promedio y se usan para ordenar el portal y para el ranking mensual de la API.</li>
+            <li>Los comentarios tienen que referirse a la experiencia. No se permiten insultos, contenido discriminatorio, datos personales de terceros ni publicidad. Uruguay Mnatural puede retirar los comentarios que no cumplan estas reglas.</li>
+        </ul>
+    </section>
+
+    <section id="t-responsabilidad">
+        <h2>8. Responsabilidades</h2>
+        <ul>
+            <li>El prestador responde por la realización de la actividad, la seguridad de los participantes y la exactitud de lo que publica.</li>
+            <li>El turista se compromete a respetar las indicaciones del prestador, llevar el equipamiento que se pide y cumplir la edad mínima.</li>
+            <li>El pronóstico del clima que se muestra en cada actividad proviene de un servicio externo (Open-Meteo) y es solo orientativo.</li>
+            <li>No se permite usar la plataforma para fines ilegales, intentar acceder a cuentas ajenas, alterar su funcionamiento ni extraer datos de forma automatizada fuera de la API pública.</li>
+            <li>Uruguay Mnatural puede suspender las cuentas que incumplan estos términos.</li>
+        </ul>
+    </section>
+
+    <section id="t-api">
+        <h2>9. API para otras plataformas</h2>
+        <p>
+            Uruguay Mnatural ofrece una API pública de solo lectura con información de emprendimientos aprobados y
+            actividades publicadas: listado de emprendimientos, actividades por día y ubicación, las tres mejor
+            puntuadas del mes, verificación de emprendimientos y búsqueda por palabra clave. La API no expone
+            datos personales de los turistas.
+        </p>
+    </section>
+
+    <section id="t-cambios">
+        <h2>10. Cambios y contacto</h2>
+        <p>
+            Estos términos pueden actualizarse. Cuando cambien, se modifica la fecha de esta página.
+            Se rigen por las leyes de la República Oriental del Uruguay.
+        </p>
+        <p class="legal-note">
+            Consultas, quejas o pedidos de cancelación:
+            <a href="mailto:contacto@uruguaymnatural.uy">contacto@uruguaymnatural.uy</a>.
+        </p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/site :: footer}"></footer>
+</body>
+</html>

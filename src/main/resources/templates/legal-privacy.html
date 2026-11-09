@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}" href="../static/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Política de privacidad · Uruguay Mnatural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/main.css}" href="../static/css/main.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+        <a class="brand text-decoration-none" th:href="@{/}" href="home.html"><img class="brand-mark" th:src="@{/img/oasis-mark.png}" src="../static/img/oasis-mark.png" alt="" width="34" height="34">Uruguay <span>Mnatural</span></a>
+        <a class="small" th:href="@{/terminos}" href="legal-terms.html">Términos y condiciones</a>
+    </div>
+</header>
+
+<main class="container-xl legal">
+    <header class="legal-head">
+        <h1>Política de privacidad</h1>
+        <p class="legal-updated">Última actualización: 9 de noviembre de 2026</p>
+    </header>
+
+    <p class="legal-note">
+        En resumen: pedimos solo los datos necesarios para que puedas reservar o publicar actividades, no
+        vendemos tus datos, no guardamos el número de tu tarjeta y podés pedirnos ver, corregir o borrar tu
+        información cuando quieras. Esta política se basa en la Ley N.º 18.331 de Protección de Datos Personales
+        y su decreto reglamentario.
+    </p>
+
+    <nav class="legal-toc" aria-label="Contenido">
+        <strong>Contenido</strong>
+        <ol>
+            <li><a href="#p-responsable">Responsable</a></li>
+            <li><a href="#p-datos">Qué datos pedimos y para qué</a></li>
+            <li><a href="#p-compartir">Con quién se comparten</a></li>
+            <li><a href="#p-donde">Dónde se guardan</a></li>
+            <li><a href="#p-seguridad">Cómo los protegemos</a></li>
+            <li><a href="#p-cookies">Cookies</a></li>
+            <li><a href="#p-plazo">Cuánto tiempo los guardamos</a></li>
+            <li><a href="#p-derechos">Tus derechos</a></li>
+            <li><a href="#p-cambios">Cambios</a></li>
+        </ol>
+    </nav>
+
+    <section id="p-responsable">
+        <h2>1. Responsable de los datos</h2>
+        <p>
+            El responsable de la base de datos es Uruguay Mnatural. Para cualquier consulta sobre tus datos
+            escribinos a <a href="mailto:contacto@uruguaymnatural.uy">contacto@uruguaymnatural.uy</a>.
+        </p>
+    </section>
+
+    <section id="p-datos">
+        <h2>2. Qué datos pedimos y para qué</h2>
+        <table>
+            <thead>
+            <tr><th scope="col">Quién</th><th scope="col">Datos</th><th scope="col">Para qué</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Turista</td>
+                <td>Nombre, apellido, cédula, correo, teléfono (opcional) y contraseña.</td>
+                <td>Crear tu cuenta, identificarte en las reservas y avisarte de cambios en ellas.</td>
+            </tr>
+            <tr>
+                <td>Medio de pago (opcional)</td>
+                <td>Marca de la tarjeta, últimos 4 dígitos, vencimiento y un identificador que entrega Mercado Pago.</td>
+                <td>Agilizar tus próximos pagos. <strong>El número completo y el código de seguridad no se guardan.</strong></td>
+            </tr>
+            <tr>
+                <td>Participantes de una reserva</td>
+                <td>Nombre, apellido, cédula y teléfono de cada persona que va a la actividad.</td>
+                <td>Que el prestador sepa quiénes participan y pueda organizar la actividad.</td>
+            </tr>
+            <tr>
+                <td>Prestador (persona física)</td>
+                <td>Nombre, apellido, documento, domicilio, correo y contraseña.</td>
+                <td>Validar que el prestador existe antes de habilitarlo a publicar.</td>
+            </tr>
+            <tr>
+                <td>Prestador (persona jurídica)</td>
+                <td>RUT, razón social, nombre del emprendimiento, dirección, correo y contraseña.</td>
+                <td>Validar la empresa antes de habilitarla a publicar.</td>
+            </tr>
+            <tr>
+                <td>Emprendimiento</td>
+                <td>Nombre, descripción, dirección, departamento, localidad, teléfono y correo de contacto.</td>
+                <td>Mostrarlo en el portal: estos datos son <strong>públicos</strong>.</td>
+            </tr>
+            <tr>
+                <td>Reservas, pagos y valoraciones</td>
+                <td>Fechas, estados, montos, resultado del pago, puntajes y comentarios.</td>
+                <td>Gestionar las reservas y mostrar las valoraciones. Las valoraciones se publican junto a la actividad.</td>
+            </tr>
+            </tbody>
+        </table>
+        <p>
+            No usamos tus datos para publicidad ni los vendemos. Los datos se piden con tu consentimiento, que das
+            al marcar la casilla de aceptación cuando creás la cuenta.
+        </p>
+    </section>
+
+    <section id="p-compartir">
+        <h2>3. Con quién se comparten</h2>
+        <ul>
+            <li><strong>El prestador de la actividad que reservaste</strong> ve tu nombre, la cantidad de participantes, los datos de cada participante y el estado de la reserva. No ve tu medio de pago.</li>
+            <li><strong>Mercado Pago</strong> recibe los datos necesarios para procesar el pago y los reembolsos. Se rige por su propia política de privacidad.</li>
+            <li><strong>Open-Meteo</strong> recibe solo la ubicación de la actividad para obtener el pronóstico del clima. No recibe ningún dato tuyo.</li>
+            <li><strong>Otras plataformas, a través de la API pública</strong>, solo acceden a datos de emprendimientos aprobados y de actividades publicadas. Nunca a datos de turistas.</li>
+            <li>Al navegar, tu navegador descarga estilos y tipografías de jsDelivr y Google Fonts, y algunas fotos de actividades pueden venir de sitios externos. Esos servicios reciben la dirección IP de tu conexión, como pasa al visitar cualquier página web.</li>
+            <li>Fuera de estos casos, solo compartimos datos si lo exige una autoridad competente según la ley.</li>
+        </ul>
+    </section>
+
+    <section id="p-donde">
+        <h2>4. Dónde se guardan</h2>
+        <p>
+            La base de datos está alojada en Supabase, en servidores ubicados en Estados Unidos. Esto implica una
+            transferencia internacional de datos, que se realiza con un proveedor que aplica medidas de seguridad
+            adecuadas, en los términos de la Ley 18.331.
+        </p>
+    </section>
+
+    <section id="p-seguridad">
+        <h2>5. Cómo los protegemos</h2>
+        <ul>
+            <li>Las contraseñas se guardan con hash BCrypt: nadie, ni siquiera los administradores, puede verlas.</li>
+            <li>La conexión entre la aplicación y la base de datos está cifrada.</li>
+            <li>Cada perfil accede solo a su información: un turista ve sus reservas y un prestador ve solo las reservas de sus actividades.</li>
+            <li>Los formularios están protegidos contra envíos desde otros sitios (CSRF).</li>
+            <li>Al iniciar sesión, un error no indica si falló el correo o la contraseña.</li>
+            <li>Si ocurriera un incidente de seguridad que afecte tus datos, te avisaremos y lo informaremos a la Unidad Reguladora y de Control de Datos Personales (URCDP).</li>
+        </ul>
+    </section>
+
+    <section id="p-cookies">
+        <h2>6. Cookies</h2>
+        <p>
+            Usamos una sola cookie, la de sesión, que es necesaria para que puedas iniciar sesión y navegar con tu
+            cuenta. Se borra al cerrar sesión o al cerrar el navegador. No usamos cookies de publicidad ni de
+            análisis, por eso no te pedimos que las aceptes.
+        </p>
+    </section>
+
+    <section id="p-plazo">
+        <h2>7. Cuánto tiempo los guardamos</h2>
+        <p>
+            Guardamos tus datos mientras tengas la cuenta. Si pedís darla de baja, borramos o anonimizamos tus
+            datos personales, salvo los registros de pagos que debamos conservar por obligaciones legales o
+            contables.
+        </p>
+    </section>
+
+    <section id="p-derechos">
+        <h2>8. Tus derechos</h2>
+        <p>Según la Ley 18.331 tenés derecho a:</p>
+        <ul>
+            <li><strong>Acceso:</strong> saber qué datos tuyos tenemos.</li>
+            <li><strong>Rectificación:</strong> corregir datos incorrectos o desactualizados.</li>
+            <li><strong>Supresión:</strong> pedir que borremos tus datos.</li>
+            <li><strong>Oposición:</strong> oponerte a un uso determinado de tus datos.</li>
+        </ul>
+        <p>
+            Para ejercerlos escribí a <a href="mailto:contacto@uruguaymnatural.uy">contacto@uruguaymnatural.uy</a>
+            desde el correo de tu cuenta. Respondemos dentro de los plazos que fija la ley. Si no quedás conforme,
+            podés presentar una denuncia ante la
+            <a href="https://www.gub.uy/unidad-reguladora-control-datos-personales/" target="_blank" rel="noopener">URCDP</a>.
+        </p>
+    </section>
+
+    <section id="p-cambios">
+        <h2>9. Cambios en esta política</h2>
+        <p>
+            Si cambiamos esta política, actualizamos la fecha de esta página. Si el cambio es importante, te lo
+            avisamos dentro de la plataforma.
+        </p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/site :: footer}"></footer>
+</body>
+</html>

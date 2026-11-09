@@ -43,6 +43,11 @@ public class ProviderRegistrationPageController {
     @PostMapping
     public String submit(@Valid @ModelAttribute("form") RegisterProviderRequest form, BindingResult result,
                          Model model) {
+        // Sin aceptar los términos y la política de privacidad no se crea la cuenta (Ley 18.331: consentimiento previo)
+        if (!form.acceptedTerms()) {
+            result.rejectValue("acceptTerms", "required",
+                    "tenés que aceptar los términos y condiciones y la política de privacidad");
+        }
         if (result.hasErrors()) {
             return FORM_VIEW;
         }

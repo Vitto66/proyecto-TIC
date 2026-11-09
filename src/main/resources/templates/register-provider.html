@@ -178,6 +178,21 @@
                         <div class="invalid-feedback"
                              th:text="${#fields.hasErrors('confirmPassword')} ? ${#fields.errors('confirmPassword')[0]} : 'las contraseñas no coinciden'">las contraseñas no coinciden</div>
                     </div>
+                    <!-- Consentimiento: términos y política de privacidad (Ley 18.331). Se valida también en el servidor. -->
+                    <div class="col-12">
+                        <div class="form-check terms-check">
+                            <input class="form-check-input" type="checkbox" th:field="*{acceptTerms}" required
+                                   th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'">
+                            <label class="form-check-label" th:for="${#ids.prev('acceptTerms')}">
+                                Leí y acepto los
+                                <a th:href="@{/terminos}" href="legal-terms.html" target="_blank" rel="noopener">términos y condiciones</a>
+                                y la
+                                <a th:href="@{/privacidad}" href="legal-privacy.html" target="_blank" rel="noopener">política de privacidad</a>.
+                            </label>
+                            <div class="invalid-feedback"
+                                 th:text="${#fields.hasErrors('acceptTerms')} ? ${#fields.errors('acceptTerms')[0]} : 'tenés que aceptarlos para crear la cuenta'">tenés que aceptarlos para crear la cuenta</div>
+                        </div>
+                    </div>
                     <div class="col-12 pt-2">
                         <button type="submit" class="btn btn-submit">Registrarse como prestador</button>
                     </div>

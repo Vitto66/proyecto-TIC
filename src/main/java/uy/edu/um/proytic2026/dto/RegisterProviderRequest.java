@@ -67,4 +67,16 @@ public class RegisterProviderRequest {
     /** Solo lo manda el formulario web. Si viene, tiene que coincidir con password. */
     @ToString.Exclude
     private String confirmPassword;
+
+    /**
+     * Aceptación de los términos y condiciones y de la política de privacidad.
+     * La exige solo el formulario web (la API la usan otros sistemas, no personas).
+     * Es Boolean y no boolean: en el JSON de la API el campo no viene y queda null.
+     */
+    private Boolean acceptTerms;
+
+    /** true solo si se marcó la casilla. */
+    public boolean acceptedTerms() {
+        return Boolean.TRUE.equals(acceptTerms);
+    }
 }
