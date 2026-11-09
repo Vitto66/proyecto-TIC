@@ -44,7 +44,7 @@ public class TouristRegistrationPageController {
     public String submit(@Valid @ModelAttribute("form") RegisterTouristRequest form, BindingResult result,
                          Model model) {
         // Sin aceptar los términos y la política de privacidad no se crea la cuenta (Ley 18.331: consentimiento previo)
-        if (!form.isAcceptTerms()) {
+        if (!form.acceptedTerms()) {
             result.rejectValue("acceptTerms", "required",
                     "tenés que aceptar los términos y condiciones y la política de privacidad");
         }
