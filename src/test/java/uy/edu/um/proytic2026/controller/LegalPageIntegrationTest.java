@@ -34,7 +34,9 @@ class LegalPageIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("legal-terms"))
                 .andExpect(content().string(containsString("Términos y condiciones de uso")))
-                .andExpect(content().string(containsString("24 horas")));
+                .andExpect(content().string(containsString("24 horas")))
+                .andExpect(content().string(containsString("si el turista puede cancelar su reserva")))
+                .andExpect(content().string(containsString("adulto responsable")));
     }
 
     @Test
