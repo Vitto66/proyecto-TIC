@@ -11,7 +11,8 @@ import java.util.List;
  */
 public record ProviderReservationRow(Long id, String touristName, String nationalId, String email, String phone,
                                      int participants, BigDecimal totalPrice, ReservationStatus status,
-                                     List<CompanionView> companions) {
+                                     List<CompanionView> companions, boolean touristAttends,
+                                     boolean cancelledByTourist) {
 
     public String participantsLabel() {
         return participants + (participants == 1 ? " persona" : " personas");
@@ -27,7 +28,7 @@ public record ProviderReservationRow(Long id, String touristName, String nationa
             case CONFIRMED -> "Confirmada";
             case FINISHED -> "Finalizada";
             case EXPIRED -> "Vencida";
-            case CANCELLED -> "Cancelada";
+            case CANCELLED -> cancelledByTourist ? "Cancelada por el turista" : "Cancelada";
         };
     }
 

@@ -90,6 +90,15 @@
                 <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('participants')}"
                      th:text="${#fields.errors('participants')[0]}">para esa fecha quedan 2 lugares</div>
                 <p class="form-text mb-0">Contá también a los niños: el precio es por persona.</p>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" th:field="*{responsibleOnly}"
+                           aria-describedby="responsible-help">
+                    <label class="form-check-label" th:for="${#ids.prev('responsibleOnly')}">
+                        No voy a participar: solo soy el adulto responsable
+                    </label>
+                    <div class="form-text" id="responsible-help">Por ejemplo, si reservás para tus hijos. No te
+                        cuentes en los participantes: cargás los datos de cada persona que va.</div>
+                </div>
             </fieldset></section>
 
             <!-- Paso 3 (cont.): si va más de una persona, los datos de cada una -->
@@ -99,19 +108,24 @@
                 <p class="form-text mt-0">Completá nombre, apellido, cédula y teléfono de cada persona. El teléfono va
                     solo con números (8 o 9), sin espacios.</p>
 
-                <div class="companion-me" th:if="${me != null}">
+                <div class="companion-me" id="companion-me" th:if="${me != null}" th:hidden="*{responsibleOnly}">
                     <span class="companion-number" aria-hidden="true">1</span>
                     <span>
                         <strong th:text="${me.fullName()}">Ana Pérez</strong>
                         <small>Vos, con los datos de tu cuenta</small>
                     </span>
                 </div>
+                <p class="form-text" id="responsible-me" th:if="${me != null}" th:hidden="*{!responsibleOnly}">
+                    <strong th:text="${me.fullName()}">Ana Pérez</strong> (vos) queda como adulto responsable
+                    de la reserva, sin participar.
+                </p>
 
                 <div id="companions">
                     <div class="companion-card" data-companion th:each="c, it : *{companions}">
                         <h3 class="companion-title">
-                            <span class="companion-number" aria-hidden="true" th:text="${it.index + 2}">2</span>
-                            Persona <span th:text="${it.index + 2}">2</span>
+                            <span class="companion-number" aria-hidden="true" data-person-number
+                                  th:text="${it.index + form.firstCompanionNumber()}">2</span>
+                            Persona <span data-person-number th:text="${it.index + form.firstCompanionNumber()}">2</span>
                         </h3>
                         <div class="row g-3">
                             <div class="col-sm-6">
@@ -157,8 +171,8 @@
             <template id="companion-template">
                 <div class="companion-card" data-companion>
                     <h3 class="companion-title">
-                        <span class="companion-number" aria-hidden="true">__N__</span>
-                        Persona __N__
+                        <span class="companion-number" aria-hidden="true" data-person-number>__N__</span>
+                        Persona <span data-person-number>__N__</span>
                     </h3>
                     <div class="row g-3">
                         <div class="col-sm-6">

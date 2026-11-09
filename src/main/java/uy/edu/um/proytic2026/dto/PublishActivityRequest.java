@@ -68,6 +68,20 @@ public class PublishActivityRequest {
     @Max(value = 10080, message = "no puede superar los 7 días (10080 minutos)")
     private Integer bookingCutoffMinutes;
 
+    /** Paso 5: si el turista puede cancelar su reserva y recibir la devolución del pago. */
+    private boolean cancellationAllowed;
+
+    /** Paso 5: hasta cuántas horas antes del inicio se puede cancelar (solo cuenta si se permite; vacío = 24). */
+    @Min(value = 0, message = "no puede ser negativo")
+    @Max(value = 720, message = "no puede superar los 30 días (720 horas)")
+    @Builder.Default
+    private Integer cancellationHours = 24;
+
+    /** Las horas para cancelar, con 24 si quedó vacío. */
+    public int cancellationHoursOrDefault() {
+        return cancellationHours == null ? 24 : cancellationHours;
+    }
+
     /** Paso 3: uno o más tipos de actividad. */
     @NotEmpty(message = "elegí al menos un tipo de actividad")
     @Builder.Default

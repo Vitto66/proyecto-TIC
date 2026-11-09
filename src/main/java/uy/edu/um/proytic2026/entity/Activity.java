@@ -62,6 +62,16 @@ public class Activity {
     @Builder.Default
     private boolean active = true;
 
+    /** Si el turista puede cancelar su reserva y recibir la devolución del pago. */
+    @Column(name = "cancellation_allowed", nullable = false)
+    @Builder.Default
+    private boolean cancellationAllowed = false;
+
+    /** Hasta cuántas horas antes del inicio se puede cancelar (si se permite). */
+    @Column(name = "cancellation_hours", nullable = false)
+    @Builder.Default
+    private Integer cancellationHours = 24;
+
     /** Uno o más tipos (paso 3). Tabla intermedia activity_activity_type. */
     @ManyToMany
     @JoinTable(name = "activity_activity_type",

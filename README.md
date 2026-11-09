@@ -228,6 +228,21 @@ para simular que el servicio no responde) y responde igual que el sandbox.
 - Pendiente para más adelante: pagar con las tarjetas guardadas al registrarse (CU-01). Para eso hay que guardarlas
   como *clientes y tarjetas* de Mercado Pago; hoy se paga ingresando la tarjeta.
 
+## Cancelación por el turista, adulto responsable y fechas dd/mm/aaaa (pedidos del cliente)
+
+- **Cancelación.** Al publicar o modificar una actividad, el prestador elige si el turista puede cancelar y hasta
+  cuántas horas antes del inicio (por defecto, no se puede; 0 = hasta la hora de comienzo). Se ve en el detalle de la
+  actividad y en la reserva. Si está en plazo, el turista cancela desde su reserva (`POST /tourist/reservations/{id}/cancel`,
+  con confirmación) y se le devuelve el 100% de lo pagado: la reserva muestra la devolución como pago negativo
+  (`− $ 3.000`). Si el servicio de pagos no responde, la reserva queda cancelada y la devolución se puede reintentar
+  (como en CU-10). Lo resuelve `ReservationCancellationService`, que bloquea la fecha igual que al confirmar un pago.
+- **Adulto responsable.** Al reservar, el turista puede marcar "No voy a participar: solo soy el adulto responsable"
+  (por ejemplo, para anotar solo a sus hijos). Entonces todos los participantes se cargan como acompañantes
+  (personas 1 en adelante) y el turista queda como responsable, también a la vista del prestador.
+- **Fechas.** Los campos de fecha (inicio, Explorar y fechas de una actividad) se ven y se escriben como `dd/mm/aaaa`
+  en cualquier navegador, con flatpickr (`static/js/date-inputs.js`). Al servidor se sigue mandando `aaaa-mm-dd`.
+- **Necesita el script** `2026-11-09_cancelacion_adulto_responsable.sql`.
+
 ## Mis valoraciones (CU-24, agregado por el equipo)
 
 Caso de uso nuevo, que no estaba en la letra (se suma al RF-09 Valoraciones y comentarios):
@@ -338,6 +353,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-28_activity_photo.sql` | Tabla `activity_photo`: la foto de portada de cada actividad (subida o con dirección externa). **Sin este script la app no arranca con Supabase** |
 | `2026-10-28_demo_activities.sql` | **Opcional.** Datos de ejemplo: 7 prestadores (correos `@demo.uy`, contraseña `Demo2026`) y 15 actividades en 10 departamentos, con fotos de Wikimedia Commons (solo la dirección) y fechas desde hoy |
 | `2026-10-28_demo_reviews.sql` | **Opcional, después del anterior.** 12 turistas de ejemplo (`@demo.uy`, contraseña `Demo2026`) con 44 reservas finalizadas y sus valoraciones en las actividades de ejemplo |
+| `2026-11-09_cancelacion_adulto_responsable.sql` | Política de cancelación de cada actividad, reservas canceladas por el turista y adulto responsable que no participa. **Sin este script la app no arranca con Supabase** |
 
 ## Medios de pago
 

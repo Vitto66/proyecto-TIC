@@ -17,6 +17,7 @@ import java.util.Locale;
 public record ActivityDetail(Long id, String name, String description, String businessName,
                              String localityName, String departmentName, List<String> typeNames,
                              int durationMinutes, BigDecimal price, int minAge, int bookingCutoffMinutes,
+                             boolean cancellationAllowed, int cancellationHours,
                              List<String> equipmentProvided, List<String> equipmentToBring,
                              List<DetailDate> dates, List<ReviewView> reviews, Double averageRating) {
 
@@ -24,7 +25,7 @@ public record ActivityDetail(Long id, String name, String description, String bu
 
     public ActivityDetail withDates(List<DetailDate> newDates) {
         return new ActivityDetail(id, name, description, businessName, localityName, departmentName, typeNames,
-                durationMinutes, price, minAge, bookingCutoffMinutes, equipmentProvided, equipmentToBring,
+                durationMinutes, price, minAge, bookingCutoffMinutes, cancellationAllowed, cancellationHours, equipmentProvided, equipmentToBring,
                 newDates, reviews, averageRating);
     }
 
@@ -53,6 +54,19 @@ public record ActivityDetail(Long id, String name, String description, String bu
     public String cutoffLabel() {
         return bookingCutoffMinutes == 0 ? "Hasta la hora de comienzo"
                 : "Hasta " + ActivitySummary.formatMinutes(bookingCutoffMinutes) + " antes";
+    }
+
+    /** "Sin cancelación" o "Hasta 24 h antes, con devolución total". */
+    public String cancellationLabel() {
+        return cancellationPolicyLabel(cancellationAllowed, cancellationHours);
+    }
+
+    public static String cancellationPolicyLabel(boolean allowed, int hours) {
+        if (!allowed) {
+            return "No se puede cancelar";
+        }
+        return (hours == 0 ? "Hasta la hora de comienzo" : "Hasta " + hours + " h antes")
+                + ", con devolución total";
     }
 
     public boolean rated() {

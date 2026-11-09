@@ -109,6 +109,7 @@ public class ReservationService {
                 .totalPrice(quote.total())
                 .status(ReservationStatus.PENDING)
                 .createdAt(LocalDateTime.now(clock))
+                .touristAttends(!request.isResponsibleOnly())
                 .build());
         for (CompanionForm c : request.getCompanions()) {
             CompanionForm data = c.trimmed();
@@ -244,6 +245,9 @@ public class ReservationService {
         return new ReservationView(r.getId(), activity.getId(), activity.getName(), activity.getBusiness().getName(),
                 location(activity), date, r.getParticipants(), r.getTotalPrice(), r.getStatus(), r.getCreatedAt(),
                 tourist.getFirstName() + " " + tourist.getLastName(), companions, lastPayment,
-                payable(r, LocalDateTime.now(clock)));
+                payable(r, LocalDateTime.now(clock)), r.isTouristAttends(), r.isCancelledByTourist(),
+                activity.isCancellationAllowed(), activity.getCancellationHours(),
+                ReservationCancellationService.cancellable(r, LocalDateTime.now(clock)),
+                ReservationCancellationService.cancelDeadline(r));
     }
 }
