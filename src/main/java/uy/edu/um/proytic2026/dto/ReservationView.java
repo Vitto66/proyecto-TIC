@@ -14,11 +14,18 @@ import java.util.List;
  * @param companions   las personas 2 en adelante.
  * @param lastPayment  el resultado del último intento de pago, o null si todavía no intentó pagar.
  * @param payable      si todavía se puede pagar: está pendiente, no pasaron 24 horas y no cerraron las reservas.
+ * @param touristAttends     false si el turista es solo el adulto responsable y no participa.
+ * @param cancelledByTourist la canceló el turista (y no el prestador al dar de baja la actividad).
+ * @param cancellationAllowed la actividad permite cancelar; cancellationHours, hasta cuántas horas antes.
+ * @param cancellable        si todavía la puede cancelar ahora.
+ * @param cancelDeadline     hasta cuándo se puede cancelar.
  */
 public record ReservationView(Long id, Long activityId, String activityName, String businessName, String location,
                               ActivityDateView date, int participants, BigDecimal totalPrice,
                               ReservationStatus status, LocalDateTime createdAt, String touristName,
-                              List<CompanionView> companions, PaymentStatus lastPayment, boolean payable) {
+                              List<CompanionView> companions, PaymentStatus lastPayment, boolean payable,
+                              boolean touristAttends, boolean cancelledByTourist, boolean cancellationAllowed,
+                              int cancellationHours, boolean cancellable, LocalDateTime cancelDeadline) {
 
     /** Una reserva PENDIENTE vence a las 24 horas de creada si no se paga (CU-15 4a, CU-16). */
     public static final int HOURS_TO_PAY = 24;
@@ -39,7 +46,7 @@ public record ReservationView(Long id, Long activityId, String activityName, Str
         return status == ReservationStatus.CONFIRMED;
     }
 
-    /** El prestador dio de baja la actividad (CU-10). */
+    /** Se canceló: la dio de baja el prestador (CU-10) o la canceló el turista. */
     public boolean cancelled() {
         return status == ReservationStatus.CANCELLED;
     }
@@ -57,6 +64,21 @@ public record ReservationView(Long id, Long activityId, String activityName, Str
     /** El último pago quedó en revisión del servicio: se puede consultar si ya se aprobó. */
     public boolean paymentInProcess() {
         return pending() && lastPayment == PaymentStatus.IN_PROCESS;
+    }
+
+    /** La política de la actividad: "No se puede cancelar" o "Hasta 24 h antes, con devolución total". */
+    public String cancellationLabel() {
+        return ActivityDetail.cancellationPolicyLabel(cancellationAllowed, cancellationHours);
+    }
+
+    /** Hasta cuándo se puede cancelar: "Sábado 14 de noviembre de 2026 a las 10:00". */
+    public String cancelUntilLabel() {
+        return DateLabels.day(cancelDeadline.toLocalDate()) + " a las " + DateLabels.time(cancelDeadline);
+    }
+
+    /** La devolución, como un pago negativo: "− $ 3.000". */
+    public String refundLabel() {
+        return "− " + totalLabel();
     }
 
     /** Hasta cuándo se puede pagar: "Martes 27 de octubre de 2026 a las 10:15". */

@@ -91,6 +91,7 @@ public class ActivityDetailService {
                 a.getLocality().getName(), a.getLocality().getDepartment().getName(),
                 a.getTypes().stream().map(ActivityType::getName).sorted().toList(),
                 a.getDurationMinutes(), a.getPrice(), a.getMinAge(), a.getBookingCutoffMinutes(),
+                a.isCancellationAllowed(), a.getCancellationHours(),
                 equipment.stream().filter(ActivityEquipment::isProvidedByProvider)
                         .map(e -> e.getEquipmentType().getName()).toList(),
                 equipment.stream().filter(e -> !e.isProvidedByProvider())

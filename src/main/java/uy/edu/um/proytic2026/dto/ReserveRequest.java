@@ -32,14 +32,27 @@ public class ReserveRequest {
     @Max(value = 50, message = "para más de 50 personas, contactá al prestador")
     private Integer participants;
 
-    /** Las personas 2 en adelante: la 1 es el turista que reserva. */
+    /**
+     * El turista reserva para otros (por ejemplo, sus hijos) y no participa: queda como adulto
+     * responsable y todos los participantes son acompañantes.
+     */
+    private boolean responsibleOnly;
+
+    /** Las personas que van además del turista (o todas, si él es solo el adulto responsable). */
     @Valid
     @Builder.Default
     private List<CompanionForm> companions = new ArrayList<>();
 
     /** Cuántos acompañantes corresponden a la cantidad de participantes. */
     public int expectedCompanions() {
-        return participants == null || participants < 1 ? 0 : Math.min(participants, 50) - 1;
+        if (participants == null || participants < 1) return 0;
+        int people = Math.min(participants, 50);
+        return responsibleOnly ? people : people - 1;
+    }
+
+    /** El número de persona del primer acompañante: 2 si el turista va, 1 si es solo el responsable. */
+    public int firstCompanionNumber() {
+        return responsibleOnly ? 1 : 2;
     }
 
     public boolean companionsMatchParticipants() {

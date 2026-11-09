@@ -47,18 +47,22 @@
         <th:block th:unless="${quote.companions().isEmpty()}">
             <h2 class="people-title">Quiénes van</h2>
             <ol class="people-list">
-                <li th:if="${me != null}">
+                <li th:if="${me != null and !form.responsibleOnly}">
                     <span class="companion-number" aria-hidden="true">1</span>
                     <span><strong th:text="${me.fullName()}">Ana Pérez</strong><small>Vos</small></span>
                 </li>
                 <li th:each="c, it : ${quote.companions()}">
-                    <span class="companion-number" aria-hidden="true" th:text="${it.index + 2}">2</span>
+                    <span class="companion-number" aria-hidden="true" th:text="${it.index + form.firstCompanionNumber()}">2</span>
                     <span>
                         <strong th:text="${c.firstName} + ' ' + ${c.lastName}">Luis Pérez</strong>
                         <small th:text="'Cédula ' + ${c.nationalId} + ' · Tel. ' + ${c.phone}">Cédula 4567890 · Tel. 099 123 456</small>
                     </span>
                 </li>
             </ol>
+            <p class="responsible-note" th:if="${me != null and form.responsibleOnly}">
+                <strong th:text="${me.fullName()}">Ana Pérez</strong> (vos) quedás como adulto responsable de la
+                reserva, sin participar.
+            </p>
         </th:block>
 
         <p class="form-text">
@@ -88,6 +92,7 @@
     <th:block th:fragment="reserve-data">
         <input type="hidden" name="instanceId" th:value="${quote.date().id()}">
         <input type="hidden" name="participants" th:value="${quote.participants()}">
+        <input type="hidden" name="responsibleOnly" th:value="${form.responsibleOnly}">
         <th:block th:each="c, it : ${quote.companions()}">
             <input type="hidden" th:name="|companions[${it.index}].firstName|" th:value="${c.firstName}">
             <input type="hidden" th:name="|companions[${it.index}].lastName|" th:value="${c.lastName}">

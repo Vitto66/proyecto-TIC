@@ -61,7 +61,7 @@
         <th:block th:unless="${reservation.companions().isEmpty()}">
             <h2 class="people-title">Quiénes van</h2>
             <ol class="people-list">
-                <li>
+                <li th:if="${reservation.touristAttends()}">
                     <span class="companion-number" aria-hidden="true">1</span>
                     <span><strong th:text="${reservation.touristName()}">Ana Pérez</strong><small>Vos</small></span>
                 </li>
@@ -73,6 +73,11 @@
                     </span>
                 </li>
             </ol>
+            <!-- Adulto responsable: reservó para otros y no participa -->
+            <p class="responsible-note" th:unless="${reservation.touristAttends()}">
+                <strong th:text="${reservation.touristName()}">Ana Pérez</strong> (vos) sos el adulto responsable
+                de la reserva y no participás de la actividad.
+            </p>
         </th:block>
 
         <!-- Pendiente: falta el pago (CU-15) -->
@@ -97,16 +102,25 @@
             </p>
         </div>
 
-        <!-- CU-10: el prestador dio de baja la actividad -->
+        <!-- Cancelada: por el turista, o porque el prestador dio de baja la actividad (CU-10) -->
         <div class="pay-box" role="status" th:if="${reservation.cancelled()}">
-            <p class="mb-1"><strong>El prestador dio de baja esta actividad, así que tu reserva se canceló.</strong></p>
-            <p class="mb-0" th:if="${reservation.refunded()}">
-                Se te devolvió el 100% del pago (<span th:text="${reservation.totalLabel()}">$ 3.000</span>) en la
-                misma tarjeta con la que pagaste.
-            </p>
-            <p class="mb-0" th:if="${reservation.refundPending()}">
-                Estamos gestionando la devolución del 100% del pago con el servicio de pagos.
-            </p>
+            <p class="mb-1" th:if="${reservation.cancelledByTourist()}"><strong>Cancelaste esta reserva.</strong></p>
+            <p class="mb-1" th:unless="${reservation.cancelledByTourist()}"><strong>El prestador dio de baja esta actividad, así que tu reserva se canceló.</strong></p>
+            <th:block th:if="${reservation.refunded()}">
+                <dl class="summary-rows refund-row">
+                    <div><dt>Devolución</dt><dd th:text="${reservation.refundLabel()}">− $ 3.000</dd></div>
+                </dl>
+                <p class="mb-0">Se te devolvió el 100% del pago en la misma tarjeta con la que pagaste.</p>
+            </th:block>
+            <th:block th:if="${reservation.refundPending()}">
+                <p class="mb-2">
+                    Estamos gestionando la devolución del 100% del pago con el servicio de pagos.
+                </p>
+                <form th:if="${reservation.cancelledByTourist()}" method="post"
+                      th:action="@{/tourist/reservations/{id}/cancel(id=${reservation.id()})}">
+                    <button type="submit" class="btn btn-outline-monte">Reintentar la devolución</button>
+                </form>
+            </th:block>
             <p class="mb-0" th:unless="${reservation.refunded() or reservation.refundPending()}">
                 No se te cobró nada.
             </p>
@@ -115,6 +129,30 @@
         <div class="pay-box" th:if="${reservation.confirmed()}">
             <p class="mb-0"><strong>Tu lugar está asegurado.</strong> Te esperamos el
                 <span th:text="${reservation.date().dayLabel()}">domingo 25 de octubre</span>.</p>
+        </div>
+
+        <!-- Cancelar la reserva: según lo que eligió el prestador al publicar la actividad -->
+        <div class="cancel-box" th:if="${reservation.pending() or reservation.confirmed()}">
+            <p class="mb-2"><strong>Cancelación:</strong>
+                <span th:text="${reservation.cancellationLabel()}">Hasta 24 h antes, con devolución total</span>.</p>
+            <th:block th:if="${reservation.cancellable()}">
+                <p class="mb-2 text-muted">Podés cancelarla hasta el
+                    <span th:text="${reservation.cancelUntilLabel()}">sábado 14 de noviembre de 2026 a las 10:00</span>.</p>
+                <details class="cancel-confirm">
+                    <summary class="btn btn-outline-danger">Cancelar la reserva</summary>
+                    <form method="post" th:action="@{/tourist/reservations/{id}/cancel(id=${reservation.id()})}">
+                        <p class="my-2">
+                            ¿Seguro? La reserva se cancela y no se puede deshacer.
+                            <th:block th:if="${reservation.confirmed()}">Se te devuelven
+                                <strong th:text="${reservation.totalLabel()}">$ 3.000</strong>.</th:block>
+                        </p>
+                        <button type="submit" class="btn btn-danger">Sí, cancelar</button>
+                    </form>
+                </details>
+            </th:block>
+            <p class="mb-0 text-muted" th:if="${reservation.cancellationAllowed() and !reservation.cancellable()}">
+                Ya pasó el plazo para cancelarla.
+            </p>
         </div>
 
         <!-- CU-18: finalizada → valorarla, o ver la valoración que ya hizo -->

@@ -56,6 +56,7 @@
                 <div class="res-item-head">
                     <div>
                         <strong th:text="${r.touristName()}">Ana Pérez</strong>
+                        <span class="res-responsible" th:unless="${r.touristAttends()}">Adulto responsable (no participa)</span>
                         <span class="res-meta">
                             <span th:text="'Cédula ' + ${r.nationalId()}">Cédula 12345678</span>
                             <span th:text="${r.email()}">ana@mail.com</span>
@@ -68,7 +69,7 @@
                     </div>
                 </div>
                 <div class="res-companions" th:unless="${r.companions().isEmpty()}">
-                    <span class="res-companions-title">Acompañantes</span>
+                    <span class="res-companions-title" th:text="${r.touristAttends()} ? 'Acompañantes' : 'Participantes'">Acompañantes</span>
                     <ul>
                         <li th:each="c : ${r.companions()}">
                             <span th:text="${c.fullName()}">Juan Pérez</span>

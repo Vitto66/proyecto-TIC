@@ -189,3 +189,15 @@
 @media (max-width: 575.98px) {
     .res-side, .res-item-side { align-items: flex-start; text-align: left; }
 }
+
+/* Adulto responsable que reservó para otros y no participa */
+.res-responsible {
+    display: inline-block;
+    margin: 0.15rem 0 0.25rem;
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    background: #FFF4DC;
+    color: #7A5200;
+    font-size: 0.8rem;
+    font-weight: 600;
+}

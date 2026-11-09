@@ -213,3 +213,18 @@
 .reservation-status.is-expired { background: #F1E3E3; color: #7A1E1E; }
 .pay-box .btn-submit { text-decoration: none; display: inline-block; }
 .summary-actions button.btn-outline-monte { cursor: pointer; }
+
+/* Cancelación por el turista */
+.cancel-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+}
+.cancel-confirm summary { list-style: none; display: inline-block; }
+.cancel-confirm summary::-webkit-details-marker { display: none; }
+.refund-row { margin: 0.25rem 0 0.5rem; }
+.refund-row dd { color: #9b2c2c; font-weight: 700; }
+
+/* Adulto responsable que no participa */
+.responsible-note { margin: 0.5rem 0 0; color: var(--muted); }

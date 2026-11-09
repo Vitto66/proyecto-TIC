@@ -214,6 +214,72 @@ class ReservationPageIntegrationTest {
     // ---------- Paso 6: confirmar ----------
 
     @Test
+    void confirm_responsibleOnly_savesEveryParticipantAsACompanion() throws Exception {
+        // Ana reserva para dos personas y no va: es solo la adulta responsable
+        MvcResult result = mockMvc.perform(post(reserveUrl + "/confirm").with(touristSession()).with(csrf())
+                        .param("instanceId", date.getId().toString())
+                        .param("participants", "2")
+                        .param("responsibleOnly", "true")
+                        .param("companions[0].firstName", "Hijo").param("companions[0].lastName", "Pérez")
+                        .param("companions[0].nationalId", "40000001").param("companions[0].phone", "099123451")
+                        .param("companions[1].firstName", "Hija").param("companions[1].lastName", "Pérez")
+                        .param("companions[1].nationalId", "40000002").param("companions[1].phone", "099123452"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        Reservation saved = reservationRepository.findAll().get(0);
+        assertThat(saved.isTouristAttends()).isFalse();
+        assertThat(saved.getParticipants()).isEqualTo(2);
+        assertThat(saved.getTotalPrice()).isEqualByComparingTo("3000");
+        assertThat(saved.getCompanions()).hasSize(2);
+
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl()).with(touristSession()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("adulto responsable")));
+    }
+
+    @Test
+    void cancel_whenTheActivityAllowsIt_cancelsTheReservation() throws Exception {
+        activity.setCancellationAllowed(true);
+        activity.setCancellationHours(24);
+        Reservation pending = reservationRepository.save(Reservation.builder().tourist(tourist).instance(date)
+                .participants(1).totalPrice(new BigDecimal("1500")).status(ReservationStatus.PENDING)
+                .createdAt(NOW.minusHours(1)).build());
+        String url = "/tourist/reservations/" + pending.getId();
+
+        mockMvc.perform(get(url).with(touristSession()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Cancelar la reserva")));
+
+        mockMvc.perform(post(url + "/cancel").with(touristSession()).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(url))
+                .andExpect(flash().attribute("paymentMessage", containsString("No se te había cobrado nada")));
+
+        assertThat(pending.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
+        assertThat(pending.isCancelledByTourist()).isTrue();
+    }
+
+    @Test
+    void cancel_whenTheActivityDoesNotAllowIt_keepsTheReservation() throws Exception {
+        Reservation pending = reservationRepository.save(Reservation.builder().tourist(tourist).instance(date)
+                .participants(1).totalPrice(new BigDecimal("1500")).status(ReservationStatus.PENDING)
+                .createdAt(NOW.minusHours(1)).build());
+        String url = "/tourist/reservations/" + pending.getId();
+
+        mockMvc.perform(get(url).with(touristSession()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("No se puede cancelar")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Sí, cancelar"))));
+
+        mockMvc.perform(post(url + "/cancel").with(touristSession()).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("paymentLevel", "danger"));
+
+        assertThat(pending.getStatus()).isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
     void confirm_createsAPendingReservationAndShowsIt() throws Exception {
         MvcResult result = mockMvc.perform(confirm(date, 2))
                 .andExpect(status().is3xxRedirection())

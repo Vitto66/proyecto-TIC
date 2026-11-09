@@ -227,6 +227,41 @@ class ReservationServiceTest {
     }
 
     @Test
+    void reserve_responsibleOnly_theTouristDoesNotGo_andEveryParticipantIsACompanion() {
+        Tourist tourist = Tourist.builder().id(TOURIST_ID).firstName("Ana").lastName("Gómez").nationalId("12345678").build();
+        when(touristRepository.findById(TOURIST_ID)).thenReturn(Optional.of(tourist));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(inv -> inv.getArgument(0));
+        // Ana reserva para sus dos hijos y no va
+        ReserveRequest request = ReserveRequest.builder().instanceId(1L).participants(2).responsibleOnly(true).build();
+        request.getCompanions().add(companion("Hijo", "40000001"));
+        request.getCompanions().add(companion("Hija", "40000002"));
+        assertThat(request.expectedCompanions()).isEqualTo(2);
+        assertThat(request.companionsMatchParticipants()).isTrue();
+
+        ReservationView view = service.reserve(TOURIST_ID, ACTIVITY_ID, request);
+
+        ArgumentCaptor<Reservation> saved = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository).save(saved.capture());
+        Reservation r = saved.getValue();
+        assertThat(r.isTouristAttends()).isFalse();
+        assertThat(r.getParticipants()).isEqualTo(2);
+        assertThat(r.getTotalPrice()).isEqualByComparingTo("3000");
+        // Los que van se numeran desde la persona 1
+        assertThat(r.getCompanions()).extracting(ReservationParticipant::getPosition).containsExactly(1, 2);
+        assertThat(view.touristAttends()).isFalse();
+    }
+
+    @Test
+    void responsibleOnly_withoutDataForEveryParticipant_doesNotMatch() {
+        ReserveRequest request = ReserveRequest.builder().instanceId(1L).participants(2).responsibleOnly(true).build();
+        request.getCompanions().add(companion("Hijo", "40000001"));
+
+        assertThat(request.companionsMatchParticipants()).isFalse();
+        request.fitCompanions();
+        assertThat(request.getCompanions()).hasSize(2);
+    }
+
+    @Test
     void reserve_checksAgain_ifTheSeatsWereTakenMeanwhile() {
         occupied(1L, 10L);
 

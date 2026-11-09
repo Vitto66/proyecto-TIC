@@ -49,6 +49,19 @@ public class Reservation {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Si el turista que reserva también participa. Si no (por ejemplo, anota solo a sus hijos), queda
+     * como adulto responsable y todas las personas de la reserva son acompañantes.
+     */
+    @Column(name = "tourist_attends", nullable = false)
+    @Builder.Default
+    private boolean touristAttends = true;
+
+    /** La canceló el turista (y no el prestador al dar de baja la actividad, CU-10). */
+    @Column(name = "cancelled_by_tourist", nullable = false)
+    @Builder.Default
+    private boolean cancelledByTourist = false;
+
     /** Las personas 2 en adelante (la 1 es el turista), con sus datos. */
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position")
@@ -58,7 +71,8 @@ public class Reservation {
     /** Agrega un acompañante con el número de persona que le sigue. */
     public void addCompanion(ReservationParticipant companion) {
         companion.setReservation(this);
-        companion.setPosition(companions.size() + 2);
+        // Si el turista va, él es la persona 1 y los demás empiezan en la 2
+        companion.setPosition(companions.size() + (touristAttends ? 2 : 1));
         companions.add(companion);
     }
 }

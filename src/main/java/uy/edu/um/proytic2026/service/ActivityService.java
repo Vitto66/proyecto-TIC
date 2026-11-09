@@ -104,6 +104,8 @@ public class ActivityService {
         form.setLocalityId(business.getLocality().getId());
         form.setMinAge(0);
         form.setBookingCutoffMinutes(0);
+        form.setCancellationAllowed(false);
+        form.setCancellationHours(24);
         return form;
     }
 
@@ -129,6 +131,8 @@ public class ActivityService {
                 .price(request.getPrice())
                 .minAge(request.getMinAge())
                 .bookingCutoffMinutes(request.getBookingCutoffMinutes())
+                .cancellationAllowed(request.isCancellationAllowed())
+                .cancellationHours(request.cancellationHoursOrDefault())
                 .active(true)
                 .build();
 
@@ -172,6 +176,8 @@ public class ActivityService {
                 .price(a.getPrice())
                 .minAge(a.getMinAge())
                 .bookingCutoffMinutes(a.getBookingCutoffMinutes())
+                .cancellationAllowed(a.isCancellationAllowed())
+                .cancellationHours(a.getCancellationHours())
                 .activityTypeIds(new java.util.ArrayList<>(a.getTypes().stream().map(ActivityType::getId).toList()))
                 .equipment(equipment)
                 .build();
@@ -227,6 +233,8 @@ public class ActivityService {
         activity.setPrice(request.getPrice());
         activity.setMinAge(request.getMinAge());
         activity.setBookingCutoffMinutes(request.getBookingCutoffMinutes());
+        activity.setCancellationAllowed(request.isCancellationAllowed());
+        activity.setCancellationHours(request.cancellationHoursOrDefault());
 
         activity.getTypes().retainAll(types);
         activity.getTypes().addAll(types);

@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uy.edu.um.proytic2026.exception.ReservationNotCancellableException;
+import uy.edu.um.proytic2026.service.PaymentService.RefundOutcome;
+import uy.edu.um.proytic2026.service.ReservationCancellationService;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import uy.edu.um.proytic2026.dto.AuthenticatedUser;
@@ -40,6 +44,7 @@ public class ReservationPageController {
 
     private final ReservationService reservationService;
     private final ReviewService reviewService;
+    private final ReservationCancellationService cancellationService;
 
     @ModelAttribute("currentUser")
     AuthenticatedUser currentUser(@AuthenticationPrincipal AuthenticatedUser user) {
@@ -126,6 +131,35 @@ public class ReservationPageController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return RESERVATION_VIEW;
+    }
+
+    /**
+     * El turista cancela su reserva (si la actividad lo permite y está en plazo) y se le devuelve
+     * el 100% de lo que pagó. La confirmación se pide en la misma página antes de enviar.
+     */
+    @PostMapping("/tourist/reservations/{reservationId}/cancel")
+    public String cancel(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long reservationId,
+                         RedirectAttributes redirect) {
+        String level;
+        String message;
+        try {
+            RefundOutcome outcome = cancellationService.cancel(user.userId(), reservationId);
+            level = outcome == RefundOutcome.PENDING ? "warning" : "success";
+            message = switch (outcome) {
+                case REFUNDED -> "Cancelaste tu reserva. Te devolvimos el 100% de lo que pagaste.";
+                case PENDING -> "Cancelaste tu reserva. El servicio de pagos no respondió: la devolución "
+                        + "queda pendiente y podés reintentarla desde acá.";
+                case NOTHING_TO_REFUND -> "Cancelaste tu reserva. No se te había cobrado nada.";
+            };
+        } catch (ReservationNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (ReservationNotCancellableException ex) {
+            level = "danger";
+            message = "Esta reserva ya no se puede cancelar.";
+        }
+        redirect.addFlashAttribute("paymentLevel", level);
+        redirect.addFlashAttribute("paymentMessage", message);
+        return "redirect:/tourist/reservations/" + reservationId;
     }
 
     /**

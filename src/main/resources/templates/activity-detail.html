@@ -66,6 +66,7 @@
                     <div><dt>Precio</dt><dd th:text="${activity.priceLabel()} + ' por persona'">$ 1.500 por persona</dd></div>
                     <div><dt>Edad mínima</dt><dd th:text="${activity.minAgeLabel()}">Desde 12 años</dd></div>
                     <div><dt>Se reserva</dt><dd th:text="${activity.cutoffLabel()}">Hasta 1 h antes</dd></div>
+                    <div><dt>Cancelación</dt><dd th:text="${activity.cancellationLabel()}">Hasta 24 h antes, con devolución total</dd></div>
                 </dl>
             </section>
 

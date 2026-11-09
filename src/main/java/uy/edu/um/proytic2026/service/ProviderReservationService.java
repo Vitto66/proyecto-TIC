@@ -97,7 +97,7 @@ public class ProviderReservationService {
                 .toList();
         return new ProviderReservationRow(r.getId(), t.getFirstName() + " " + t.getLastName(), t.getNationalId(),
                 t.getUser().getEmail(), t.getUser().getPhone(), r.getParticipants(), r.getTotalPrice(),
-                r.getStatus(), companions);
+                r.getStatus(), companions, r.isTouristAttends(), r.isCancelledByTourist());
     }
 
     private static ActivityDateView toView(ActivityInstance i, long occupied) {
