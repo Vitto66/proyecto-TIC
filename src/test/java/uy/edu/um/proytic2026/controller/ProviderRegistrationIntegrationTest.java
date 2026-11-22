@@ -148,7 +148,7 @@ class ProviderRegistrationIntegrationTest {
 
         mockMvc.perform(legalForm()).andExpect(status().is3xxRedirection());
 
-        Provider provider = providerRepository.findByStatus(ProviderStatus.PENDING).getFirst();
+        Provider provider = providerRepository.findByStatus(ProviderStatus.PENDING).get(0);
         assertThat(provider.getUser().getEmail()).isEqualTo("info@laguna.uy");
         assertThat(touristRepository.existsById(provider.getUser().getId())).isTrue();
     }
