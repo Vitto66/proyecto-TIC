@@ -17,7 +17,7 @@ import uy.edu.um.proytic2026.validation.ProviderRegistrationValidator;
 
 /**
  * Página del formulario de registro de prestadores (CU-02).
- * Usa el mismo servicio y las mismas validaciones que POST /api/auth/register/provider.
+ * Usa el servicio de usuarios y las validaciones del registro de prestador.
  */
 @Controller
 @RequestMapping("/register/provider")

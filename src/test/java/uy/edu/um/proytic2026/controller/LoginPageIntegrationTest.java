@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -393,16 +392,5 @@ class LoginPageIntegrationTest {
     void registrationPages_stayPublic() throws Exception {
         mockMvc.perform(get("/register/tourist")).andExpect(status().isOk());
         mockMvc.perform(get("/register/provider")).andExpect(status().isOk());
-    }
-
-    @Test
-    void api_registration_worksWithoutSessionOrCsrfToken() throws Exception {
-        // La API la consumen otras plataformas (RF-10): ni sesión ni token CSRF
-        mockMvc.perform(post("/api/auth/register/tourist").contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"firstName":"Ana","lastName":"Pérez","nationalId":"55555555",
-                                 "email":"api@mail.com","password":"secreta123"}
-                                """))
-                .andExpect(status().isCreated());
     }
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -13,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uy.edu.um.proytic2026.entity.Provider;
 import uy.edu.um.proytic2026.entity.ProviderStatus;
 import uy.edu.um.proytic2026.repository.ProviderRepository;
+import uy.edu.um.proytic2026.repository.TouristRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -20,12 +20,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/** CU-02 de punta a punta, contra la base H2 en memoria: la API REST y la página del formulario. */
+/** CU-02 de punta a punta, contra la base H2 en memoria: la página del formulario. */
 @SpringBootTest
 @Transactional
 class ProviderRegistrationIntegrationTest {
 
-    private static final String API_URL = "/api/auth/register/provider";
     private static final String PAGE_URL = "/register/provider";
 
     @Autowired
@@ -34,6 +33,9 @@ class ProviderRegistrationIntegrationTest {
     @Autowired
     private ProviderRepository providerRepository;
 
+    @Autowired
+    private TouristRepository touristRepository;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -41,64 +43,6 @@ class ProviderRegistrationIntegrationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
-    private String physicalJson(String email, String document) {
-        return """
-                {"personType":"PHYSICAL","firstName":"Juan","lastName":"Rodríguez",
-                 "document":"%s","address":"Ruta 10 km 264","email":"%s","password":"secreta123"}
-                """.formatted(document, email);
-    }
-
-    // ---------- API REST ----------
-
-    @Test
-    void api_validPhysicalPerson_returns201Pending() throws Exception {
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
-                        .content(physicalJson("juan@mail.com", "45678901")))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.roles[0]").value("PROVIDER"))
-                .andExpect(jsonPath("$.providerStatus").value("PENDING"))
-                .andExpect(jsonPath("$.passwordHash").doesNotExist());
-    }
-
-    @Test
-    void api_sameEmailTwice_returns409() throws Exception {
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
-                        .content(physicalJson("juan@mail.com", "45678901")))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
-                        .content(physicalJson("juan@mail.com", "11111111")))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    void api_legalPersonWithBadRut_returns400WithFields() throws Exception {
-        String body = """
-                {"personType":"LEGAL","rut":"123","address":"Av. Costanera 123",
-                 "email":"info@laguna.uy","password":"secreta123"}
-                """;
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fields.rut").exists())
-                .andExpect(jsonPath("$.fields.legalName").exists())
-                .andExpect(jsonPath("$.fields.businessName").exists());
-    }
-
-    @Test
-    void api_existingTourist_getsProviderProfileOnSameAccount() throws Exception {
-        mockMvc.perform(post("/api/auth/register/tourist").contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"firstName":"Juan","lastName":"Rodríguez","nationalId":"45678901",
-                                 "email":"juan@mail.com","password":"secreta123"}
-                                """))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
-                        .content(physicalJson("juan@mail.com", "45678901")))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.roles[0]").value("TOURIST"))
-                .andExpect(jsonPath("$.roles[1]").value("PROVIDER"));
-    }
 
     // ---------- Página web (Thymeleaf) ----------
 
@@ -168,14 +112,6 @@ class ProviderRegistrationIntegrationTest {
     }
 
     @Test
-    void api_doesNotRequireTermsAcceptance() throws Exception {
-        // La API la usan otros sistemas: la aceptación solo se pide en el formulario web
-        mockMvc.perform(post(API_URL).contentType(MediaType.APPLICATION_JSON)
-                        .content(physicalJson("juan@mail.com", "45678901")))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
     void page_rutAlreadyRegistered_marksRutField() throws Exception {
         mockMvc.perform(legalForm()).andExpect(status().is3xxRedirection());
 
@@ -194,5 +130,26 @@ class ProviderRegistrationIntegrationTest {
                 .andExpect(model().attributeHasFieldErrors("form", "email"))
                 .andExpect(content().string(containsString("Iniciá sesión con esa cuenta")))
                 .andExpect(content().string(containsString("href=\"/login\"")));
+    }
+
+    @Test
+    void page_existingTourist_getsProviderProfileOnSameAccount() throws Exception {
+        // 5c. El correo ya es de un turista y la contraseña coincide: se agrega el perfil a la misma cuenta
+        mockMvc.perform(post("/register/tourist")
+                        .param("firstName", "Juan")
+                        .param("lastName", "Rodríguez")
+                        .param("nationalId", "45678901")
+                        .param("phone", "")
+                        .param("email", "info@laguna.uy")
+                        .param("password", "secreta123")
+                        .param("confirmPassword", "secreta123")
+                        .param("acceptTerms", "true"))
+                .andExpect(status().is3xxRedirection());
+
+        mockMvc.perform(legalForm()).andExpect(status().is3xxRedirection());
+
+        Provider provider = providerRepository.findByStatus(ProviderStatus.PENDING).get(0);
+        assertThat(provider.getUser().getEmail()).isEqualTo("info@laguna.uy");
+        assertThat(touristRepository.existsById(provider.getUser().getId())).isTrue();
     }
 }
