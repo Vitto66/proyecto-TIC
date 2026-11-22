@@ -17,7 +17,7 @@ import uy.edu.um.proytic2026.validation.TouristRegistrationValidator;
 
 /**
  * Página del formulario de registro de turistas (CU-01).
- * Usa el mismo servicio y las mismas validaciones que POST /api/auth/register/tourist.
+ * Usa el servicio de usuarios y las validaciones del registro de turista.
  */
 @Controller
 @RequestMapping("/register/tourist")

@@ -60,8 +60,6 @@ primero con las variables `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NAME` (opcion
 | Mis actividades y publicar una nueva (CU-08, con emprendimiento) | http://localhost:8080/provider/activities |
 | Modificar o dar de baja una actividad (CU-10) | `/provider/activities/{id}/edit` y `/provider/activities/{id}/cancel` (desde "Mis actividades") |
 | Fechas, horarios y cupos de una actividad (CU-09) | `/provider/activities/{id}/dates` (desde "Mis actividades") |
-| API: registrar turista (CU-01) | `POST /api/auth/register/tourist` |
-| API: registrar prestador (CU-02) | `POST /api/auth/register/provider` |
 | API: listar emprendimientos aprobados (CU-19, pública) | `GET /api/businesses` |
 | API: actividades de un día por departamento o localidad (CU-20, pública) | `GET /api/activities?date=2026-11-05&departmentId=3` (o `&localityId=10`) |
 | API: top 3 de actividades del mes por departamento (CU-21, pública) | `GET /api/activities/top?departmentId=3&month=2026-10` |

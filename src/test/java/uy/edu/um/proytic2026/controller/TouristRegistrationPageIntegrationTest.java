@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import uy.edu.um.proytic2026.entity.CardBrand;
-import uy.edu.um.proytic2026.entity.PaymentMethod;
 import uy.edu.um.proytic2026.entity.Tourist;
 import uy.edu.um.proytic2026.repository.PaymentMethodRepository;
 import uy.edu.um.proytic2026.repository.TouristRepository;
@@ -152,17 +151,6 @@ class TouristRegistrationPageIntegrationTest {
                 .andExpect(model().attributeHasFieldErrors("form", "nationalId"));
     }
 
-    @Test
-    void api_confirmPasswordMismatch_returns400() throws Exception {
-        mockMvc.perform(post("/api/auth/register/tourist").contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"firstName":"Ana","lastName":"Pérez","nationalId":"12345678",
-                                 "email":"ana@mail.com","password":"secreta123","confirmPassword":"otra"}
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fields.confirmPassword").exists());
-    }
-
     // ---------- Paso 3: medio de pago opcional ----------
 
     private static final String FUTURE_EXPIRY = java.time.YearMonth.now().plusYears(3)
@@ -206,18 +194,5 @@ class TouristRegistrationPageIntegrationTest {
 
         assertThat(touristRepository.count()).isZero();
         assertThat(paymentMethodRepository.count()).isZero();
-    }
-
-    @Test
-    void api_withCard_registersPaymentMethod() throws Exception {
-        mockMvc.perform(post("/api/auth/register/tourist").contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"firstName":"Ana","lastName":"Pérez","nationalId":"12345678",
-                                 "email":"ana@mail.com","password":"secreta123",
-                                 "cardNumber":"4242424242424242","cardExpiry":"%s","cardCvv":"123"}
-                                """.formatted(FUTURE_EXPIRY)))
-                .andExpect(status().isCreated());
-
-        assertThat(paymentMethodRepository.findAll()).extracting(PaymentMethod::getLast4).containsExactly("4242");
     }
 }
