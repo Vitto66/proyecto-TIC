@@ -197,14 +197,6 @@
                     <span class="space-card-more">Ir →</span>
                 </a>
             </th:block>
-
-            <!-- Prestador: reservas recibidas, más adelante -->
-            <div class="space-card is-soon" th:if="${role == 'provider'}">
-                <span class="space-card-icon"><svg th:replace="~{fragments/icons :: icon('users')}"></svg></span>
-                <strong>Reservas recibidas</strong>
-                <small>Vas a ver quién reservó cada fecha.</small>
-                <span class="space-card-more">Próximamente</span>
-            </div>
         </div>
     </section>
 </main>

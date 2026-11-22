@@ -354,6 +354,7 @@ la app con el perfil `postgres`. Los scripts solo agregan tablas o columnas: no 
 | `2026-10-28_demo_activities.sql` | **Opcional.** Datos de ejemplo: 7 prestadores (correos `@demo.uy`, contraseña `Demo2026`) y 15 actividades en 10 departamentos, con fotos de Wikimedia Commons (solo la dirección) y fechas desde hoy |
 | `2026-10-28_demo_reviews.sql` | **Opcional, después del anterior.** 12 turistas de ejemplo (`@demo.uy`, contraseña `Demo2026`) con 44 reservas finalizadas y sus valoraciones en las actividades de ejemplo |
 | `2026-11-09_cancelacion_adulto_responsable.sql` | Política de cancelación de cada actividad, reservas canceladas por el turista y adulto responsable que no participa. **Sin este script la app no arranca con Supabase** |
+| `2026-11-22_drop_legacy_payment.sql` | **Opcional.** Borra la tabla vieja `payment`, que la app no usa (los pagos están en `reservation_payment`). |
 
 ## Medios de pago
 
