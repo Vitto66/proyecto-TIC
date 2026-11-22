@@ -250,15 +250,6 @@ a.space-card:focus-visible { outline: 3px solid var(--celeste); outline-offset: 
 a.tone-celeste:hover, a.tone-celeste:focus-visible { color: var(--monte-dark); }
 .tone-celeste .space-card-icon { background: rgba(255, 255, 255, 0.45); }
 
-.space-card.is-soon {
-    background: #fff;
-    color: var(--muted);
-    border: 1.5px dashed #BFD0E0;
-}
-.space-card.is-soon strong { color: var(--ink); }
-.space-card.is-soon .space-card-icon { background: #EAF2F9; color: var(--celeste); }
-.space-card.is-soon .space-card-more { color: var(--celeste); font-weight: 600; }
-
 @media (max-width: 767.98px) {
     .progress-steps { grid-template-columns: 1fr 1fr; row-gap: 1.5rem; }
     .progress-steps li:nth-child(2)::before { display: none; }
